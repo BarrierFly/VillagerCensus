@@ -20,6 +20,7 @@ import net.villagercensus.util.Compat;
 public class CensusHud
 {
     private static final int COLOR = 0xFFFFFFFF;
+    private static boolean loggedFirstFrame;
 
     //? if >= 26.1 {
     public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker)
@@ -98,6 +99,12 @@ public class CensusHud
             {
                 lines.add("  remark: " + last.remark);
             }
+        }
+
+        if (!loggedFirstFrame)
+        {
+            loggedFirstFrame = true;
+            net.villagercensus.Reference.logger().info("Villager Census HUD is rendering ({} lines)", lines.size());
         }
 
         return lines;

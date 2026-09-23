@@ -26,5 +26,7 @@ public class VillagerCensusClient implements ClientModInitializer
         //?} else {
         /*HudRenderCallback.EVENT.register((graphics, deltaTracker) -> HUD.render(graphics, deltaTracker));
         *//*?}*/
+
+        Reference.logger().info("Villager Census HUD registered");
     }
 }
