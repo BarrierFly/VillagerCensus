@@ -64,7 +64,7 @@ census/     session state machine, records, undo stack, interaction manager
 trade/      trade category catalog + matching
 data/       report writer, draft storage, world-id/filename helpers
 mixin/      interact / offers / openScreen hooks
-render/     HUD (malilib IRenderer)
+render/     HUD (Fabric HUD API: HudElementRegistry for 26.1+, HudRenderCallback below)
 config/     malilib config options and hotkeys
 event/      malilib init, keybind callbacks, world load listener
 util/       version shims and name formatting

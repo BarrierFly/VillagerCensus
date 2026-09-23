@@ -2,7 +2,6 @@ package net.villagercensus.event;
 
 import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.event.InputEventHandler;
-import fi.dy.masa.malilib.event.RenderEventHandler;
 import fi.dy.masa.malilib.event.TickHandler;
 import fi.dy.masa.malilib.event.WorldLoadHandler;
 import fi.dy.masa.malilib.interfaces.IInitializationHandler;
@@ -11,7 +10,6 @@ import fi.dy.masa.malilib.util.data.ModInfo;
 import net.villagercensus.Reference;
 import net.villagercensus.config.Configs;
 import net.villagercensus.gui.GuiConfigs;
-import net.villagercensus.render.CensusHud;
 
 public class InitHandler implements IInitializationHandler
 {
@@ -31,12 +29,6 @@ public class InitHandler implements IInitializationHandler
 
         TickHandler.getInstance().registerClientTickHandler(KeybindCallbacks.getInstance());
         KeybindCallbacks.getInstance().setCallbacks();
-
-        //? if >= 26.1 {
-        RenderEventHandler.getInstance().registerInGameGuiRenderer(new CensusHud());
-        //?} else {
-        /*RenderEventHandler.getInstance().registerGameOverlayRenderer(new CensusHud());
-        *//*?}*/
 
         Reference.logger().info("Villager Census initialized ({} {})", Reference.MOD_NAME, Reference.MOD_VERSION);
     }
