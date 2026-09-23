@@ -14,6 +14,17 @@
         ]
       },
       {
+        "id": "buy_diamond",
+        "label": "buy_diamond",
+        "cost1": [
+          "minecraft:diamond"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
         "id": "buy_iron_ingot",
         "label": "buy_iron_ingot",
         "cost1": [
@@ -36,25 +47,58 @@
         ]
       },
       {
-        "id": "buy_diamond",
-        "label": "buy_diamond",
+        "id": "sell_bell",
+        "label": "sell_bell",
         "cost1": [
-          "minecraft:diamond"
+          "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:emerald"
+          "minecraft:bell"
         ]
       },
       {
-        "id": "sell_diamond_leggings",
-        "label": "sell_diamond_leggings",
+        "id": "sell_chainmail_boots",
+        "label": "sell_chainmail_boots",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:diamond_leggings"
+          "minecraft:chainmail_boots"
+        ]
+      },
+      {
+        "id": "sell_chainmail_chestplate",
+        "label": "sell_chainmail_chestplate",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:chainmail_chestplate"
+        ]
+      },
+      {
+        "id": "sell_chainmail_helmet",
+        "label": "sell_chainmail_helmet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:chainmail_helmet"
+        ]
+      },
+      {
+        "id": "sell_chainmail_leggings",
+        "label": "sell_chainmail_leggings",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:chainmail_leggings"
         ]
       },
       {
@@ -69,6 +113,17 @@
         ]
       },
       {
+        "id": "sell_diamond_chestplate",
+        "label": "sell_diamond_chestplate",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:diamond_chestplate"
+        ]
+      },
+      {
         "id": "sell_diamond_helmet",
         "label": "sell_diamond_helmet",
         "cost1": [
@@ -80,14 +135,69 @@
         ]
       },
       {
-        "id": "sell_diamond_chestplate",
-        "label": "sell_diamond_chestplate",
+        "id": "sell_diamond_leggings",
+        "label": "sell_diamond_leggings",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:diamond_chestplate"
+          "minecraft:diamond_leggings"
+        ]
+      },
+      {
+        "id": "sell_iron_boots",
+        "label": "sell_iron_boots",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_boots"
+        ]
+      },
+      {
+        "id": "sell_iron_chestplate",
+        "label": "sell_iron_chestplate",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_chestplate"
+        ]
+      },
+      {
+        "id": "sell_iron_helmet",
+        "label": "sell_iron_helmet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_helmet"
+        ]
+      },
+      {
+        "id": "sell_iron_leggings",
+        "label": "sell_iron_leggings",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_leggings"
+        ]
+      },
+      {
+        "id": "sell_shield",
+        "label": "sell_shield",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:shield"
         ]
       }
     ]
@@ -96,10 +206,54 @@
     "profession": "minecraft:butcher",
     "categories": [
       {
+        "id": "buy_beef",
+        "label": "buy_beef",
+        "cost1": [
+          "minecraft:beef"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
         "id": "buy_chicken",
         "label": "buy_chicken",
         "cost1": [
           "minecraft:chicken"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_coal",
+        "label": "buy_coal",
+        "cost1": [
+          "minecraft:coal"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_dried_kelp_block",
+        "label": "buy_dried_kelp_block",
+        "cost1": [
+          "minecraft:dried_kelp_block"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_mutton",
+        "label": "buy_mutton",
+        "cost1": [
+          "minecraft:mutton"
         ],
         "cost2": [],
         "result": [
@@ -129,36 +283,14 @@
         ]
       },
       {
-        "id": "sell_rabbit_stew",
-        "label": "sell_rabbit_stew",
+        "id": "buy_sweet_berries",
+        "label": "buy_sweet_berries",
         "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:rabbit_stew"
-        ]
-      },
-      {
-        "id": "buy_coal",
-        "label": "buy_coal",
-        "cost1": [
-          "minecraft:coal"
+          "minecraft:sweet_berries"
         ],
         "cost2": [],
         "result": [
           "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_cooked_porkchop",
-        "label": "sell_cooked_porkchop",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:cooked_porkchop"
         ]
       },
       {
@@ -173,47 +305,25 @@
         ]
       },
       {
-        "id": "buy_mutton",
-        "label": "buy_mutton",
+        "id": "sell_cooked_porkchop",
+        "label": "sell_cooked_porkchop",
         "cost1": [
-          "minecraft:mutton"
+          "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:emerald"
+          "minecraft:cooked_porkchop"
         ]
       },
       {
-        "id": "buy_beef",
-        "label": "buy_beef",
+        "id": "sell_rabbit_stew",
+        "label": "sell_rabbit_stew",
         "cost1": [
-          "minecraft:beef"
+          "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "buy_dried_kelp_block",
-        "label": "buy_dried_kelp_block",
-        "cost1": [
-          "minecraft:dried_kelp_block"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "buy_sweet_berries",
-        "label": "buy_sweet_berries",
-        "cost1": [
-          "minecraft:sweet_berries"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
+          "minecraft:rabbit_stew"
         ]
       }
     ]
@@ -222,25 +332,14 @@
     "profession": "minecraft:cartographer",
     "categories": [
       {
-        "id": "buy_paper",
-        "label": "buy_paper",
+        "id": "buy_compass",
+        "label": "buy_compass",
         "cost1": [
-          "minecraft:paper"
+          "minecraft:compass"
         ],
         "cost2": [],
         "result": [
           "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_map",
-        "label": "sell_map",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:map"
         ]
       },
       {
@@ -255,38 +354,14 @@
         ]
       },
       {
-        "id": "sell_filled_map_for_compass",
-        "label": "sell_filled_map_for_compass",
+        "id": "buy_paper",
+        "label": "buy_paper",
         "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [
-          "minecraft:compass"
-        ],
-        "result": [
-          "minecraft:filled_map"
-        ]
-      },
-      {
-        "id": "buy_compass",
-        "label": "buy_compass",
-        "cost1": [
-          "minecraft:compass"
+          "minecraft:paper"
         ],
         "cost2": [],
         "result": [
           "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_item_frame",
-        "label": "sell_item_frame",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:item_frame"
         ]
       },
       {
@@ -315,6 +390,89 @@
         ]
       },
       {
+        "id": "sell_black_banner",
+        "label": "sell_black_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_banner"
+        ]
+      },
+      {
+        "id": "sell_blue_banner",
+        "label": "sell_blue_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:blue_banner"
+        ]
+      },
+      {
+        "id": "sell_brown_banner",
+        "label": "sell_brown_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brown_banner"
+        ]
+      },
+      {
+        "id": "sell_buried_trial_chambers_map_for_compass",
+        "label": "sell_buried_trial_chambers_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:buried_trial_chambers_map"
+        ]
+      },
+      {
+        "id": "sell_cyan_banner",
+        "label": "sell_cyan_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cyan_banner"
+        ]
+      },
+      {
+        "id": "sell_desert_village_map_for_compass",
+        "label": "sell_desert_village_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:desert_village_map"
+        ]
+      },
+      {
+        "id": "sell_filled_map_for_compass",
+        "label": "sell_filled_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:filled_map"
+        ]
+      },
+      {
         "id": "sell_globe_banner_pattern",
         "label": "sell_globe_banner_pattern",
         "cost1": [
@@ -324,6 +482,253 @@
         "result": [
           "minecraft:globe_banner_pattern"
         ]
+      },
+      {
+        "id": "sell_gray_banner",
+        "label": "sell_gray_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:gray_banner"
+        ]
+      },
+      {
+        "id": "sell_green_banner",
+        "label": "sell_green_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:green_banner"
+        ]
+      },
+      {
+        "id": "sell_item_frame",
+        "label": "sell_item_frame",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:item_frame"
+        ]
+      },
+      {
+        "id": "sell_jungle_pyramid_map_for_compass",
+        "label": "sell_jungle_pyramid_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:jungle_pyramid_map"
+        ]
+      },
+      {
+        "id": "sell_light_blue_banner",
+        "label": "sell_light_blue_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_blue_banner"
+        ]
+      },
+      {
+        "id": "sell_lime_banner",
+        "label": "sell_lime_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lime_banner"
+        ]
+      },
+      {
+        "id": "sell_magenta_banner",
+        "label": "sell_magenta_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:magenta_banner"
+        ]
+      },
+      {
+        "id": "sell_map",
+        "label": "sell_map",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:map"
+        ]
+      },
+      {
+        "id": "sell_ocean_monument_map_for_compass",
+        "label": "sell_ocean_monument_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:ocean_monument_map"
+        ]
+      },
+      {
+        "id": "sell_orange_banner",
+        "label": "sell_orange_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:orange_banner"
+        ]
+      },
+      {
+        "id": "sell_pink_banner",
+        "label": "sell_pink_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:pink_banner"
+        ]
+      },
+      {
+        "id": "sell_plains_village_map_for_compass",
+        "label": "sell_plains_village_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:plains_village_map"
+        ]
+      },
+      {
+        "id": "sell_purple_banner",
+        "label": "sell_purple_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:purple_banner"
+        ]
+      },
+      {
+        "id": "sell_red_banner",
+        "label": "sell_red_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_banner"
+        ]
+      },
+      {
+        "id": "sell_savanna_village_map_for_compass",
+        "label": "sell_savanna_village_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:savanna_village_map"
+        ]
+      },
+      {
+        "id": "sell_snowy_village_map_for_compass",
+        "label": "sell_snowy_village_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:snowy_village_map"
+        ]
+      },
+      {
+        "id": "sell_swamp_hut_map_for_compass",
+        "label": "sell_swamp_hut_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:swamp_hut_map"
+        ]
+      },
+      {
+        "id": "sell_taiga_village_map_for_compass",
+        "label": "sell_taiga_village_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:taiga_village_map"
+        ]
+      },
+      {
+        "id": "sell_white_banner",
+        "label": "sell_white_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:white_banner"
+        ]
+      },
+      {
+        "id": "sell_woodland_mansion_map_for_compass",
+        "label": "sell_woodland_mansion_map_for_compass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:compass"
+        ],
+        "result": [
+          "minecraft:woodland_mansion_map"
+        ]
+      },
+      {
+        "id": "sell_yellow_banner",
+        "label": "sell_yellow_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:yellow_banner"
+        ]
       }
     ]
   },
@@ -331,25 +736,14 @@
     "profession": "minecraft:cleric",
     "categories": [
       {
-        "id": "buy_rotten_flesh",
-        "label": "buy_rotten_flesh",
+        "id": "buy_glass_bottle",
+        "label": "buy_glass_bottle",
         "cost1": [
-          "minecraft:rotten_flesh"
+          "minecraft:glass_bottle"
         ],
         "cost2": [],
         "result": [
           "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_redstone",
-        "label": "sell_redstone",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:redstone"
         ]
       },
       {
@@ -364,14 +758,14 @@
         ]
       },
       {
-        "id": "sell_lapis_lazuli",
-        "label": "sell_lapis_lazuli",
+        "id": "buy_nether_wart",
+        "label": "buy_nether_wart",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:nether_wart"
         ],
         "cost2": [],
         "result": [
-          "minecraft:lapis_lazuli"
+          "minecraft:emerald"
         ]
       },
       {
@@ -386,14 +780,14 @@
         ]
       },
       {
-        "id": "sell_glowstone",
-        "label": "sell_glowstone",
+        "id": "buy_rotten_flesh",
+        "label": "buy_rotten_flesh",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:rotten_flesh"
         ],
         "cost2": [],
         "result": [
-          "minecraft:glowstone"
+          "minecraft:emerald"
         ]
       },
       {
@@ -401,17 +795,6 @@
         "label": "buy_turtle_scute",
         "cost1": [
           "minecraft:turtle_scute"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "buy_glass_bottle",
-        "label": "buy_glass_bottle",
-        "cost1": [
-          "minecraft:glass_bottle"
         ],
         "cost2": [],
         "result": [
@@ -430,17 +813,6 @@
         ]
       },
       {
-        "id": "buy_nether_wart",
-        "label": "buy_nether_wart",
-        "cost1": [
-          "minecraft:nether_wart"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
         "id": "sell_experience_bottle",
         "label": "sell_experience_bottle",
         "cost1": [
@@ -450,6 +822,39 @@
         "result": [
           "minecraft:experience_bottle"
         ]
+      },
+      {
+        "id": "sell_glowstone",
+        "label": "sell_glowstone",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:glowstone"
+        ]
+      },
+      {
+        "id": "sell_lapis_lazuli",
+        "label": "sell_lapis_lazuli",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lapis_lazuli"
+        ]
+      },
+      {
+        "id": "sell_redstone",
+        "label": "sell_redstone",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:redstone"
+        ]
       }
     ]
   },
@@ -457,21 +862,10 @@
     "profession": "minecraft:farmer",
     "categories": [
       {
-        "id": "buy_wheat",
-        "label": "buy_wheat",
+        "id": "buy_beetroot",
+        "label": "buy_beetroot",
         "cost1": [
-          "minecraft:wheat"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "buy_potato",
-        "label": "buy_potato",
-        "cost1": [
-          "minecraft:potato"
+          "minecraft:beetroot"
         ],
         "cost2": [],
         "result": [
@@ -490,10 +884,10 @@
         ]
       },
       {
-        "id": "buy_beetroot",
-        "label": "buy_beetroot",
+        "id": "buy_melon",
+        "label": "buy_melon",
         "cost1": [
-          "minecraft:beetroot"
+          "minecraft:melon"
         ],
         "cost2": [],
         "result": [
@@ -501,14 +895,14 @@
         ]
       },
       {
-        "id": "sell_bread",
-        "label": "sell_bread",
+        "id": "buy_potato",
+        "label": "buy_potato",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:potato"
         ],
         "cost2": [],
         "result": [
-          "minecraft:bread"
+          "minecraft:emerald"
         ]
       },
       {
@@ -523,14 +917,14 @@
         ]
       },
       {
-        "id": "sell_pumpkin_pie",
-        "label": "sell_pumpkin_pie",
+        "id": "buy_wheat",
+        "label": "buy_wheat",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:wheat"
         ],
         "cost2": [],
         "result": [
-          "minecraft:pumpkin_pie"
+          "minecraft:emerald"
         ]
       },
       {
@@ -545,25 +939,14 @@
         ]
       },
       {
-        "id": "sell_cookie",
-        "label": "sell_cookie",
+        "id": "sell_bread",
+        "label": "sell_bread",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:cookie"
-        ]
-      },
-      {
-        "id": "buy_melon",
-        "label": "buy_melon",
-        "cost1": [
-          "minecraft:melon"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
+          "minecraft:bread"
         ]
       },
       {
@@ -578,14 +961,25 @@
         ]
       },
       {
-        "id": "sell_suspicious_stew",
-        "label": "sell_suspicious_stew",
+        "id": "sell_cookie",
+        "label": "sell_cookie",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:suspicious_stew"
+          "minecraft:cookie"
+        ]
+      },
+      {
+        "id": "sell_glistering_melon_slice",
+        "label": "sell_glistering_melon_slice",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:glistering_melon_slice"
         ]
       },
       {
@@ -600,14 +994,25 @@
         ]
       },
       {
-        "id": "sell_glistering_melon_slice",
-        "label": "sell_glistering_melon_slice",
+        "id": "sell_pumpkin_pie",
+        "label": "sell_pumpkin_pie",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:glistering_melon_slice"
+          "minecraft:pumpkin_pie"
+        ]
+      },
+      {
+        "id": "sell_suspicious_stew",
+        "label": "sell_suspicious_stew",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:suspicious_stew"
         ]
       }
     ]
@@ -616,10 +1021,10 @@
     "profession": "minecraft:fisherman",
     "categories": [
       {
-        "id": "buy_string",
-        "label": "buy_string",
+        "id": "buy_acacia_boat",
+        "label": "buy_acacia_boat",
         "cost1": [
-          "minecraft:string"
+          "minecraft:acacia_boat"
         ],
         "cost2": [],
         "result": [
@@ -631,6 +1036,17 @@
         "label": "buy_coal",
         "cost1": [
           "minecraft:coal"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_cod",
+        "label": "buy_cod",
+        "cost1": [
+          "minecraft:cod"
         ],
         "cost2": [],
         "result": [
@@ -651,21 +1067,54 @@
         ]
       },
       {
-        "id": "sell_cod_bucket",
-        "label": "sell_cod_bucket",
+        "id": "buy_dark_oak_boat",
+        "label": "buy_dark_oak_boat",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:dark_oak_boat"
         ],
         "cost2": [],
         "result": [
-          "minecraft:cod_bucket"
+          "minecraft:emerald"
         ]
       },
       {
-        "id": "buy_cod",
-        "label": "buy_cod",
+        "id": "buy_jungle_boat",
+        "label": "buy_jungle_boat",
         "cost1": [
-          "minecraft:cod"
+          "minecraft:jungle_boat"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_oak_boat",
+        "label": "buy_oak_boat",
+        "cost1": [
+          "minecraft:oak_boat"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_pufferfish",
+        "label": "buy_pufferfish",
+        "cost1": [
+          "minecraft:pufferfish"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_salmon",
+        "label": "buy_salmon",
+        "cost1": [
+          "minecraft:salmon"
         ],
         "cost2": [],
         "result": [
@@ -686,21 +1135,10 @@
         ]
       },
       {
-        "id": "sell_campfire",
-        "label": "sell_campfire",
+        "id": "buy_spruce_boat",
+        "label": "buy_spruce_boat",
         "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:campfire"
-        ]
-      },
-      {
-        "id": "buy_salmon",
-        "label": "buy_salmon",
-        "cost1": [
-          "minecraft:salmon"
+          "minecraft:spruce_boat"
         ],
         "cost2": [],
         "result": [
@@ -708,14 +1146,14 @@
         ]
       },
       {
-        "id": "sell_fishing_rod",
-        "label": "sell_fishing_rod",
+        "id": "buy_string",
+        "label": "buy_string",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:string"
         ],
         "cost2": [],
         "result": [
-          "minecraft:fishing_rod"
+          "minecraft:emerald"
         ]
       },
       {
@@ -730,14 +1168,36 @@
         ]
       },
       {
-        "id": "buy_pufferfish",
-        "label": "buy_pufferfish",
+        "id": "sell_campfire",
+        "label": "sell_campfire",
         "cost1": [
-          "minecraft:pufferfish"
+          "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
+          "minecraft:campfire"
+        ]
+      },
+      {
+        "id": "sell_cod_bucket",
+        "label": "sell_cod_bucket",
+        "cost1": [
           "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cod_bucket"
+        ]
+      },
+      {
+        "id": "sell_fishing_rod",
+        "label": "sell_fishing_rod",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:fishing_rod"
         ]
       }
     ]
@@ -746,10 +1206,23 @@
     "profession": "minecraft:fletcher",
     "categories": [
       {
-        "id": "buy_stick",
-        "label": "buy_stick",
+        "id": "buy_arrow_get_tipped_arrow",
+        "label": "buy_arrow_get_tipped_arrow",
         "cost1": [
-          "minecraft:stick"
+          "minecraft:arrow"
+        ],
+        "cost2": [
+          "minecraft:emerald"
+        ],
+        "result": [
+          "minecraft:tipped_arrow"
+        ]
+      },
+      {
+        "id": "buy_feather",
+        "label": "buy_feather",
+        "cost1": [
+          "minecraft:feather"
         ],
         "cost2": [],
         "result": [
@@ -757,14 +1230,14 @@
         ]
       },
       {
-        "id": "sell_arrow",
-        "label": "sell_arrow",
+        "id": "buy_flint",
+        "label": "buy_flint",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:flint"
         ],
         "cost2": [],
         "result": [
-          "minecraft:arrow"
+          "minecraft:emerald"
         ]
       },
       {
@@ -781,25 +1254,14 @@
         ]
       },
       {
-        "id": "buy_flint",
-        "label": "buy_flint",
+        "id": "buy_stick",
+        "label": "buy_stick",
         "cost1": [
-          "minecraft:flint"
+          "minecraft:stick"
         ],
         "cost2": [],
         "result": [
           "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_bow",
-        "label": "sell_bow",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:bow"
         ]
       },
       {
@@ -807,28 +1269,6 @@
         "label": "buy_string",
         "cost1": [
           "minecraft:string"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_crossbow",
-        "label": "sell_crossbow",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:crossbow"
-        ]
-      },
-      {
-        "id": "buy_feather",
-        "label": "buy_feather",
-        "cost1": [
-          "minecraft:feather"
         ],
         "cost2": [],
         "result": [
@@ -847,13 +1287,46 @@
         ]
       },
       {
-        "id": "buy_arrow_get_tipped_arrow",
-        "label": "buy_arrow_get_tipped_arrow",
+        "id": "sell_arrow",
+        "label": "sell_arrow",
         "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
           "minecraft:arrow"
+        ]
+      },
+      {
+        "id": "sell_bow",
+        "label": "sell_bow",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:bow"
+        ]
+      },
+      {
+        "id": "sell_crossbow",
+        "label": "sell_crossbow",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:crossbow"
+        ]
+      },
+      {
+        "id": "sell_tipped_arrow_for_arrow",
+        "label": "sell_tipped_arrow_for_arrow",
+        "cost1": [
+          "minecraft:emerald"
         ],
         "cost2": [
-          "minecraft:emerald"
+          "minecraft:arrow"
         ],
         "result": [
           "minecraft:tipped_arrow"
@@ -864,39 +1337,6 @@
   {
     "profession": "minecraft:leatherworker",
     "categories": [
-      {
-        "id": "buy_leather",
-        "label": "buy_leather",
-        "cost1": [
-          "minecraft:leather"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_leather_leggings",
-        "label": "sell_leather_leggings",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:leather_leggings"
-        ]
-      },
-      {
-        "id": "sell_leather_chestplate",
-        "label": "sell_leather_chestplate",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:leather_chestplate"
-        ]
-      },
       {
         "id": "buy_flint",
         "label": "buy_flint",
@@ -909,25 +1349,14 @@
         ]
       },
       {
-        "id": "sell_leather_helmet",
-        "label": "sell_leather_helmet",
+        "id": "buy_leather",
+        "label": "buy_leather",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:leather"
         ],
         "cost2": [],
         "result": [
-          "minecraft:leather_helmet"
-        ]
-      },
-      {
-        "id": "sell_leather_boots",
-        "label": "sell_leather_boots",
-        "cost1": [
           "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:leather_boots"
         ]
       },
       {
@@ -953,6 +1382,39 @@
         ]
       },
       {
+        "id": "sell_leather_boots",
+        "label": "sell_leather_boots",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:leather_boots"
+        ]
+      },
+      {
+        "id": "sell_leather_chestplate",
+        "label": "sell_leather_chestplate",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:leather_chestplate"
+        ]
+      },
+      {
+        "id": "sell_leather_helmet",
+        "label": "sell_leather_helmet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:leather_helmet"
+        ]
+      },
+      {
         "id": "sell_leather_horse_armor",
         "label": "sell_leather_horse_armor",
         "cost1": [
@@ -962,47 +1424,34 @@
         "result": [
           "minecraft:leather_horse_armor"
         ]
+      },
+      {
+        "id": "sell_leather_leggings",
+        "label": "sell_leather_leggings",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:leather_leggings"
+        ]
+      },
+      {
+        "id": "sell_saddle",
+        "label": "sell_saddle",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:saddle"
+        ]
       }
     ]
   },
   {
     "profession": "minecraft:librarian",
     "categories": [
-      {
-        "id": "buy_paper",
-        "label": "buy_paper",
-        "cost1": [
-          "minecraft:paper"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_enchanted_book_for_book",
-        "label": "sell_enchanted_book_for_book",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [
-          "minecraft:book"
-        ],
-        "result": [
-          "minecraft:enchanted_book"
-        ]
-      },
-      {
-        "id": "sell_bookshelf",
-        "label": "sell_bookshelf",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:bookshelf"
-        ]
-      },
       {
         "id": "buy_book",
         "label": "buy_book",
@@ -1012,17 +1461,6 @@
         "cost2": [],
         "result": [
           "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_lantern",
-        "label": "sell_lantern",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:lantern"
         ]
       },
       {
@@ -1037,14 +1475,14 @@
         ]
       },
       {
-        "id": "sell_glass",
-        "label": "sell_glass",
+        "id": "buy_paper",
+        "label": "buy_paper",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:paper"
         ],
         "cost2": [],
         "result": [
-          "minecraft:glass"
+          "minecraft:emerald"
         ]
       },
       {
@@ -1056,6 +1494,17 @@
         "cost2": [],
         "result": [
           "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "sell_bookshelf",
+        "label": "sell_bookshelf",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:bookshelf"
         ]
       },
       {
@@ -1081,17 +1530,6 @@
         ]
       },
       {
-        "id": "sell_name_tag",
-        "label": "sell_name_tag",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:name_tag"
-        ]
-      },
-      {
         "id": "sell_enchanted_book",
         "label": "sell_enchanted_book",
         "cost1": [
@@ -1103,6 +1541,74 @@
         "result": [
           "minecraft:enchanted_book"
         ]
+      },
+      {
+        "id": "sell_enchanted_book_for_book",
+        "label": "sell_enchanted_book_for_book",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [
+          "minecraft:book"
+        ],
+        "result": [
+          "minecraft:enchanted_book"
+        ]
+      },
+      {
+        "id": "sell_glass",
+        "label": "sell_glass",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:glass"
+        ]
+      },
+      {
+        "id": "sell_lantern",
+        "label": "sell_lantern",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lantern"
+        ]
+      },
+      {
+        "id": "sell_name_tag",
+        "label": "sell_name_tag",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:name_tag"
+        ]
+      },
+      {
+        "id": "sell_red_candle",
+        "label": "sell_red_candle",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_candle"
+        ]
+      },
+      {
+        "id": "sell_yellow_candle",
+        "label": "sell_yellow_candle",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:yellow_candle"
+        ]
       }
     ]
   },
@@ -1110,65 +1616,21 @@
     "profession": "minecraft:mason",
     "categories": [
       {
-        "id": "buy_clay_ball",
-        "label": "buy_clay_ball",
-        "cost1": [
-          "minecraft:clay_ball"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_brick",
-        "label": "sell_brick",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:brick"
-        ]
-      },
-      {
-        "id": "buy_stone",
-        "label": "buy_stone",
-        "cost1": [
-          "minecraft:stone"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "sell_chiseled_stone_bricks",
-        "label": "sell_chiseled_stone_bricks",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:chiseled_stone_bricks"
-        ]
-      },
-      {
-        "id": "buy_granite",
-        "label": "buy_granite",
-        "cost1": [
-          "minecraft:granite"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
         "id": "buy_andesite",
         "label": "buy_andesite",
         "cost1": [
           "minecraft:andesite"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_clay_ball",
+        "label": "buy_clay_ball",
+        "cost1": [
+          "minecraft:clay_ball"
         ],
         "cost2": [],
         "result": [
@@ -1187,6 +1649,149 @@
         ]
       },
       {
+        "id": "buy_granite",
+        "label": "buy_granite",
+        "cost1": [
+          "minecraft:granite"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_quartz",
+        "label": "buy_quartz",
+        "cost1": [
+          "minecraft:quartz"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_stone",
+        "label": "buy_stone",
+        "cost1": [
+          "minecraft:stone"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "sell_black_glazed_terracotta",
+        "label": "sell_black_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_black_terracotta",
+        "label": "sell_black_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_terracotta"
+        ]
+      },
+      {
+        "id": "sell_blue_glazed_terracotta",
+        "label": "sell_blue_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:blue_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_blue_terracotta",
+        "label": "sell_blue_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:blue_terracotta"
+        ]
+      },
+      {
+        "id": "sell_brick",
+        "label": "sell_brick",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brick"
+        ]
+      },
+      {
+        "id": "sell_brown_glazed_terracotta",
+        "label": "sell_brown_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brown_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_brown_terracotta",
+        "label": "sell_brown_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brown_terracotta"
+        ]
+      },
+      {
+        "id": "sell_chiseled_stone_bricks",
+        "label": "sell_chiseled_stone_bricks",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:chiseled_stone_bricks"
+        ]
+      },
+      {
+        "id": "sell_cyan_glazed_terracotta",
+        "label": "sell_cyan_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cyan_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_cyan_terracotta",
+        "label": "sell_cyan_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cyan_terracotta"
+        ]
+      },
+      {
         "id": "sell_dripstone_block",
         "label": "sell_dripstone_block",
         "cost1": [
@@ -1195,6 +1800,208 @@
         "cost2": [],
         "result": [
           "minecraft:dripstone_block"
+        ]
+      },
+      {
+        "id": "sell_glazed_terracotta",
+        "label": "sell_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_glazed_terracotta",
+          "minecraft:blue_glazed_terracotta",
+          "minecraft:brown_glazed_terracotta",
+          "minecraft:cyan_glazed_terracotta",
+          "minecraft:gray_glazed_terracotta",
+          "minecraft:green_glazed_terracotta",
+          "minecraft:light_blue_glazed_terracotta",
+          "minecraft:light_gray_glazed_terracotta",
+          "minecraft:lime_glazed_terracotta",
+          "minecraft:magenta_glazed_terracotta",
+          "minecraft:orange_glazed_terracotta",
+          "minecraft:pink_glazed_terracotta",
+          "minecraft:purple_glazed_terracotta",
+          "minecraft:red_glazed_terracotta",
+          "minecraft:white_glazed_terracotta",
+          "minecraft:yellow_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_gray_glazed_terracotta",
+        "label": "sell_gray_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:gray_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_gray_terracotta",
+        "label": "sell_gray_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:gray_terracotta"
+        ]
+      },
+      {
+        "id": "sell_green_glazed_terracotta",
+        "label": "sell_green_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:green_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_green_terracotta",
+        "label": "sell_green_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:green_terracotta"
+        ]
+      },
+      {
+        "id": "sell_light_blue_glazed_terracotta",
+        "label": "sell_light_blue_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_blue_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_light_blue_terracotta",
+        "label": "sell_light_blue_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_blue_terracotta"
+        ]
+      },
+      {
+        "id": "sell_light_gray_glazed_terracotta",
+        "label": "sell_light_gray_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_gray_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_light_gray_terracotta",
+        "label": "sell_light_gray_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_gray_terracotta"
+        ]
+      },
+      {
+        "id": "sell_lime_glazed_terracotta",
+        "label": "sell_lime_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lime_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_lime_terracotta",
+        "label": "sell_lime_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lime_terracotta"
+        ]
+      },
+      {
+        "id": "sell_magenta_glazed_terracotta",
+        "label": "sell_magenta_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:magenta_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_magenta_terracotta",
+        "label": "sell_magenta_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:magenta_terracotta"
+        ]
+      },
+      {
+        "id": "sell_orange_glazed_terracotta",
+        "label": "sell_orange_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:orange_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_orange_terracotta",
+        "label": "sell_orange_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:orange_terracotta"
+        ]
+      },
+      {
+        "id": "sell_pink_glazed_terracotta",
+        "label": "sell_pink_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:pink_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_pink_terracotta",
+        "label": "sell_pink_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:pink_terracotta"
         ]
       },
       {
@@ -1231,14 +2038,69 @@
         ]
       },
       {
-        "id": "buy_quartz",
-        "label": "buy_quartz",
+        "id": "sell_purple_glazed_terracotta",
+        "label": "sell_purple_glazed_terracotta",
         "cost1": [
-          "minecraft:quartz"
+          "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
+          "minecraft:purple_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_purple_terracotta",
+        "label": "sell_purple_terracotta",
+        "cost1": [
           "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:purple_terracotta"
+        ]
+      },
+      {
+        "id": "sell_quartz_block",
+        "label": "sell_quartz_block",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:quartz_block"
+        ]
+      },
+      {
+        "id": "sell_quartz_pillar",
+        "label": "sell_quartz_pillar",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:quartz_pillar"
+        ]
+      },
+      {
+        "id": "sell_red_glazed_terracotta",
+        "label": "sell_red_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_red_terracotta",
+        "label": "sell_red_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_terracotta"
         ]
       },
       {
@@ -1268,51 +2130,47 @@
         ]
       },
       {
-        "id": "sell_glazed_terracotta",
-        "label": "sell_glazed_terracotta",
+        "id": "sell_white_glazed_terracotta",
+        "label": "sell_white_glazed_terracotta",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:black_glazed_terracotta",
-          "minecraft:blue_glazed_terracotta",
-          "minecraft:brown_glazed_terracotta",
-          "minecraft:cyan_glazed_terracotta",
-          "minecraft:gray_glazed_terracotta",
-          "minecraft:green_glazed_terracotta",
-          "minecraft:light_blue_glazed_terracotta",
-          "minecraft:light_gray_glazed_terracotta",
-          "minecraft:lime_glazed_terracotta",
-          "minecraft:magenta_glazed_terracotta",
-          "minecraft:orange_glazed_terracotta",
-          "minecraft:pink_glazed_terracotta",
-          "minecraft:purple_glazed_terracotta",
-          "minecraft:red_glazed_terracotta",
-          "minecraft:white_glazed_terracotta",
+          "minecraft:white_glazed_terracotta"
+        ]
+      },
+      {
+        "id": "sell_white_terracotta",
+        "label": "sell_white_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:white_terracotta"
+        ]
+      },
+      {
+        "id": "sell_yellow_glazed_terracotta",
+        "label": "sell_yellow_glazed_terracotta",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
           "minecraft:yellow_glazed_terracotta"
         ]
       },
       {
-        "id": "sell_quartz_pillar",
-        "label": "sell_quartz_pillar",
+        "id": "sell_yellow_terracotta",
+        "label": "sell_yellow_terracotta",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:quartz_pillar"
-        ]
-      },
-      {
-        "id": "sell_quartz_block",
-        "label": "sell_quartz_block",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:quartz_block"
+          "minecraft:yellow_terracotta"
         ]
       }
     ]
@@ -1321,13 +2179,10 @@
     "profession": "minecraft:shepherd",
     "categories": [
       {
-        "id": "buy_wool",
-        "label": "buy_wool",
+        "id": "buy_black_dye",
+        "label": "buy_black_dye",
         "cost1": [
-          "minecraft:black_wool",
-          "minecraft:brown_wool",
-          "minecraft:gray_wool",
-          "minecraft:white_wool"
+          "minecraft:black_dye"
         ],
         "cost2": [],
         "result": [
@@ -1335,14 +2190,58 @@
         ]
       },
       {
-        "id": "sell_shears",
-        "label": "sell_shears",
+        "id": "buy_black_wool",
+        "label": "buy_black_wool",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:black_wool"
         ],
         "cost2": [],
         "result": [
-          "minecraft:shears"
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_blue_dye",
+        "label": "buy_blue_dye",
+        "cost1": [
+          "minecraft:blue_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_brown_dye",
+        "label": "buy_brown_dye",
+        "cost1": [
+          "minecraft:brown_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_brown_wool",
+        "label": "buy_brown_wool",
+        "cost1": [
+          "minecraft:brown_wool"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_cyan_dye",
+        "label": "buy_cyan_dye",
+        "cost1": [
+          "minecraft:cyan_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
         ]
       },
       {
@@ -1372,81 +2271,171 @@
         ]
       },
       {
-        "id": "sell_wool",
-        "label": "sell_wool",
+        "id": "buy_gray_dye",
+        "label": "buy_gray_dye",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:gray_dye"
         ],
         "cost2": [],
         "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_gray_wool",
+        "label": "buy_gray_wool",
+        "cost1": [
+          "minecraft:gray_wool"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_green_dye",
+        "label": "buy_green_dye",
+        "cost1": [
+          "minecraft:green_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_light_blue_dye",
+        "label": "buy_light_blue_dye",
+        "cost1": [
+          "minecraft:light_blue_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_light_gray_dye",
+        "label": "buy_light_gray_dye",
+        "cost1": [
+          "minecraft:light_gray_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_lime_dye",
+        "label": "buy_lime_dye",
+        "cost1": [
+          "minecraft:lime_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_magenta_dye",
+        "label": "buy_magenta_dye",
+        "cost1": [
+          "minecraft:magenta_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_orange_dye",
+        "label": "buy_orange_dye",
+        "cost1": [
+          "minecraft:orange_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_pink_dye",
+        "label": "buy_pink_dye",
+        "cost1": [
+          "minecraft:pink_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_purple_dye",
+        "label": "buy_purple_dye",
+        "cost1": [
+          "minecraft:purple_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_red_dye",
+        "label": "buy_red_dye",
+        "cost1": [
+          "minecraft:red_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_white_dye",
+        "label": "buy_white_dye",
+        "cost1": [
+          "minecraft:white_dye"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_white_wool",
+        "label": "buy_white_wool",
+        "cost1": [
+          "minecraft:white_wool"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "buy_wool",
+        "label": "buy_wool",
+        "cost1": [
           "minecraft:black_wool",
-          "minecraft:blue_wool",
           "minecraft:brown_wool",
-          "minecraft:cyan_wool",
           "minecraft:gray_wool",
-          "minecraft:green_wool",
-          "minecraft:light_blue_wool",
-          "minecraft:light_gray_wool",
-          "minecraft:lime_wool",
-          "minecraft:magenta_wool",
-          "minecraft:orange_wool",
-          "minecraft:pink_wool",
-          "minecraft:purple_wool",
-          "minecraft:red_wool",
-          "minecraft:white_wool",
-          "minecraft:yellow_wool"
-        ]
-      },
-      {
-        "id": "sell_carpet",
-        "label": "sell_carpet",
-        "cost1": [
-          "minecraft:emerald"
+          "minecraft:white_wool"
         ],
         "cost2": [],
         "result": [
-          "minecraft:black_carpet",
-          "minecraft:blue_carpet",
-          "minecraft:brown_carpet",
-          "minecraft:cyan_carpet",
-          "minecraft:gray_carpet",
-          "minecraft:green_carpet",
-          "minecraft:light_blue_carpet",
-          "minecraft:light_gray_carpet",
-          "minecraft:lime_carpet",
-          "minecraft:magenta_carpet",
-          "minecraft:orange_carpet",
-          "minecraft:pink_carpet",
-          "minecraft:purple_carpet",
-          "minecraft:red_carpet",
-          "minecraft:white_carpet",
-          "minecraft:yellow_carpet"
+          "minecraft:emerald"
         ]
       },
       {
-        "id": "sell_bed",
-        "label": "sell_bed",
+        "id": "buy_yellow_dye",
+        "label": "buy_yellow_dye",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:yellow_dye"
         ],
         "cost2": [],
         "result": [
-          "minecraft:black_bed",
-          "minecraft:blue_bed",
-          "minecraft:brown_bed",
-          "minecraft:cyan_bed",
-          "minecraft:gray_bed",
-          "minecraft:green_bed",
-          "minecraft:light_blue_bed",
-          "minecraft:light_gray_bed",
-          "minecraft:lime_bed",
-          "minecraft:magenta_bed",
-          "minecraft:orange_bed",
-          "minecraft:pink_bed",
-          "minecraft:purple_bed",
-          "minecraft:red_bed",
-          "minecraft:white_bed",
-          "minecraft:yellow_bed"
+          "minecraft:emerald"
         ]
       },
       {
@@ -1476,6 +2465,542 @@
         ]
       },
       {
+        "id": "sell_bed",
+        "label": "sell_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_bed",
+          "minecraft:blue_bed",
+          "minecraft:brown_bed",
+          "minecraft:cyan_bed",
+          "minecraft:gray_bed",
+          "minecraft:green_bed",
+          "minecraft:light_blue_bed",
+          "minecraft:light_gray_bed",
+          "minecraft:lime_bed",
+          "minecraft:magenta_bed",
+          "minecraft:orange_bed",
+          "minecraft:pink_bed",
+          "minecraft:purple_bed",
+          "minecraft:red_bed",
+          "minecraft:white_bed",
+          "minecraft:yellow_bed"
+        ]
+      },
+      {
+        "id": "sell_black_banner",
+        "label": "sell_black_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_banner"
+        ]
+      },
+      {
+        "id": "sell_black_bed",
+        "label": "sell_black_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_bed"
+        ]
+      },
+      {
+        "id": "sell_black_carpet",
+        "label": "sell_black_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_carpet"
+        ]
+      },
+      {
+        "id": "sell_black_wool",
+        "label": "sell_black_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_wool"
+        ]
+      },
+      {
+        "id": "sell_blue_banner",
+        "label": "sell_blue_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:blue_banner"
+        ]
+      },
+      {
+        "id": "sell_blue_bed",
+        "label": "sell_blue_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:blue_bed"
+        ]
+      },
+      {
+        "id": "sell_blue_carpet",
+        "label": "sell_blue_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:blue_carpet"
+        ]
+      },
+      {
+        "id": "sell_blue_wool",
+        "label": "sell_blue_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:blue_wool"
+        ]
+      },
+      {
+        "id": "sell_brown_banner",
+        "label": "sell_brown_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brown_banner"
+        ]
+      },
+      {
+        "id": "sell_brown_bed",
+        "label": "sell_brown_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brown_bed"
+        ]
+      },
+      {
+        "id": "sell_brown_carpet",
+        "label": "sell_brown_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brown_carpet"
+        ]
+      },
+      {
+        "id": "sell_brown_wool",
+        "label": "sell_brown_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:brown_wool"
+        ]
+      },
+      {
+        "id": "sell_carpet",
+        "label": "sell_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_carpet",
+          "minecraft:blue_carpet",
+          "minecraft:brown_carpet",
+          "minecraft:cyan_carpet",
+          "minecraft:gray_carpet",
+          "minecraft:green_carpet",
+          "minecraft:light_blue_carpet",
+          "minecraft:light_gray_carpet",
+          "minecraft:lime_carpet",
+          "minecraft:magenta_carpet",
+          "minecraft:orange_carpet",
+          "minecraft:pink_carpet",
+          "minecraft:purple_carpet",
+          "minecraft:red_carpet",
+          "minecraft:white_carpet",
+          "minecraft:yellow_carpet"
+        ]
+      },
+      {
+        "id": "sell_cyan_banner",
+        "label": "sell_cyan_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cyan_banner"
+        ]
+      },
+      {
+        "id": "sell_cyan_bed",
+        "label": "sell_cyan_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cyan_bed"
+        ]
+      },
+      {
+        "id": "sell_cyan_carpet",
+        "label": "sell_cyan_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cyan_carpet"
+        ]
+      },
+      {
+        "id": "sell_cyan_wool",
+        "label": "sell_cyan_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:cyan_wool"
+        ]
+      },
+      {
+        "id": "sell_gray_banner",
+        "label": "sell_gray_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:gray_banner"
+        ]
+      },
+      {
+        "id": "sell_gray_bed",
+        "label": "sell_gray_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:gray_bed"
+        ]
+      },
+      {
+        "id": "sell_gray_carpet",
+        "label": "sell_gray_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:gray_carpet"
+        ]
+      },
+      {
+        "id": "sell_gray_wool",
+        "label": "sell_gray_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:gray_wool"
+        ]
+      },
+      {
+        "id": "sell_green_banner",
+        "label": "sell_green_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:green_banner"
+        ]
+      },
+      {
+        "id": "sell_green_bed",
+        "label": "sell_green_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:green_bed"
+        ]
+      },
+      {
+        "id": "sell_green_carpet",
+        "label": "sell_green_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:green_carpet"
+        ]
+      },
+      {
+        "id": "sell_green_wool",
+        "label": "sell_green_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:green_wool"
+        ]
+      },
+      {
+        "id": "sell_light_blue_banner",
+        "label": "sell_light_blue_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_blue_banner"
+        ]
+      },
+      {
+        "id": "sell_light_blue_bed",
+        "label": "sell_light_blue_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_blue_bed"
+        ]
+      },
+      {
+        "id": "sell_light_blue_carpet",
+        "label": "sell_light_blue_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_blue_carpet"
+        ]
+      },
+      {
+        "id": "sell_light_blue_wool",
+        "label": "sell_light_blue_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_blue_wool"
+        ]
+      },
+      {
+        "id": "sell_light_gray_banner",
+        "label": "sell_light_gray_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_gray_banner"
+        ]
+      },
+      {
+        "id": "sell_light_gray_bed",
+        "label": "sell_light_gray_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_gray_bed"
+        ]
+      },
+      {
+        "id": "sell_light_gray_carpet",
+        "label": "sell_light_gray_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_gray_carpet"
+        ]
+      },
+      {
+        "id": "sell_light_gray_wool",
+        "label": "sell_light_gray_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:light_gray_wool"
+        ]
+      },
+      {
+        "id": "sell_lime_banner",
+        "label": "sell_lime_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lime_banner"
+        ]
+      },
+      {
+        "id": "sell_lime_bed",
+        "label": "sell_lime_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lime_bed"
+        ]
+      },
+      {
+        "id": "sell_lime_carpet",
+        "label": "sell_lime_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lime_carpet"
+        ]
+      },
+      {
+        "id": "sell_lime_wool",
+        "label": "sell_lime_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:lime_wool"
+        ]
+      },
+      {
+        "id": "sell_magenta_banner",
+        "label": "sell_magenta_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:magenta_banner"
+        ]
+      },
+      {
+        "id": "sell_magenta_bed",
+        "label": "sell_magenta_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:magenta_bed"
+        ]
+      },
+      {
+        "id": "sell_magenta_carpet",
+        "label": "sell_magenta_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:magenta_carpet"
+        ]
+      },
+      {
+        "id": "sell_magenta_wool",
+        "label": "sell_magenta_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:magenta_wool"
+        ]
+      },
+      {
+        "id": "sell_orange_banner",
+        "label": "sell_orange_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:orange_banner"
+        ]
+      },
+      {
+        "id": "sell_orange_bed",
+        "label": "sell_orange_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:orange_bed"
+        ]
+      },
+      {
+        "id": "sell_orange_carpet",
+        "label": "sell_orange_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:orange_carpet"
+        ]
+      },
+      {
+        "id": "sell_orange_wool",
+        "label": "sell_orange_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:orange_wool"
+        ]
+      },
+      {
         "id": "sell_painting",
         "label": "sell_painting",
         "cost1": [
@@ -1484,6 +3009,263 @@
         "cost2": [],
         "result": [
           "minecraft:painting"
+        ]
+      },
+      {
+        "id": "sell_pink_banner",
+        "label": "sell_pink_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:pink_banner"
+        ]
+      },
+      {
+        "id": "sell_pink_bed",
+        "label": "sell_pink_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:pink_bed"
+        ]
+      },
+      {
+        "id": "sell_pink_carpet",
+        "label": "sell_pink_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:pink_carpet"
+        ]
+      },
+      {
+        "id": "sell_pink_wool",
+        "label": "sell_pink_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:pink_wool"
+        ]
+      },
+      {
+        "id": "sell_purple_banner",
+        "label": "sell_purple_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:purple_banner"
+        ]
+      },
+      {
+        "id": "sell_purple_bed",
+        "label": "sell_purple_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:purple_bed"
+        ]
+      },
+      {
+        "id": "sell_purple_carpet",
+        "label": "sell_purple_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:purple_carpet"
+        ]
+      },
+      {
+        "id": "sell_purple_wool",
+        "label": "sell_purple_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:purple_wool"
+        ]
+      },
+      {
+        "id": "sell_red_banner",
+        "label": "sell_red_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_banner"
+        ]
+      },
+      {
+        "id": "sell_red_bed",
+        "label": "sell_red_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_bed"
+        ]
+      },
+      {
+        "id": "sell_red_carpet",
+        "label": "sell_red_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_carpet"
+        ]
+      },
+      {
+        "id": "sell_red_wool",
+        "label": "sell_red_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:red_wool"
+        ]
+      },
+      {
+        "id": "sell_shears",
+        "label": "sell_shears",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:shears"
+        ]
+      },
+      {
+        "id": "sell_white_banner",
+        "label": "sell_white_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:white_banner"
+        ]
+      },
+      {
+        "id": "sell_white_bed",
+        "label": "sell_white_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:white_bed"
+        ]
+      },
+      {
+        "id": "sell_white_carpet",
+        "label": "sell_white_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:white_carpet"
+        ]
+      },
+      {
+        "id": "sell_white_wool",
+        "label": "sell_white_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:white_wool"
+        ]
+      },
+      {
+        "id": "sell_wool",
+        "label": "sell_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ]
+      },
+      {
+        "id": "sell_yellow_banner",
+        "label": "sell_yellow_banner",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:yellow_banner"
+        ]
+      },
+      {
+        "id": "sell_yellow_bed",
+        "label": "sell_yellow_bed",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:yellow_bed"
+        ]
+      },
+      {
+        "id": "sell_yellow_carpet",
+        "label": "sell_yellow_carpet",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:yellow_carpet"
+        ]
+      },
+      {
+        "id": "sell_yellow_wool",
+        "label": "sell_yellow_wool",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:yellow_wool"
         ]
       }
     ]
@@ -1503,10 +3285,10 @@
         ]
       },
       {
-        "id": "buy_iron_ingot",
-        "label": "buy_iron_ingot",
+        "id": "buy_diamond",
+        "label": "buy_diamond",
         "cost1": [
-          "minecraft:iron_ingot"
+          "minecraft:diamond"
         ],
         "cost2": [],
         "result": [
@@ -1525,47 +3307,25 @@
         ]
       },
       {
-        "id": "sell_iron_axe",
-        "label": "sell_iron_axe",
+        "id": "buy_iron_ingot",
+        "label": "buy_iron_ingot",
         "cost1": [
-          "minecraft:emerald"
+          "minecraft:iron_ingot"
         ],
         "cost2": [],
         "result": [
-          "minecraft:iron_axe"
+          "minecraft:emerald"
         ]
       },
       {
-        "id": "sell_iron_shovel",
-        "label": "sell_iron_shovel",
+        "id": "sell_bell",
+        "label": "sell_bell",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:iron_shovel"
-        ]
-      },
-      {
-        "id": "sell_iron_pickaxe",
-        "label": "sell_iron_pickaxe",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:iron_pickaxe"
-        ]
-      },
-      {
-        "id": "buy_diamond",
-        "label": "buy_diamond",
-        "cost1": [
-          "minecraft:diamond"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
+          "minecraft:bell"
         ]
       },
       {
@@ -1580,14 +3340,14 @@
         ]
       },
       {
-        "id": "sell_diamond_shovel",
-        "label": "sell_diamond_shovel",
+        "id": "sell_diamond_hoe",
+        "label": "sell_diamond_hoe",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
-          "minecraft:diamond_shovel"
+          "minecraft:diamond_hoe"
         ]
       },
       {
@@ -1599,6 +3359,94 @@
         "cost2": [],
         "result": [
           "minecraft:diamond_pickaxe"
+        ]
+      },
+      {
+        "id": "sell_diamond_shovel",
+        "label": "sell_diamond_shovel",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:diamond_shovel"
+        ]
+      },
+      {
+        "id": "sell_iron_axe",
+        "label": "sell_iron_axe",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_axe"
+        ]
+      },
+      {
+        "id": "sell_iron_pickaxe",
+        "label": "sell_iron_pickaxe",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_pickaxe"
+        ]
+      },
+      {
+        "id": "sell_iron_shovel",
+        "label": "sell_iron_shovel",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_shovel"
+        ]
+      },
+      {
+        "id": "sell_stone_axe",
+        "label": "sell_stone_axe",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:stone_axe"
+        ]
+      },
+      {
+        "id": "sell_stone_hoe",
+        "label": "sell_stone_hoe",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:stone_hoe"
+        ]
+      },
+      {
+        "id": "sell_stone_pickaxe",
+        "label": "sell_stone_pickaxe",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:stone_pickaxe"
+        ]
+      },
+      {
+        "id": "sell_stone_shovel",
+        "label": "sell_stone_shovel",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:stone_shovel"
         ]
       }
     ]
@@ -1618,21 +3466,10 @@
         ]
       },
       {
-        "id": "sell_iron_sword",
-        "label": "sell_iron_sword",
+        "id": "buy_diamond",
+        "label": "buy_diamond",
         "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:iron_sword"
-        ]
-      },
-      {
-        "id": "buy_iron_ingot",
-        "label": "buy_iron_ingot",
-        "cost1": [
-          "minecraft:iron_ingot"
+          "minecraft:diamond"
         ],
         "cost2": [],
         "result": [
@@ -1651,14 +3488,25 @@
         ]
       },
       {
-        "id": "buy_diamond",
-        "label": "buy_diamond",
+        "id": "buy_iron_ingot",
+        "label": "buy_iron_ingot",
         "cost1": [
-          "minecraft:diamond"
+          "minecraft:iron_ingot"
         ],
         "cost2": [],
         "result": [
           "minecraft:emerald"
+        ]
+      },
+      {
+        "id": "sell_bell",
+        "label": "sell_bell",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:bell"
         ]
       },
       {
@@ -1681,6 +3529,28 @@
         "cost2": [],
         "result": [
           "minecraft:diamond_sword"
+        ]
+      },
+      {
+        "id": "sell_iron_axe",
+        "label": "sell_iron_axe",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_axe"
+        ]
+      },
+      {
+        "id": "sell_iron_sword",
+        "label": "sell_iron_sword",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_sword"
         ]
       }
     ]

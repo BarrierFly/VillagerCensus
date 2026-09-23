@@ -110,12 +110,14 @@ Hotkeys (all default `none`): `openConfigGui`, `toggleStats`, `undoLast`.
 ## Deviations from the original plan / 与原规划的差异
 
 - **Fabric only** for now (no NeoForge target). 首版只做 Fabric。
-- The trade-category catalog (`villagercensus/trade_categories.json`) is generated from the
-  decompiled vanilla `VillagerTrades` in the `guardian` repository (commit `192e7132b4`,
-  branch `mojmap/vineflower` = Minecraft 1.21.11). 26.3 made villager trades data-driven and
-  its trade set is larger; trades that do not map to a catalog entry fall back to the
-  item-triple label. 交易类别目录由 guardian 仓库反编译源码生成（1.21.11 提交）；
-  26.3 的交易改为数据驱动且条目更多，未命中的交易回退为物品三元组。
+- The trade-category catalog (`villagercensus/trade_categories.json`, **303 categories across
+  all 13 professions**) is generated from the decompiled vanilla trades in the `guardian`
+  repository (`mojmap/vineflower`): **1.21.11** commit `192e7132b4` (explicit `ItemListing`
+  constructors) and **26.3** commit `d5822ca2a1` (data-driven `VillagerTrade.builder` plus
+  `villager_trade` tags). Both sets are merged. Trades that still match no entry fall back to
+  an item-triple label.
+  交易类别目录由 guardian 反编译源码生成，并合并 1.21.11 与 26.3（共 303 项，覆盖全部职业）；
+  未命中的交易回退为物品三元组。
 - Continuation uses commands rather than a custom screen (see above).
 - The initial version targets the plan's milestones roughly through **M5/M6** for the two
   first versions (1.21.11, 26.3).

@@ -97,9 +97,12 @@ Interaction contract (do not break):
   (branch `mojmap/vineflower`):
   - 1.21.11 commit: `192e7132b4` → `src/main/java/net/minecraft/world/entity/npc/villager/VillagerTrades.java`
   - 26.3 commit: `d5822ca2a1` → `src/main/java/net/minecraft/world/item/trading/VillagerTrades.java`
-  - 1.21.11 uses explicit `ItemListing` constructors (fully parsed); 26.3 is data-driven
-    (`VillagerTrade.builder(...)`), so unmatched 26.3 trades fall back to the item triple.
-  Regenerate with `git -C <guardian> show <commit>:<path>` + the parser script used previously.
+  - 1.21.11 uses explicit `ItemListing` constructors; 26.3 uses `VillagerTrade.builder(...)`
+    with `ColorCollection` loops and `create*` helper methods, and assigns trades to
+    professions through `data/minecraft/tags/villager_trade/<profession>/level_*.json`
+    (recursively including `common_smith`).
+  - Both versions are fully parsed and merged (303 categories, 0 unresolved). Regenerate with
+    the parser scripts (see commit history) via `git -C <guardian> show <commit>:<path>`.
 
 ## Commits
 
