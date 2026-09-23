@@ -1,0 +1,159 @@
+[
+  {
+    "profession": "minecraft:armorer",
+    "categories": [
+      { "id": "buy_coal", "label": "armorer.buy_coal", "cost1": "minecraft:coal", "result": "minecraft:emerald" },
+      { "id": "buy_iron", "label": "armorer.buy_iron", "cost1": "minecraft:iron_ingot", "result": "minecraft:emerald" },
+      { "id": "buy_lava_bucket", "label": "armorer.buy_lava_bucket", "cost1": "minecraft:lava_bucket", "result": "minecraft:emerald" },
+      { "id": "buy_diamond", "label": "armorer.buy_diamond", "cost1": "minecraft:diamond", "result": "minecraft:emerald" },
+      { "id": "sell_iron_armor", "label": "armorer.sell_iron_armor", "cost1": "minecraft:emerald", "result": ["minecraft:iron_helmet", "minecraft:iron_chestplate", "minecraft:iron_leggings", "minecraft:iron_boots"] },
+      { "id": "sell_chainmail", "label": "armorer.sell_chainmail", "cost1": "minecraft:emerald", "result": ["minecraft:chainmail_helmet", "minecraft:chainmail_chestplate", "minecraft:chainmail_leggings", "minecraft:chainmail_boots"] },
+      { "id": "sell_bell", "label": "armorer.sell_bell", "cost1": "minecraft:emerald", "result": "minecraft:bell" },
+      { "id": "sell_shield", "label": "armorer.sell_shield", "cost1": "minecraft:emerald", "result": "minecraft:shield" }
+    ]
+  },
+  {
+    "profession": "minecraft:butcher",
+    "categories": [
+      { "id": "buy_meat", "label": "butcher.buy_meat", "cost1": ["minecraft:beef", "minecraft:porkchop", "minecraft:chicken", "minecraft:mutton", "minecraft:rabbit", "minecraft:raw_beef", "minecraft:raw_porkchop", "minecraft:raw_chicken", "minecraft:raw_mutton", "minecraft:raw_rabbit"], "result": "minecraft:emerald" },
+      { "id": "buy_coal", "label": "butcher.buy_coal", "cost1": "minecraft:coal", "result": "minecraft:emerald" },
+      { "id": "sell_cooked_meat", "label": "butcher.sell_cooked_meat", "cost1": "minecraft:emerald", "result": ["minecraft:cooked_beef", "minecraft:cooked_porkchop", "minecraft:cooked_chicken", "minecraft:cooked_mutton", "minecraft:cooked_rabbit"] },
+      { "id": "sell_dried_kelp", "label": "butcher.sell_dried_kelp", "cost1": "minecraft:emerald", "result": "minecraft:dried_kelp" }
+    ]
+  },
+  {
+    "profession": "minecraft:cartographer",
+    "categories": [
+      { "id": "buy_paper", "label": "cartographer.buy_paper", "cost1": "minecraft:paper", "result": "minecraft:emerald" },
+      { "id": "buy_glass_pane", "label": "cartographer.buy_glass_pane", "cost1": "minecraft:glass_pane", "result": "minecraft:emerald" },
+      { "id": "buy_compass", "label": "cartographer.buy_compass", "cost1": "minecraft:compass", "result": "minecraft:emerald" },
+      { "id": "sell_map", "label": "cartographer.sell_map", "cost1": "minecraft:emerald", "cost2": "minecraft:compass", "result": "minecraft:map" },
+      { "id": "sell_explorer_map", "label": "cartographer.sell_explorer_map", "cost1": "minecraft:emerald", "result": ["minecraft:ocean_explorer_map", "minecraft:woodland_explorer_map", "minecraft:map"] },
+      { "id": "sell_banner_pattern", "label": "cartographer.sell_banner_pattern", "cost1": "minecraft:emerald", "result": "minecraft:flower_banner_pattern" }
+    ]
+  },
+  {
+    "profession": "minecraft:cleric",
+    "categories": [
+      { "id": "buy_rotten_flesh", "label": "cleric.buy_rotten_flesh", "cost1": "minecraft:rotten_flesh", "result": "minecraft:emerald" },
+      { "id": "buy_gold_ingot", "label": "cleric.buy_gold_ingot", "cost1": "minecraft:gold_ingot", "result": "minecraft:emerald" },
+      { "id": "buy_rabbit_foot", "label": "cleric.buy_rabbit_foot", "cost1": "minecraft:rabbit_foot", "result": "minecraft:emerald" },
+      { "id": "buy_scute", "label": "cleric.buy_scute", "cost1": "minecraft:turtle_scute", "result": "minecraft:emerald" },
+      { "id": "buy_glass_bottle", "label": "cleric.buy_glass_bottle", "cost1": "minecraft:glass_bottle", "result": "minecraft:emerald" },
+      { "id": "sell_redstone", "label": "cleric.sell_redstone", "cost1": "minecraft:emerald", "result": "minecraft:redstone" },
+      { "id": "sell_lapis", "label": "cleric.sell_lapis", "cost1": "minecraft:emerald", "result": "minecraft:lapis_lazuli" },
+      { "id": "sell_ender_pearl", "label": "cleric.sell_ender_pearl", "cost1": "minecraft:emerald", "result": "minecraft:ender_pearl" },
+      { "id": "sell_experience_bottle", "label": "cleric.sell_experience_bottle", "cost1": "minecraft:emerald", "result": "minecraft:experience_bottle" },
+      { "id": "sell_glowstone", "label": "cleric.sell_glowstone", "cost1": "minecraft:emerald", "result": "minecraft:glowstone" }
+    ]
+  },
+  {
+    "profession": "minecraft:farmer",
+    "categories": [
+      { "id": "buy_wheat", "label": "farmer.buy_wheat", "cost1": "minecraft:wheat", "result": "minecraft:emerald" },
+      { "id": "buy_potato", "label": "farmer.buy_potato", "cost1": "minecraft:potato", "result": "minecraft:emerald" },
+      { "id": "buy_carrot", "label": "farmer.buy_carrot", "cost1": "minecraft:carrot", "result": "minecraft:emerald" },
+      { "id": "buy_beetroot", "label": "farmer.buy_beetroot", "cost1": "minecraft:beetroot", "result": "minecraft:emerald" },
+      { "id": "buy_pumpkin", "label": "farmer.buy_pumpkin", "cost1": "minecraft:pumpkin", "result": "minecraft:emerald" },
+      { "id": "buy_melon", "label": "farmer.buy_melon", "cost1": "minecraft:melon", "result": "minecraft:emerald" },
+      { "id": "sell_bread", "label": "farmer.sell_bread", "cost1": "minecraft:emerald", "result": "minecraft:bread" },
+      { "id": "sell_pumpkin_pie", "label": "farmer.sell_pumpkin_pie", "cost1": "minecraft:emerald", "result": "minecraft:pumpkin_pie" },
+      { "id": "sell_apple", "label": "farmer.sell_apple", "cost1": "minecraft:emerald", "result": "minecraft:apple" },
+      { "id": "sell_cookie", "label": "farmer.sell_cookie", "cost1": "minecraft:emerald", "result": "minecraft:cookie" },
+      { "id": "sell_cake", "label": "farmer.sell_cake", "cost1": "minecraft:emerald", "result": "minecraft:cake" },
+      { "id": "sell_golden_carrot", "label": "farmer.sell_golden_carrot", "cost1": "minecraft:emerald", "result": "minecraft:golden_carrot" },
+      { "id": "sell_glistering_melon", "label": "farmer.sell_glistering_melon", "cost1": "minecraft:emerald", "result": "minecraft:glistering_melon_slice" }
+    ]
+  },
+  {
+    "profession": "minecraft:fisherman",
+    "categories": [
+      { "id": "buy_string", "label": "fisherman.buy_string", "cost1": "minecraft:string", "result": "minecraft:emerald" },
+      { "id": "buy_coal", "label": "fisherman.buy_coal", "cost1": "minecraft:coal", "result": "minecraft:emerald" },
+      { "id": "buy_raw_fish", "label": "fisherman.buy_raw_fish", "cost1": ["minecraft:cod", "minecraft:salmon", "minecraft:raw_cod", "minecraft:raw_salmon"], "result": "minecraft:emerald" },
+      { "id": "sell_cooked_fish", "label": "fisherman.sell_cooked_fish", "cost1": "minecraft:emerald", "result": ["minecraft:cooked_cod", "minecraft:cooked_salmon"] },
+      { "id": "sell_campfire", "label": "fisherman.sell_campfire", "cost1": "minecraft:emerald", "result": "minecraft:campfire" },
+      { "id": "sell_fishing_rod", "label": "fisherman.sell_fishing_rod", "cost1": "minecraft:emerald", "result": "minecraft:fishing_rod" }
+    ]
+  },
+  {
+    "profession": "minecraft:fletcher",
+    "categories": [
+      { "id": "buy_stick", "label": "fletcher.buy_stick", "cost1": "minecraft:stick", "result": "minecraft:emerald" },
+      { "id": "buy_flint", "label": "fletcher.buy_flint", "cost1": "minecraft:flint", "result": "minecraft:emerald" },
+      { "id": "buy_string", "label": "fletcher.buy_string", "cost1": "minecraft:string", "result": "minecraft:emerald" },
+      { "id": "buy_feather", "label": "fletcher.buy_feather", "cost1": "minecraft:feather", "result": "minecraft:emerald" },
+      { "id": "sell_bow", "label": "fletcher.sell_bow", "cost1": "minecraft:emerald", "result": "minecraft:bow" },
+      { "id": "sell_crossbow", "label": "fletcher.sell_crossbow", "cost1": "minecraft:emerald", "result": "minecraft:crossbow" },
+      { "id": "sell_arrow", "label": "fletcher.sell_arrow", "cost1": "minecraft:emerald", "result": "minecraft:arrow" },
+      { "id": "sell_tipped_arrow", "label": "fletcher.sell_tipped_arrow", "cost1": "minecraft:emerald", "result": "minecraft:tipped_arrow" }
+    ]
+  },
+  {
+    "profession": "minecraft:leatherworker",
+    "categories": [
+      { "id": "buy_leather", "label": "leatherworker.buy_leather", "cost1": "minecraft:leather", "result": "minecraft:emerald" },
+      { "id": "buy_rabbit_hide", "label": "leatherworker.buy_rabbit_hide", "cost1": "minecraft:rabbit_hide", "result": "minecraft:emerald" },
+      { "id": "buy_scute", "label": "leatherworker.buy_scute", "cost1": "minecraft:turtle_scute", "result": "minecraft:emerald" },
+      { "id": "sell_leather_armor", "label": "leatherworker.sell_leather_armor", "cost1": "minecraft:emerald", "result": ["minecraft:leather_helmet", "minecraft:leather_chestplate", "minecraft:leather_leggings", "minecraft:leather_boots"] },
+      { "id": "sell_saddle", "label": "leatherworker.sell_saddle", "cost1": "minecraft:emerald", "result": "minecraft:saddle" }
+    ]
+  },
+  {
+    "profession": "minecraft:librarian",
+    "categories": [
+      { "id": "buy_paper", "label": "librarian.buy_paper", "cost1": "minecraft:paper", "result": "minecraft:emerald" },
+      { "id": "buy_book", "label": "librarian.buy_book", "cost1": "minecraft:book", "result": "minecraft:emerald" },
+      { "id": "buy_ink_sac", "label": "librarian.buy_ink_sac", "cost1": "minecraft:ink_sac", "result": "minecraft:emerald" },
+      { "id": "sell_enchanted_book", "label": "librarian.sell_enchanted_book", "cost1": "minecraft:emerald", "cost2": "minecraft:book", "result": "minecraft:enchanted_book" },
+      { "id": "sell_bookshelf", "label": "librarian.sell_bookshelf", "cost1": "minecraft:emerald", "result": "minecraft:bookshelf" },
+      { "id": "sell_lantern", "label": "librarian.sell_lantern", "cost1": "minecraft:emerald", "result": "minecraft:lantern" },
+      { "id": "sell_glass", "label": "librarian.sell_glass", "cost1": "minecraft:emerald", "result": "minecraft:glass" }
+    ]
+  },
+  {
+    "profession": "minecraft:mason",
+    "categories": [
+      { "id": "buy_clay_ball", "label": "mason.buy_clay_ball", "cost1": "minecraft:clay_ball", "result": "minecraft:emerald" },
+      { "id": "buy_quartz", "label": "mason.buy_quartz", "cost1": "minecraft:quartz", "result": "minecraft:emerald" },
+      { "id": "sell_bricks", "label": "mason.sell_bricks", "cost1": "minecraft:emerald", "result": "minecraft:bricks" },
+      { "id": "sell_stone_bricks", "label": "mason.sell_stone_bricks", "cost1": "minecraft:emerald", "result": ["minecraft:stone_bricks", "minecraft:chiseled_stone_bricks", "minecraft:cracked_stone_bricks"] },
+      { "id": "sell_polished", "label": "mason.sell_polished", "cost1": "minecraft:emerald", "result": ["minecraft:polished_andesite", "minecraft:polished_diorite", "minecraft:polished_granite"] },
+      { "id": "sell_terracotta", "label": "mason.sell_terracotta", "cost1": "minecraft:emerald", "result": "minecraft:terracotta" },
+      { "id": "sell_mud_bricks", "label": "mason.sell_mud_bricks", "cost1": "minecraft:emerald", "result": "minecraft:mud_bricks" },
+      { "id": "sell_quartz_block", "label": "mason.sell_quartz_block", "cost1": "minecraft:emerald", "result": ["minecraft:quartz_block", "minecraft:quartz_pillar", "minecraft:chiseled_quartz_block"] },
+      { "id": "sell_glazed_terracotta", "label": "mason.sell_glazed_terracotta", "cost1": "minecraft:emerald", "result": "minecraft:white_glazed_terracotta" }
+    ]
+  },
+  {
+    "profession": "minecraft:shepherd",
+    "categories": [
+      { "id": "buy_wool", "label": "shepherd.buy_wool", "cost1": "minecraft:white_wool", "result": "minecraft:emerald" },
+      { "id": "buy_dye", "label": "shepherd.buy_dye", "cost1": ["minecraft:white_dye", "minecraft:black_dye", "minecraft:red_dye", "minecraft:blue_dye", "minecraft:yellow_dye", "minecraft:green_dye", "minecraft:brown_dye", "minecraft:orange_dye", "minecraft:purple_dye", "minecraft:cyan_dye", "minecraft:light_blue_dye", "minecraft:lime_dye", "minecraft:pink_dye", "minecraft:magenta_dye", "minecraft:gray_dye", "minecraft:light_gray_dye"], "result": "minecraft:emerald" },
+      { "id": "sell_wool", "label": "shepherd.sell_wool", "cost1": "minecraft:emerald", "result": "minecraft:white_wool" },
+      { "id": "sell_carpet", "label": "shepherd.sell_carpet", "cost1": "minecraft:emerald", "result": "minecraft:white_carpet" },
+      { "id": "sell_bed", "label": "shepherd.sell_bed", "cost1": "minecraft:emerald", "result": "minecraft:white_bed" },
+      { "id": "sell_painting", "label": "shepherd.sell_painting", "cost1": "minecraft:emerald", "result": "minecraft:painting" }
+    ]
+  },
+  {
+    "profession": "minecraft:toolsmith",
+    "categories": [
+      { "id": "buy_coal", "label": "toolsmith.buy_coal", "cost1": "minecraft:coal", "result": "minecraft:emerald" },
+      { "id": "buy_iron", "label": "toolsmith.buy_iron", "cost1": "minecraft:iron_ingot", "result": "minecraft:emerald" },
+      { "id": "buy_flint", "label": "toolsmith.buy_flint", "cost1": "minecraft:flint", "result": "minecraft:emerald" },
+      { "id": "sell_tools", "label": "toolsmith.sell_tools", "cost1": "minecraft:emerald", "result": ["minecraft:iron_axe", "minecraft:iron_shovel", "minecraft:iron_pickaxe", "minecraft:diamond_axe", "minecraft:diamond_shovel", "minecraft:diamond_pickaxe"] },
+      { "id": "sell_bell", "label": "toolsmith.sell_bell", "cost1": "minecraft:emerald", "result": "minecraft:bell" }
+    ]
+  },
+  {
+    "profession": "minecraft:weaponsmith",
+    "categories": [
+      { "id": "buy_coal", "label": "weaponsmith.buy_coal", "cost1": "minecraft:coal", "result": "minecraft:emerald" },
+      { "id": "buy_iron", "label": "weaponsmith.buy_iron", "cost1": "minecraft:iron_ingot", "result": "minecraft:emerald" },
+      { "id": "buy_flint", "label": "weaponsmith.buy_flint", "cost1": "minecraft:flint", "result": "minecraft:emerald" },
+      { "id": "sell_weapons", "label": "weaponsmith.sell_weapons", "cost1": "minecraft:emerald", "result": ["minecraft:iron_sword", "minecraft:iron_axe", "minecraft:diamond_sword", "minecraft:diamond_axe"] },
+      { "id": "sell_bell", "label": "weaponsmith.sell_bell", "cost1": "minecraft:emerald", "result": "minecraft:bell" }
+    ]
+  }
+]

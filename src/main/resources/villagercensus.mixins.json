@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.villagercensus.mixin",
+  "compatibilityLevel": "JAVA_${java_version}",
+  "mixins": [],
+  "client": [
+    "MixinMultiPlayerGameMode",
+    "MixinClientPacketListener"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

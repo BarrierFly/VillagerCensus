@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "villagercensus",
+  "version": "${version}",
+  "name": "Villager Census",
+  "description": "Client-side villager profession and trade census with a readable report export.",
+  "authors": [
+    "villagercensus"
+  ],
+  "license": "Unlicense",
+  "icon": "assets/villagercensus/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "net.villagercensus.VillagerCensus"
+    ],
+    "client": [
+      "net.villagercensus.VillagerCensusClient"
+    ]
+  },
+  "mixins": [
+    "villagercensus.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "${mc_version}",
+    "fabricloader": ">=0.19.0",
+    "fabric-api": "*",
+    "malilib": "*"
+  }
+}
