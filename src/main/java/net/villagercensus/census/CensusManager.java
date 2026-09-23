@@ -43,13 +43,16 @@ public class CensusManager
 {
     private static final CensusManager INSTANCE = new CensusManager();
 
-    private CensusSession session;
-    private PendingTarget pending;
+    private volatile CensusSession session;
+    private volatile PendingTarget pending;
     private PendingUpdate pendingUpdate;
-    private long tickCounter;
+    private volatile long tickCounter;
 
     private final Map<UUID, Boolean> originalGlow = new LinkedHashMap<>();
     private final Set<UUID> modGlowing = new HashSet<>();
+
+    private final java.util.concurrent.ConcurrentLinkedQueue<ClientboundMerchantOffersPacket> offersQueue =
+            new java.util.concurrent.ConcurrentLinkedQueue<>();
 
     private java.nio.file.Path resumeCandidate;
 
@@ -385,7 +388,19 @@ public class CensusManager
         this.pending = new PendingTarget(villager.getId(), uuid, villager.getVillagerData().level(), this.tickCounter, restat);
     }
 
+    /**
+     * Called from the network thread by the mixin. Only queues the packet; all record building,
+     * entity access and messaging happen later on the client thread (see {@link #onClientTick}).
+     */
     public void onMerchantOffers(ClientboundMerchantOffersPacket packet)
+    {
+        if (this.hasSession())
+        {
+            this.offersQueue.add(packet);
+        }
+    }
+
+    private void processMerchantOffers(ClientboundMerchantOffersPacket packet)
     {
         if (!this.hasSession() || this.pending == null)
         {
@@ -524,6 +539,14 @@ public class CensusManager
         if (mc.level == null)
         {
             return;
+        }
+
+        // Network-thread packets are processed here, on the client thread.
+        ClientboundMerchantOffersPacket queued;
+
+        while ((queued = this.offersQueue.poll()) != null)
+        {
+            this.processMerchantOffers(queued);
         }
 
         if (this.hasSession() && this.pending != null)
@@ -863,6 +886,7 @@ public class CensusManager
 
             this.pending = null;
             this.pendingUpdate = null;
+            this.offersQueue.clear();
             this.originalGlow.clear();
             this.modGlowing.clear();
         }
@@ -894,7 +918,7 @@ public class CensusManager
         final int level;
         final long tick;
         final boolean restat;
-        int containerId = -1;
+        volatile int containerId = -1;
 
         PendingTarget(int entityId, UUID uuid, int level, long tick, boolean restat)
         {

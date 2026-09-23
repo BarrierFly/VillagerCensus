@@ -77,6 +77,11 @@ Interaction contract (do not break):
 - `handleMerchantOffers` **never calls `ci.cancel()`** (offers-hud compatibility).
 - `handleOpenScreen` cancels only when a matching pending target exists and the type is
   `MenuType.MERCHANT`.
+- **Threading:** `handleMerchantOffers` / `handleOpenScreen` run on the Netty network thread.
+  They must only touch thread-safe state (the offers queue, `volatile` pending/tick fields)
+  and must never call malilib message/render helpers or mutate entities there. All record
+  building, messaging and entity access happens in `CensusManager.onClientTick` (client
+  thread), which drains the offers queue.
 
 ## Code style
 
