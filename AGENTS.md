@@ -83,6 +83,19 @@ Interaction contract (do not break):
   building, messaging and entity access happens in `CensusManager.onClientTick` (client
   thread), which drains the offers queue.
 
+## Markers, HUD and messages
+
+- Glowing markers: **do not** use `Entity#setGlowingTag` on the client — it only round-trips
+  the shared flag and is a no-op client-side. `CensusManager.setGlow` calls the invoker mixin
+  `IMixinEntity.villagercensus$setSharedFlag(6, value)` to toggle the glowing shared flag
+  directly, and `maintainMarkers` re-applies it every tick (server data updates can clear it).
+- Feedback uses `util/Messages` which sends vanilla action-bar text, avoiding malilib's
+  opaque on-screen message overlay.
+- HUD is drawn through the Fabric HUD API (`HudElementRegistry` on 26.1+, `HudRenderCallback`
+  below) with no background. It shows draft status when no session is active.
+- ModMenu integration is `compat/modmenu/ModMenuImpl` (optional; the `modmenu` entrypoint is
+  only read when ModMenu is installed).
+
 ## Code style
 
 - Match the surrounding code: 4-space indent, Allman braces, explicit types where the

@@ -20,7 +20,6 @@ import net.villagercensus.util.Compat;
 public class CensusHud
 {
     private static final int COLOR = 0xFFFFFFFF;
-    private static boolean loggedFirstFrame;
 
     //? if >= 26.1 {
     public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker)
@@ -58,18 +57,25 @@ public class CensusHud
             return lines;
         }
 
+        Minecraft mc = Minecraft.getInstance();
+
+        if (mc.player == null || Compat.currentScreen(mc) != null)
+        {
+            return lines;
+        }
+
         CensusManager manager = CensusManager.getInstance();
         CensusSession session = manager.getSession();
 
         if (session == null)
         {
-            return lines;
-        }
+            if (manager.getDraftTotal() > 0)
+            {
+                lines.add("Census draft: " + manager.getDraftName());
+                lines.add("loaded " + manager.getDraftLoaded() + "/" + manager.getDraftTotal());
+                lines.add("/census resume  |  /census discard");
+            }
 
-        Minecraft mc = Minecraft.getInstance();
-
-        if (mc.player == null || Compat.currentScreen(mc) != null)
-        {
             return lines;
         }
 
@@ -99,12 +105,6 @@ public class CensusHud
             {
                 lines.add("  remark: " + last.remark);
             }
-        }
-
-        if (!loggedFirstFrame)
-        {
-            loggedFirstFrame = true;
-            net.villagercensus.Reference.logger().info("Villager Census HUD is rendering ({} lines)", lines.size());
         }
 
         return lines;

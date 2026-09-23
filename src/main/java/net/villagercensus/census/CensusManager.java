@@ -34,6 +34,7 @@ import net.villagercensus.config.Configs;
 import net.villagercensus.data.DraftStorage;
 import net.villagercensus.data.ReportWriter;
 import net.villagercensus.data.WorldId;
+import net.villagercensus.mixin.IMixinEntity;
 import net.villagercensus.trade.TradeCatalog;
 import net.villagercensus.trade.TradeCategory;
 import net.villagercensus.util.Messages;
@@ -52,6 +53,11 @@ public class CensusManager
 
     private int verifyTotal;
     private int verifyLoaded;
+
+    private CensusSession resumeDraft;
+    private String draftName;
+    private int draftLoaded;
+    private int draftTotal;
 
     private final java.util.concurrent.ConcurrentLinkedQueue<ClientboundMerchantOffersPacket> offersQueue =
             new java.util.concurrent.ConcurrentLinkedQueue<>();
@@ -254,6 +260,36 @@ public class CensusManager
     public void refreshResumeCandidate()
     {
         this.resumeCandidate = DraftStorage.findAnyDraft(WorldId.current(), currentDimension());
+
+        if (this.resumeCandidate != null)
+        {
+            this.resumeDraft = DraftStorage.load(this.resumeCandidate);
+            this.draftName = this.resumeCandidate.getFileName().toString();
+            this.draftTotal = this.resumeDraft != null ? this.resumeDraft.records.size() : 0;
+            this.draftLoaded = this.resumeDraft != null ? this.updateVerification(this.resumeDraft) : 0;
+        }
+        else
+        {
+            this.resumeDraft = null;
+            this.draftName = null;
+            this.draftTotal = 0;
+            this.draftLoaded = 0;
+        }
+    }
+
+    public String getDraftName()
+    {
+        return this.draftName;
+    }
+
+    public int getDraftLoaded()
+    {
+        return this.draftLoaded;
+    }
+
+    public int getDraftTotal()
+    {
+        return this.draftTotal;
     }
 
     public boolean resumeSession()
@@ -295,6 +331,12 @@ public class CensusManager
         this.pending = null;
         this.pendingUpdate = null;
 
+        this.resumeCandidate = null;
+        this.resumeDraft = null;
+        this.draftName = null;
+        this.draftTotal = 0;
+        this.draftLoaded = 0;
+
         this.startVerification(loaded);
         Messages.success( "villagercensus.message.resumed",
                 loaded.rawName, this.verifyLoaded, this.verifyTotal);
@@ -313,7 +355,11 @@ public class CensusManager
 
         DraftStorage.archive(this.resumeCandidate);
         this.resumeCandidate = null;
-        Messages.info( "villagercensus.message.draft_discarded");
+        this.resumeDraft = null;
+        this.draftName = null;
+        this.draftTotal = 0;
+        this.draftLoaded = 0;
+        Messages.info("villagercensus.message.draft_discarded");
     }
 
     private void startVerification(CensusSession loaded)
@@ -651,10 +697,14 @@ public class CensusManager
                 if (this.verifyLoaded >= this.verifyTotal)
                 {
                     this.verifyTotal = 0;
-                    Messages.info( "villagercensus.message.verified_all",
-                            this.verifyLoaded);
+                    Messages.info("villagercensus.message.verified_all", this.verifyLoaded);
                 }
             }
+        }
+
+        if (!this.hasSession() && this.resumeDraft != null && this.tickCounter % 20L == 0L)
+        {
+            this.draftLoaded = this.updateVerification(this.resumeDraft);
         }
     }
 
@@ -879,8 +929,8 @@ public class CensusManager
         }
 
         UUID uuid = villager.getUUID();
-        this.originalGlow.putIfAbsent(uuid, villager.hasGlowingTag());
-        villager.setGlowingTag(true);
+        this.originalGlow.putIfAbsent(uuid, villager.isCurrentlyGlowing());
+        setGlow(villager, true);
         this.modGlowing.add(uuid);
     }
 
@@ -899,7 +949,7 @@ public class CensusManager
 
             if (!original)
             {
-                villager.setGlowingTag(false);
+                setGlow(villager, false);
             }
         }
 
@@ -946,16 +996,22 @@ public class CensusManager
 
             if (villager != null)
             {
-                this.originalGlow.putIfAbsent(record.uuid, villager.hasGlowingTag());
+                this.originalGlow.putIfAbsent(record.uuid, villager.isCurrentlyGlowing());
 
-                if (!villager.hasGlowingTag())
+                if (!villager.isCurrentlyGlowing())
                 {
-                    villager.setGlowingTag(true);
+                    setGlow(villager, true);
                 }
 
                 this.modGlowing.add(record.uuid);
             }
         }
+    }
+
+    private static void setGlow(Villager villager, boolean value)
+    {
+        // Client-side Entity#setGlowingTag only round-trips the shared flag, so set it directly.
+        ((IMixinEntity) villager).villagercensus$setSharedFlag(6, value);
     }
 
     // ------------------------------------------------------------------
@@ -981,6 +1037,11 @@ public class CensusManager
             this.modGlowing.clear();
             this.verifyTotal = 0;
             this.verifyLoaded = 0;
+            this.resumeCandidate = null;
+            this.resumeDraft = null;
+            this.draftName = null;
+            this.draftTotal = 0;
+            this.draftLoaded = 0;
         }
     }
 

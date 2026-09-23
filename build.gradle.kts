@@ -54,6 +54,10 @@ repositories {
             includeGroupAndSubgroups("fi.dy.masa")
         }
     }
+    maven {
+        name = "TerraformersMC"
+        url = uri("https://maven.terraformersmc.com/releases/")
+    }
 }
 
 val loom = extensions.getByType<net.fabricmc.loom.api.LoomGradleExtensionAPI>()
@@ -79,6 +83,15 @@ dependencies {
     modImpl("net.fabricmc:fabric-loader:${property("loader_version")}")
     modImpl("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
     modImpl("fi.dy.masa.malilib:malilib-fabric-${current}:${property("malilib_version")}")
+
+    val modmenuVersion = findProperty("modmenu_version") as String?
+
+    if (modmenuVersion != null && modmenuVersion.isNotBlank())
+    {
+        modImpl("com.terraformersmc:modmenu:$modmenuVersion") {
+            exclude(module = "fabric-api")
+        }
+    }
 }
 
 tasks.named<ProcessResources>("processResources") {
