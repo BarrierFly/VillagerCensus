@@ -29,6 +29,7 @@ public class CensusHud
 
         for (String line : this.buildLines())
         {
+            graphics.text(font, line, 5, y + 1, 0xFF000000);
             graphics.text(font, line, 4, y, COLOR);
             y += 10;
         }
@@ -41,7 +42,7 @@ public class CensusHud
 
         for (String line : this.buildLines())
         {
-            graphics.drawString(font, line, 4, y, COLOR);
+            graphics.drawString(font, line, 4, y, COLOR, true);
             y += 10;
         }
     }

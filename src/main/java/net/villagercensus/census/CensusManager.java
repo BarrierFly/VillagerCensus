@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import fi.dy.masa.malilib.gui.Message.MessageType;
-import fi.dy.masa.malilib.util.InfoUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -38,6 +36,7 @@ import net.villagercensus.data.ReportWriter;
 import net.villagercensus.data.WorldId;
 import net.villagercensus.trade.TradeCatalog;
 import net.villagercensus.trade.TradeCategory;
+import net.villagercensus.util.Messages;
 
 public class CensusManager
 {
@@ -96,13 +95,13 @@ public class CensusManager
     {
         if (rawName == null || rawName.trim().isEmpty())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.name_required");
+            Messages.error( "villagercensus.message.name_required");
             return false;
         }
 
         if (this.hasSession())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.already_running");
+            Messages.error( "villagercensus.message.already_running");
             return false;
         }
 
@@ -117,11 +116,11 @@ public class CensusManager
 
         if (draft != null)
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.WARNING, "villagercensus.message.draft_exists", safeName);
+            Messages.warn( "villagercensus.message.draft_exists", safeName);
         }
         else
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.started", rawName.trim(), dimension);
+            Messages.info( "villagercensus.message.started", rawName.trim(), dimension);
         }
 
         return true;
@@ -131,7 +130,7 @@ public class CensusManager
     {
         if (!this.hasSession())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.not_running");
+            Messages.error( "villagercensus.message.not_running");
             return null;
         }
 
@@ -145,7 +144,7 @@ public class CensusManager
         }
 
         this.removeAllMarkers();
-        InfoUtils.showGuiOrInGameMessage(MessageType.SUCCESS, "villagercensus.message.stopped",
+        Messages.success( "villagercensus.message.stopped",
                 this.session.rawName, this.session.totalCount(),
                 report != null ? report.toAbsolutePath().toString() : "-");
 
@@ -159,12 +158,12 @@ public class CensusManager
     {
         if (!this.hasSession())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.not_running");
+            Messages.error( "villagercensus.message.not_running");
             return;
         }
 
         this.removeAllMarkers();
-        InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.aborted", this.session.rawName);
+        Messages.info( "villagercensus.message.aborted", this.session.rawName);
         this.session = null;
         this.pending = null;
         this.pendingUpdate = null;
@@ -174,13 +173,13 @@ public class CensusManager
     {
         if (!this.hasSession())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.not_running");
+            Messages.error( "villagercensus.message.not_running");
             return;
         }
 
         this.cancelPendingUpdate();
         this.session.paused = !this.session.paused;
-        InfoUtils.showGuiOrInGameMessage(MessageType.INFO,
+        Messages.info(
                 this.session.paused ? "villagercensus.message.paused" : "villagercensus.message.resumed_stat");
     }
 
@@ -188,7 +187,7 @@ public class CensusManager
     {
         if (!this.hasSession())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.not_running");
+            Messages.error( "villagercensus.message.not_running");
             return null;
         }
 
@@ -197,7 +196,7 @@ public class CensusManager
 
         if (entry == null)
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.nothing_to_undo");
+            Messages.error( "villagercensus.message.nothing_to_undo");
             return null;
         }
 
@@ -206,7 +205,7 @@ public class CensusManager
             this.removeMarker(entry.uuid);
         }
 
-        InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.undone");
+        Messages.info( "villagercensus.message.undone");
         return entry;
     }
 
@@ -214,7 +213,7 @@ public class CensusManager
     {
         if (!this.hasSession())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.not_running");
+            Messages.error( "villagercensus.message.not_running");
             return false;
         }
 
@@ -223,12 +222,12 @@ public class CensusManager
 
         if (record == null)
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.no_target");
+            Messages.error( "villagercensus.message.no_target");
             return false;
         }
 
         record.remark = text == null ? "" : text;
-        InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.remark_set");
+        Messages.info( "villagercensus.message.remark_set");
         return true;
     }
 
@@ -261,7 +260,7 @@ public class CensusManager
     {
         if (this.hasSession())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.already_running");
+            Messages.error( "villagercensus.message.already_running");
             return false;
         }
 
@@ -269,7 +268,7 @@ public class CensusManager
 
         if (this.resumeCandidate == null)
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.no_draft");
+            Messages.error( "villagercensus.message.no_draft");
             return false;
         }
 
@@ -279,13 +278,13 @@ public class CensusManager
         {
             DraftStorage.archive(this.resumeCandidate);
             this.resumeCandidate = null;
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.draft_corrupt");
+            Messages.error( "villagercensus.message.draft_corrupt");
             return false;
         }
 
         if (!WorldId.safeDimension(currentDimension()).equals(WorldId.safeDimension(loaded.dimension)))
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.dimension_mismatch");
+            Messages.error( "villagercensus.message.dimension_mismatch");
             return false;
         }
 
@@ -297,7 +296,7 @@ public class CensusManager
         this.pendingUpdate = null;
 
         this.startVerification(loaded);
-        InfoUtils.showGuiOrInGameMessage(MessageType.SUCCESS, "villagercensus.message.resumed",
+        Messages.success( "villagercensus.message.resumed",
                 loaded.rawName, this.verifyLoaded, this.verifyTotal);
         return true;
     }
@@ -308,13 +307,13 @@ public class CensusManager
 
         if (this.resumeCandidate == null)
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.no_draft");
+            Messages.error( "villagercensus.message.no_draft");
             return;
         }
 
         DraftStorage.archive(this.resumeCandidate);
         this.resumeCandidate = null;
-        InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.draft_discarded");
+        Messages.info( "villagercensus.message.draft_discarded");
     }
 
     private void startVerification(CensusSession loaded)
@@ -432,7 +431,7 @@ public class CensusManager
 
         if (this.pending != null)
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.WARNING, "villagercensus.message.wait_previous");
+            Messages.warn( "villagercensus.message.wait_previous");
             return;
         }
 
@@ -471,14 +470,14 @@ public class CensusManager
 
         if (!(entity instanceof Villager villager))
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.failed");
+            Messages.error( "villagercensus.message.failed");
             this.pending = null;
             return;
         }
 
         if (packet.getVillagerLevel() != villager.getVillagerData().level())
         {
-            InfoUtils.showGuiOrInGameMessage(MessageType.ERROR, "villagercensus.message.level_mismatch");
+            Messages.error( "villagercensus.message.level_mismatch");
             this.pending = null;
             return;
         }
@@ -527,18 +526,18 @@ public class CensusManager
 
             if (old != null && record.sameAs(old))
             {
-                InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.unchanged");
+                Messages.info( "villagercensus.message.unchanged");
                 return;
             }
 
             this.pendingUpdate = new PendingUpdate(villager.getUUID(), villager.getId(), record);
-            InfoUtils.showGuiOrInGameMessage(MessageType.WARNING, "villagercensus.message.pending_update");
+            Messages.warn( "villagercensus.message.pending_update");
 
             if (old != null)
             {
                 for (String line : record.diffLines(old))
                 {
-                    InfoUtils.showGuiOrInGameMessage(MessageType.INFO, line);
+                    Messages.info( line);
                 }
             }
         }
@@ -546,7 +545,7 @@ public class CensusManager
         {
             this.session.addRecord(record);
             this.applyMarker(villager);
-            InfoUtils.showGuiOrInGameMessage(MessageType.SUCCESS, "villagercensus.message.recorded",
+            Messages.success( "villagercensus.message.recorded",
                     villager.getVillagerData().profession().unwrapKey()
                             .map(key -> key.identifier().toString()).orElse("minecraft:none"),
                     record.trades.size());
@@ -575,7 +574,7 @@ public class CensusManager
         }
 
         this.applyMarker(mc.level != null ? mc.level.getEntity(update.entityId) : null);
-        InfoUtils.showGuiOrInGameMessage(MessageType.SUCCESS, "villagercensus.message.updated");
+        Messages.success( "villagercensus.message.updated");
     }
 
     private void cancelPendingUpdate()
@@ -583,7 +582,7 @@ public class CensusManager
         if (this.pendingUpdate != null)
         {
             this.pendingUpdate = null;
-            InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.pending_update_cancelled");
+            Messages.info( "villagercensus.message.pending_update_cancelled");
         }
     }
 
@@ -652,7 +651,7 @@ public class CensusManager
                 if (this.verifyLoaded >= this.verifyTotal)
                 {
                     this.verifyTotal = 0;
-                    InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.verified_all",
+                    Messages.info( "villagercensus.message.verified_all",
                             this.verifyLoaded);
                 }
             }
@@ -996,7 +995,7 @@ public class CensusManager
                 CensusSession draft = DraftStorage.load(this.resumeCandidate);
                 int total = draft != null ? draft.records.size() : 0;
                 int loaded = draft != null ? this.updateVerification(draft) : 0;
-                InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.draft_found",
+                Messages.info( "villagercensus.message.draft_found",
                         this.resumeCandidate.getFileName().toString(), loaded, total);
             }
         }

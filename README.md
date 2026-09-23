@@ -1,8 +1,8 @@
 # Villager Census / 村民普查
 
-A **client-only** Fabric mod that helps you census villagers in large or hand-built
-trading halls: batch right-click villagers with a trigger item, then export a readable
-trade report so you can pick the best enchantments, equipment and prices.
+A **client-only** Fabric mod for censusing villagers in large or hand-built trading halls:
+batch right-click villagers with a trigger item, then export a readable report so you can
+pick the best enchantments, equipment and prices.
 
 一个**纯客户端**的 Fabric Mod，用于在大型村庄或手工刷村民场景中批量统计村民的职业与
 交易信息，并导出可读报告，方便挑选优质交易（附魔书、装备、低价交易等）。
@@ -11,8 +11,8 @@ trade report so you can pick the best enchantments, equipment and prices.
 
 ## Supported versions / 支持版本
 
-| Minecraft | Java | malilib | Status |
-|-----------|------|---------|--------|
+| Minecraft | Java | MaLiLib | Status / 状态 |
+|-----------|------|---------|---------------|
 | 1.21.11   | 21   | 0.27.20 | built / 已构建 |
 | 26.3      | 25   | 0.30.0  | built / 已构建 |
 
@@ -22,16 +22,14 @@ Built with **Stonecutter** (single branch, multi-version preprocessing).
 ## Dependencies / 依赖
 
 - [Fabric Loader](https://fabricmc.net/) + [Fabric API](https://modrinth.com/mod/fabric-api)
-- [MaLiLib (sakura-ryoko fork)](https://masa.dy.fi/maven/sakura-ryoko/) — config GUI, hotkeys,
-  i18n and file/data utilities / 配置界面、快捷键、i18n 与文件/数据工具
+- [MaLiLib (sakura-ryoko fork)](https://masa.dy.fi/maven/sakura-ryoko/) — 配置界面、快捷键、
+  i18n 与文件/数据工具 / config GUI, hotkeys, i18n and file/data utilities
 
 ## Install / 安装
 
-1. Install Fabric Loader for the target Minecraft version.
-2. Put `fabric-api` and the matching `malilib` jar in `mods/`.
-3. Put the matching `villagercensus-*.jar` in `mods/`.
-
----
+1. 为目标 Minecraft 版本安装 Fabric Loader。
+2. 把 `fabric-api` 与对应版本的 `malilib` 放进 `mods/`。
+3. 把对应版本的 `villagercensus-*.jar` 放进 `mods/`。
 
 ## Usage / 用法
 
@@ -55,7 +53,7 @@ offers are captured and counted.
 /census help            show help / 显示帮助
 ```
 
-Output files / 输出文件:
+## Output files / 输出文件
 
 ```
 <minecraft>/villager_census/<world>/<name>_<dimension>_<yyyyMMdd_HHmmss>.census.txt
@@ -66,64 +64,80 @@ Output files / 输出文件:
 ## Configuration / 配置
 
 Open the malilib config screen (hotkey default: none) or use the ModMenu entry
-`Villager Census` → config.
+`Villager Census`.
+打开 malilib 配置界面（快捷键默认无绑定），或从 ModMenu 的 `Villager Census` 进入。
 
-- `triggerItem` — held item used to right-click (registry id, default `minecraft:enchanted_book`)
-- `recordAllTrades` — record every trade; when off only selected categories are recorded
-- `selectedCategories` — category ids used when the above is off
-- `glowingMarker` — mark recorded villagers with Glowing
-- `recordCoordinates` — record the villager's own position only
-- `outputJson` — also write a JSON report
-- `hudEnabled` — show the census HUD
-- `offersTimeoutTicks` — packet wait timeout before falling back to client data
-- `autoSaveDraft` — save an unfinished session on world exit
-- `debugLog` — extra logging
+- `triggerItem` — 右键村民所用的手持物品（注册名，默认 `minecraft:enchanted_book`）
+  / held item used to right-click (registry id).
+- `recordAllTrades` — 记录全部交易；关闭时只记录被选中的类别
+  / record every trade; when off only selected categories are recorded.
+- `selectedCategories` — 上述关闭时用于筛选的类别 id 列表
+  / category ids used when the above is off.
+- `glowingMarker` — 给已统计村民加发光描边 / mark recorded villagers with Glowing.
+- `recordCoordinates` — 只记录村民自身坐标 / record the villager's own position only.
+- `outputJson` — 额外输出 JSON 报告 / also write a JSON report.
+- `hudEnabled` — 显示普查 HUD / show the census HUD.
+- `offersTimeoutTicks` — 等待交易包的超时，超时后回退客户端数据
+  / packet wait timeout before falling back to client data.
+- `autoSaveDraft` — 退出世界时保存未完成会话 / save an unfinished session on world exit.
+- `debugLog` — 输出调试日志 / extra logging.
 
-Hotkeys (all default `none`): `openConfigGui`, `toggleStats`, `undoLast`.
+Hotkeys (all default unbound): `openConfigGui`, `toggleStats`, `undoLast`.
+快捷键（默认均无绑定）：打开配置界面、暂停/恢复统计、撤销上一次。
+
+## HUD / 界面显示
+
+While a session is running the HUD shows the session name and dimension, the villager count,
+profession count, baby count, any pending update, the `verify X/N` progress after resuming,
+and the last recorded villager (profession, position, health, remark). It is drawn through
+the Fabric HUD API and stays visible until you stop or abort; there is no background box.
+
+普查进行中 HUD 会显示：会话名与维度、已统计数量、职业数、幼年数、待确认更新、续普查时的
+`verify X/N` 复核进度，以及最近一只村民的职业、坐标、血量与备注。HUD 通过 Fabric HUD API
+绘制，会一直显示到 stop/abort，且没有背景色块。
 
 ## How it works / 工作原理
 
-- `MultiPlayerGameMode.interact` (HEAD) registers the right-clicked villager as the
-  pending target; the vanilla interaction still sends its packet.
-- `ClientPacketListener.handleMerchantOffers` (HEAD, **never cancelled**) reads
-  `offers` / `villagerLevel` / `villagerXp` and associates them with the pending target
-  using `containerId` (from `handleOpenScreen`) plus level. If no `containerId` is
-  available it degrades to a **weak association**.
-- `ClientPacketListener.handleOpenScreen` (HEAD, cancellable) records the container id and
-  suppresses the merchant screen, then sends one `ServerboundContainerClosePacket`.
+- `MultiPlayerGameMode.interact` (HEAD) 只把被右键的村民登记为待关联目标，不取消原版交互，
+  由原版正常发包。
+  / only registers the pending target; the vanilla interaction still sends its packet.
+- `ClientPacketListener.handleMerchantOffers` (HEAD, **never cancelled**) 读取
+  `offers` / `villagerLevel` / `villagerXp`，用 `containerId`（来自 `handleOpenScreen`）加等级
+  与待关联目标匹配，拿不到 `containerId` 时降级为**弱关联**。该回调运行在网络线程，只入队，
+  真正的记录/提示在客户端 tick 处理。
+  / reads the offers packet and associates it; runs on the network thread and only enqueues
+  the packet. Record building and messaging happen on the client thread.
+- `ClientPacketListener.handleOpenScreen` (HEAD, cancellable) 记录 container id、拦截交易界面，
+  并回发一个 `ServerboundContainerClosePacket`。
+  / records the container id, suppresses the merchant screen and sends one close packet.
 
-## Known limitations & risks / 已知限制与风险
+## Notes & limitations / 说明与限制
 
-- **Server rules / anti-cheat.** Suppressing the merchant GUI and closing the container is
-  not a vanilla interaction pattern. Use at your own risk on multiplayer servers.
-  / 拦截交易界面并非原版交互模式，在多人服务器上使用风险自负。
-- **offers-hud coexistence.** Both mods hook the same methods. This mod never cancels the
-  offers packet, so offers-hud previews keep working. If offers-hud is also installed it may
-  send the close packet as well; close-packet duplication is harmless.
-  / 本 Mod 从不取消 offers 包，不影响 offers-hud 预览；两者可能各发一次关窗包，无害。
-- Enchantment max level is resolved reflectively and may be `-1` (not shown) on some setups.
-- The draft continuation flow is command based (`/census resume` / `discard`) instead of a
-  custom confirmation screen. Leaving a world ends the in-memory session (the unfinished
-  session is saved as a draft); re-entering does **not** auto-continue. Use `/census resume`
-  to reload it, after which recorded villagers are re-scanned (HUD shows `verify X/N`) and
-  glowing markers are re-applied.
-- Workstation coordinates are intentionally never recorded or inferred (only the villager's
-  own position), per the design.
+- **服务器规则 / 反作弊。** 拦截交易界面并关闭容器并非原版交互模式，在多人服务器上使用
+  风险自负。/ Suppressing the merchant GUI is not a vanilla interaction pattern; use at
+  your own risk on multiplayer servers.
+- **与 offers-hud 共存。** 两者注入同样的方法。本 Mod 从不取消 offers 包，因此 offers-hud
+  的预览不受影响；两者可能各发一次关窗包，无害。
+  / This mod never cancels the offers packet, so offers-hud previews keep working.
+- 附魔最高等级通过反射获取，个别情况下可能取不到（不显示 `等级/最高`）。
+  / Enchantment max level is resolved reflectively and may be unavailable (`-1`).
+- 续普查为命令式：退出世界会结束内存中的会话（未完成会话已存为半成品），重进世界**不会**
+  自动继续；用 `/census resume` 重新载入，之后会对已加载村民复核（HUD 显示 `verify X/N`）
+  并重新施加发光标记。
+  / Leaving a world ends the in-memory session (an unfinished session is saved as a draft);
+  re-entering does not auto-continue. Use `/census resume` to reload, re-check and re-mark.
+- 只记录村民自身坐标，不查询、不推断工作方块坐标。
+  / Only the villager's own position is recorded; workstations are never inferred.
+- 首版仅支持 Fabric（无 NeoForge）。
+  / Fabric only for now (no NeoForge target).
 
-## Deviations from the original plan / 与原规划的差异
+## Trade category catalog / 交易类别目录
 
-- **Fabric only** for now (no NeoForge target). 首版只做 Fabric。
-- The trade-category catalog (`villagercensus/trade_categories.json`, **303 categories across
-  all 13 professions**) is generated from the decompiled vanilla trades in the `guardian`
-  repository (`mojmap/vineflower`): **1.21.11** commit `192e7132b4` (explicit `ItemListing`
-  constructors) and **26.3** commit `d5822ca2a1` (data-driven `VillagerTrade.builder` plus
-  `villager_trade` tags). Both sets are merged. Trades that still match no entry fall back to
-  an item-triple label.
-  交易类别目录由 guardian 反编译源码生成，并合并 1.21.11 与 26.3（共 303 项，覆盖全部职业）；
-  未命中的交易回退为物品三元组。
-- Continuation uses commands rather than a custom screen (see above).
-- The initial version targets the plan's milestones roughly through **M5/M6** for the two
-  first versions (1.21.11, 26.3).
+`villagercensus/trade_categories.json` 覆盖全部 13 个职业、共 **303** 个类别，由反编译的
+原版交易表生成并合并 1.21.11 与 26.3（未命中的交易回退为物品三元组标签）。
+
+The catalog is generated from the decompiled vanilla villager trades and merged across
+1.21.11 and 26.3; trades that match no entry fall back to an item-triple label.
 
 ## Build / 构建
 
@@ -131,9 +145,10 @@ Hotkeys (all default `none`): `openConfigGui`, `toggleStats`, `undoLast`.
 ./gradlew build
 ```
 
-Stonecutter's active version is configured in `stonecutter.gradle.kts`. The build compiles
-and packages **all** registered versions; per-version jars land in
-`versions/<mc>/build/libs/`.
+Stonecutter 的活动版本在 `stonecutter.gradle.kts` 中配置；构建会编译并打包**全部**已注册
+版本，产物位于 `versions/<mc>/build/libs/`。
+The active Stonecutter version is set in `stonecutter.gradle.kts`; the build compiles and
+packages **all** registered versions.
 
 ```bash
 ./gradlew stonecutterSwitch   # change the active version / 切换活动版本
@@ -141,28 +156,18 @@ and packages **all** registered versions; per-version jars land in
 
 ## Acknowledgements / 致谢
 
-This project was implemented by studying the following projects that shipped in the same
-workspace. Many patterns (Stonecutter setup, mixin/version preprocessing, malilib
-integration, trade data handling) are adapted from them:
+Many patterns and much of the version handling were adapted from the following projects:
 
-本项目的实现参考了同一工作区中的以下项目，许多模式（Stonecutter 配置、Mixin 与版本预处理、
-malilib 接入、交易数据处理）改编自它们：
+本项目的许多模式与版本处理方式改编自以下项目：
 
 - **offers-hud** (naari3) — `MultiPlayerGameMode.interact` / `handleMerchantOffers` /
   `handleOpenScreen` mixin approach, the "read offers without cancelling" rule, and the
   Stonecutter + Architectury Loom version-preprocessing setup, including the 26.1+
   `loom-no-remap` handling.
-- **itemscroller-sakura** (masa, sakura-ryoko) — malilib config/hotkey/world-load wiring,
-  `TradeType` triple concept, and villager data storage semantics.
-- **malilib-sakura** (masa, sakura-ryoko) — config GUI, hotkeys, i18n, `StringUtils`,
-  `FileUtils`, and tag data utilities used throughout.
-- **fabric-api** — client command registration API and reference for mapping differences.
-- **fabric-mod-template** — project layout reference.
-- **guardian** (TISUnion) — decompiled Minecraft source history used to generate the trade
-  category catalog from the exact `1.21.11` (`mojmap/vineflower`) vanilla trade tables.
-- The original design document provided by the user (村民普查 Mod 规划).
-
-## License / 许可
-
-No formal license. Do whatever you want with it.
-不提供正式许可证，我不管，您看着办。
+- **itemscroller-sakura** (masa, sakura-ryoko) — malilib 配置/快捷键/世界加载的接入方式、
+  交易三元组与村民数据存储语义。
+- **malilib-sakura** (masa, sakura-ryoko) — 配置界面、快捷键、i18n、`StringUtils`、`FileUtils`
+  及标签数据工具。
+- **fabric-api** — 客户端命令注册 API，以及映射差异参考。
+- **fabric-mod-template** — 工程结构参考。
+- **guardian** (TISUnion) — 反编译的 Minecraft 源码历史库，用于生成交易类别目录。
