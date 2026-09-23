@@ -110,8 +110,12 @@ Hotkeys (all default `none`): `openConfigGui`, `toggleStats`, `undoLast`.
 ## Deviations from the original plan / 与原规划的差异
 
 - **Fabric only** for now (no NeoForge target). 首版只做 Fabric。
-- The trade-category catalog is a hand-authored JSON resource; the workspace `guardian`
-  decompiled source tree was empty, so the catalog was not auto-generated.
+- The trade-category catalog (`villagercensus/trade_categories.json`) is generated from the
+  decompiled vanilla `VillagerTrades` in the `guardian` repository (commit `192e7132b4`,
+  branch `mojmap/vineflower` = Minecraft 1.21.11). 26.3 made villager trades data-driven and
+  its trade set is larger; trades that do not map to a catalog entry fall back to the
+  item-triple label. 交易类别目录由 guardian 仓库反编译源码生成（1.21.11 提交）；
+  26.3 的交易改为数据驱动且条目更多，未命中的交易回退为物品三元组。
 - Continuation uses commands rather than a custom screen (see above).
 - The initial version targets the plan's milestones roughly through **M5/M6** for the two
   first versions (1.21.11, 26.3).
@@ -149,7 +153,8 @@ malilib 接入、交易数据处理）改编自它们：
   `FileUtils`, and tag data utilities used throughout.
 - **fabric-api** — client command registration API and reference for mapping differences.
 - **fabric-mod-template** — project layout reference.
-- **guardian** — intended for generating the trade catalog (unused, repository was empty).
+- **guardian** (TISUnion) — decompiled Minecraft source history used to generate the trade
+  category catalog from the exact `1.21.11` (`mojmap/vineflower`) vanilla trade tables.
 - The original design document provided by the user (村民普查 Mod 规划).
 
 ## License / 许可

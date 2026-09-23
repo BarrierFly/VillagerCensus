@@ -93,6 +93,13 @@ Interaction contract (do not break):
   reports. Config keys follow malilib's `ConfigBase.apply(prefix)` scheme:
   `<prefix>.prettyName.<name>`, `.comment.<name>`, `.name.<name>`.
 - `villagercensus/trade_categories.json` — semantic trade category catalog loaded at runtime.
+  It was generated from the decompiled vanilla trade table in the `guardian` repository
+  (branch `mojmap/vineflower`):
+  - 1.21.11 commit: `192e7132b4` → `src/main/java/net/minecraft/world/entity/npc/villager/VillagerTrades.java`
+  - 26.3 commit: `d5822ca2a1` → `src/main/java/net/minecraft/world/item/trading/VillagerTrades.java`
+  - 1.21.11 uses explicit `ItemListing` constructors (fully parsed); 26.3 is data-driven
+    (`VillagerTrade.builder(...)`), so unmatched 26.3 trades fall back to the item triple.
+  Regenerate with `git -C <guardian> show <commit>:<path>` + the parser script used previously.
 
 ## Commits
 
