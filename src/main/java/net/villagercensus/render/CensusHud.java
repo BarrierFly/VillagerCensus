@@ -83,6 +83,11 @@ public class CensusHud
         lines.add("count " + session.totalCount() + " | professions " + session.professionCounts().size()
                 + " | babies " + session.babyCount());
 
+        if (Configs.Generic.GLOWING_MARKER.getBooleanValue())
+        {
+            lines.add("marker: " + (manager.isReverseMarkers() ? "reversed (uncounted glow)" : "normal (counted glow)"));
+        }
+
         if (manager.getPendingUpdate() != null)
         {
             lines.add("pending update: right-click again to confirm");

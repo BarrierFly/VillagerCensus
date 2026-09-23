@@ -30,3 +30,6 @@ loom-cache/
 
 # Windows reserved-name junk
 /nul
+
+# Local handover notes (kept out of version control)
+HANDOVER.md

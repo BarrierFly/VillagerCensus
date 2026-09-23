@@ -16,6 +16,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundMerchantOffersPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -48,8 +50,15 @@ public class CensusManager
     private PendingUpdate pendingUpdate;
     private volatile long tickCounter;
 
-    private final Map<UUID, Boolean> originalGlow = new LinkedHashMap<>();
-    private final Set<UUID> modGlowing = new HashSet<>();
+    // Glowing markers. baseGlow is the glow state coming from any source other than this mod
+    // (the server's shared flag). managed is the set of villagers whose glow this mod controls.
+    // The visible glow is always baseGlow || censusGlow, so other glow sources are preserved.
+    private final Map<UUID, Boolean> baseGlow = new LinkedHashMap<>();
+    private final Set<UUID> managed = new HashSet<>();
+    private volatile boolean reverseMarkers;
+    private volatile boolean trackingMarkers;
+    private final java.util.concurrent.ConcurrentLinkedQueue<BaseGlowUpdate> baseUpdates =
+            new java.util.concurrent.ConcurrentLinkedQueue<>();
 
     private int verifyTotal;
     private int verifyLoaded;
@@ -149,7 +158,8 @@ public class CensusManager
             DraftStorage.delete(draft);
         }
 
-        this.removeAllMarkers();
+        this.restoreAllMarkers();
+        this.reverseMarkers = false;
         Messages.success( "villagercensus.message.stopped",
                 this.session.rawName, this.session.totalCount(),
                 report != null ? report.toAbsolutePath().toString() : "-");
@@ -168,7 +178,8 @@ public class CensusManager
             return;
         }
 
-        this.removeAllMarkers();
+        this.restoreAllMarkers();
+        this.reverseMarkers = false;
         Messages.info( "villagercensus.message.aborted", this.session.rawName);
         this.session = null;
         this.pending = null;
@@ -204,11 +215,6 @@ public class CensusManager
         {
             Messages.error( "villagercensus.message.nothing_to_undo");
             return null;
-        }
-
-        if (entry.wasNew)
-        {
-            this.removeMarker(entry.uuid);
         }
 
         Messages.info( "villagercensus.message.undone");
@@ -360,6 +366,96 @@ public class CensusManager
         this.draftTotal = 0;
         this.draftLoaded = 0;
         Messages.info("villagercensus.message.draft_discarded");
+    }
+
+    // ------------------------------------------------------------------
+    // Fork
+    // ------------------------------------------------------------------
+
+    /**
+     * Creates a new active session from an existing draft or completed JSON report in the current
+     * world and dimension, then starts counting immediately. The source record is left untouched.
+     */
+    public boolean forkSession(String rawName)
+    {
+        if (rawName == null || rawName.trim().isEmpty())
+        {
+            Messages.error( "villagercensus.message.fork_name_required");
+            return false;
+        }
+
+        if (this.hasSession())
+        {
+            Messages.error( "villagercensus.message.already_running");
+            return false;
+        }
+
+        if (Minecraft.getInstance().level == null)
+        {
+            Messages.error( "villagercensus.message.no_world");
+            return false;
+        }
+
+        String sourceName = rawName.trim();
+        String worldId = WorldId.current();
+        String dimension = currentDimension();
+        java.nio.file.Path source = DraftStorage.findForkSource(worldId, dimension, WorldId.safe(sourceName));
+
+        if (source == null)
+        {
+            Messages.error( "villagercensus.message.fork_not_found", sourceName);
+            return false;
+        }
+
+        CensusSession base = DraftStorage.load(source);
+
+        if (base == null)
+        {
+            Messages.error( "villagercensus.message.fork_unreadable", source.getFileName().toString());
+            return false;
+        }
+
+        if (!WorldId.safeDimension(dimension).equals(WorldId.safeDimension(base.dimension)))
+        {
+            Messages.error( "villagercensus.message.dimension_mismatch");
+            return false;
+        }
+
+        String baseName = base.rawName != null && !base.rawName.isEmpty() ? base.rawName : sourceName;
+        String display = baseName + " (fork)";
+        CensusSession fork = new CensusSession(display, WorldId.safe(display), worldId, dimension, System.currentTimeMillis());
+
+        for (VillagerRecord record : base.records)
+        {
+            VillagerRecord copy = record.copy();
+            copy.order = ++fork.orderCounter;
+            fork.records.add(copy);
+
+            if (copy.uuid != null)
+            {
+                fork.byUuid.put(copy.uuid, copy);
+            }
+        }
+
+        this.session = fork;
+        this.pending = null;
+        this.pendingUpdate = null;
+        this.offersQueue.clear();
+        this.baseGlow.clear();
+        this.managed.clear();
+        this.baseUpdates.clear();
+        this.trackingMarkers = false;
+        this.reverseMarkers = false;
+        this.resumeCandidate = null;
+        this.resumeDraft = null;
+        this.draftName = null;
+        this.draftTotal = 0;
+        this.draftLoaded = 0;
+        this.verifyTotal = 0;
+        this.verifyLoaded = 0;
+
+        Messages.success( "villagercensus.message.fork_started", display, fork.totalCount(), dimension);
+        return true;
     }
 
     private void startVerification(CensusSession loaded)
@@ -590,7 +686,6 @@ public class CensusManager
         else
         {
             this.session.addRecord(record);
-            this.applyMarker(villager);
             Messages.success( "villagercensus.message.recorded",
                     villager.getVillagerData().profession().unwrapKey()
                             .map(key -> key.identifier().toString()).orElse("minecraft:none"),
@@ -619,7 +714,6 @@ public class CensusManager
             this.session.updateRecord(old, update.record.copy());
         }
 
-        this.applyMarker(mc.level != null ? mc.level.getEntity(update.entityId) : null);
         Messages.success( "villagercensus.message.updated");
     }
 
@@ -652,6 +746,8 @@ public class CensusManager
         {
             this.processMerchantOffers(queued);
         }
+
+        this.drainBaseUpdates(mc);
 
         if (this.hasSession() && this.pending != null)
         {
@@ -763,8 +859,10 @@ public class CensusManager
 
             if (!recordAll)
             {
+                // Categories are keyed as "profession/id" by the selection GUI, but a bare id
+                // from an older config still matches every profession that uses it.
                 boolean included = category != null
-                        ? selected.contains(category.id)
+                        ? selected.contains(category.profession + "/" + category.id) || selected.contains(category.id)
                         : selected.contains(categoryId);
 
                 if (!included)
@@ -921,57 +1019,93 @@ public class CensusManager
     // Glowing markers
     // ------------------------------------------------------------------
 
-    private void applyMarker(Entity entity)
+    // Entity.DATA_SHARED_FLAGS_ID is the first synced value defined on Entity, so its data id is
+    // always 0. The glowing bit is flag 6 within that byte.
+    private static final int SHARED_FLAGS_DATA_ID = 0;
+    private static final int GLOWING_FLAG_BIT = 6;
+
+    /**
+     * Called from the network thread by the mixin for entity-data updates. The server sends the
+     * full shared-flags byte whenever any of its bits change, so the glowing bit in it is the
+     * authoritative glow state from all non-census sources. It is queued and applied on the client
+     * thread in {@link #drainBaseUpdates(Minecraft)}.
+     */
+    public void onSetEntityData(ClientboundSetEntityDataPacket packet)
     {
-        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue() || !(entity instanceof Villager villager))
+        if (!this.trackingMarkers)
         {
             return;
         }
 
-        UUID uuid = villager.getUUID();
-        this.originalGlow.putIfAbsent(uuid, villager.isCurrentlyGlowing());
-        setGlow(villager, true);
-        this.modGlowing.add(uuid);
-    }
-
-    private void removeMarker(UUID uuid)
-    {
-        if (uuid == null)
+        for (SynchedEntityData.DataValue<?> item : packet.packedItems())
         {
-            return;
-        }
-
-        Entity entity = findEntity(Minecraft.getInstance().level, uuid);
-
-        if (entity instanceof Villager villager && this.modGlowing.contains(uuid))
-        {
-            boolean original = this.originalGlow.getOrDefault(uuid, false);
-
-            if (!original)
+            if (item.id() == SHARED_FLAGS_DATA_ID && item.value() instanceof Byte value)
             {
-                setGlow(villager, false);
+                this.baseUpdates.add(new BaseGlowUpdate(packet.id(), (value & (1 << GLOWING_FLAG_BIT)) != 0));
+                return;
             }
         }
-
-        this.modGlowing.remove(uuid);
-        this.originalGlow.remove(uuid);
     }
 
-    private void removeAllMarkers()
+    private void drainBaseUpdates(Minecraft mc)
     {
-        for (UUID uuid : new ArrayList<>(this.modGlowing))
+        BaseGlowUpdate update;
+
+        while ((update = this.baseUpdates.poll()) != null)
         {
-            this.removeMarker(uuid);
+            if (mc.level == null)
+            {
+                continue;
+            }
+
+            Entity entity = mc.level.getEntity(update.entityId);
+
+            if (entity != null && this.baseGlow.containsKey(entity.getUUID()))
+            {
+                this.baseGlow.put(entity.getUUID(), update.glowing);
+            }
+        }
+    }
+
+    public boolean isReverseMarkers()
+    {
+        return this.reverseMarkers;
+    }
+
+    public void toggleReverseMarkers()
+    {
+        if (!this.hasSession())
+        {
+            Messages.error( "villagercensus.message.not_running");
+            return;
         }
 
-        this.modGlowing.clear();
-        this.originalGlow.clear();
+        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue())
+        {
+            Messages.error( "villagercensus.message.glowing_disabled");
+            return;
+        }
+
+        this.reverseMarkers = !this.reverseMarkers;
+        Messages.info(this.reverseMarkers
+                ? "villagercensus.message.reverse_on"
+                : "villagercensus.message.reverse_off");
     }
 
     private void maintainMarkers(Minecraft mc)
     {
-        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue() || mc.level == null || !this.hasSession())
+        if (mc.level == null || !this.hasSession())
         {
+            return;
+        }
+
+        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue())
+        {
+            if (!this.managed.isEmpty())
+            {
+                this.restoreAllMarkers();
+            }
+
             return;
         }
 
@@ -985,33 +1119,96 @@ public class CensusManager
             }
         }
 
-        for (VillagerRecord record : this.session.records)
+        boolean reverse = this.reverseMarkers;
+        Set<UUID> targets = new HashSet<>();
+
+        if (reverse)
         {
-            if (record.uuid == null)
+            // In reverse mode every loaded villager is managed so that the uncounted ones glow.
+            targets.addAll(loaded.keySet());
+        }
+        else
+        {
+            for (VillagerRecord record : this.session.records)
             {
-                continue;
-            }
-
-            Villager villager = loaded.get(record.uuid);
-
-            if (villager != null)
-            {
-                this.originalGlow.putIfAbsent(record.uuid, villager.isCurrentlyGlowing());
-
-                if (!villager.isCurrentlyGlowing())
+                if (record.uuid != null && loaded.containsKey(record.uuid))
                 {
-                    setGlow(villager, true);
+                    targets.add(record.uuid);
                 }
-
-                this.modGlowing.add(record.uuid);
             }
         }
+
+        this.trackingMarkers = true;
+
+        for (UUID uuid : targets)
+        {
+            Villager villager = loaded.get(uuid);
+            boolean recorded = this.session.getByUuid(uuid) != null;
+            boolean censusGlow = reverse ? !recorded : recorded;
+            boolean base = this.baseGlow.computeIfAbsent(uuid, key -> villager.isCurrentlyGlowing());
+            setGlow(villager, base || censusGlow);
+            this.managed.add(uuid);
+        }
+
+        // Release villagers we no longer control, restoring their original (non-census) glow.
+        for (UUID uuid : new ArrayList<>(this.managed))
+        {
+            if (!targets.contains(uuid))
+            {
+                Villager villager = loaded.get(uuid);
+
+                if (villager != null)
+                {
+                    setGlow(villager, this.baseGlow.getOrDefault(uuid, false));
+                }
+
+                this.managed.remove(uuid);
+                this.baseGlow.remove(uuid);
+            }
+        }
+
+        this.trackingMarkers = !this.managed.isEmpty();
+    }
+
+    private void restoreAllMarkers()
+    {
+        ClientLevel level = Minecraft.getInstance().level;
+
+        for (UUID uuid : new ArrayList<>(this.managed))
+        {
+            if (level != null)
+            {
+                Entity entity = findEntity(level, uuid);
+
+                if (entity instanceof Villager villager)
+                {
+                    setGlow(villager, this.baseGlow.getOrDefault(uuid, false));
+                }
+            }
+        }
+
+        this.managed.clear();
+        this.baseGlow.clear();
+        this.baseUpdates.clear();
+        this.trackingMarkers = false;
     }
 
     private static void setGlow(Villager villager, boolean value)
     {
         // Client-side Entity#setGlowingTag only round-trips the shared flag, so set it directly.
-        ((IMixinEntity) villager).villagercensus$setSharedFlag(6, value);
+        ((IMixinEntity) villager).villagercensus$setSharedFlag(GLOWING_FLAG_BIT, value);
+    }
+
+    private static class BaseGlowUpdate
+    {
+        final int entityId;
+        final boolean glowing;
+
+        BaseGlowUpdate(int entityId, boolean glowing)
+        {
+            this.entityId = entityId;
+            this.glowing = glowing;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -1033,8 +1230,11 @@ public class CensusManager
             this.pending = null;
             this.pendingUpdate = null;
             this.offersQueue.clear();
-            this.originalGlow.clear();
-            this.modGlowing.clear();
+            this.baseGlow.clear();
+            this.managed.clear();
+            this.baseUpdates.clear();
+            this.trackingMarkers = false;
+            this.reverseMarkers = false;
             this.verifyTotal = 0;
             this.verifyLoaded = 0;
             this.resumeCandidate = null;

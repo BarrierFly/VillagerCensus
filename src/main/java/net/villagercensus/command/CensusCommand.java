@@ -37,7 +37,24 @@ public class CensusCommand
                                     {
                                         CensusManager.getInstance().startSession(StringArgumentType.getString(ctx, "name"));
                                         return 1;
-                                    })))
+                                    }))
+                            .executes(ctx ->
+                            {
+                                error(ctx.getSource(), "villagercensus.message.name_required");
+                                return 0;
+                            }))
+                    .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("fork")
+                            .then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("name", StringArgumentType.greedyString())
+                                    .executes(ctx ->
+                                    {
+                                        CensusManager.getInstance().forkSession(StringArgumentType.getString(ctx, "name"));
+                                        return 1;
+                                    }))
+                            .executes(ctx ->
+                            {
+                                error(ctx.getSource(), "villagercensus.message.fork_name_required");
+                                return 0;
+                            }))
                     .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("stop").executes(ctx ->
                     {
                         CensusManager.getInstance().stopSession();
@@ -79,6 +96,11 @@ public class CensusCommand
                     {
                         CensusManager.getInstance().togglePaused();
                         return 1;
+                    }))
+                    .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("reverse").executes(ctx ->
+                    {
+                        CensusManager.getInstance().toggleReverseMarkers();
+                        return 1;
                     }));
 
             dispatcher.register(root);
@@ -88,6 +110,7 @@ public class CensusCommand
     private static void sendHelp(FabricClientCommandSource source)
     {
         send(source, "villagercensus.command.help.start");
+        send(source, "villagercensus.command.help.fork");
         send(source, "villagercensus.command.help.stop");
         send(source, "villagercensus.command.help.abort");
         send(source, "villagercensus.command.help.undo");
@@ -96,10 +119,16 @@ public class CensusCommand
         send(source, "villagercensus.command.help.resume");
         send(source, "villagercensus.command.help.discard");
         send(source, "villagercensus.command.help.pause");
+        send(source, "villagercensus.command.help.reverse");
     }
 
     private static void send(FabricClientCommandSource source, String key)
     {
         source.sendFeedback(Component.translatable(key));
+    }
+
+    private static void error(FabricClientCommandSource source, String key, Object... args)
+    {
+        source.sendError(Component.translatable(key, args));
     }
 }

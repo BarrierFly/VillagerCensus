@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -109,6 +110,53 @@ public class DraftStorage
         }
 
         return null;
+    }
+
+    /**
+     * Finds the source for a fork: the exact draft first, then the newest completed JSON report
+     * whose base name matches {@code <safeName>_<dimension>}.
+     */
+    public static Path findForkSource(String worldId, String dimension, String safeName)
+    {
+        Path draft = findDraft(worldId, dimension, safeName);
+
+        if (draft != null)
+        {
+            return draft;
+        }
+
+        Path dir = ReportWriter.reportDirectory(worldId);
+
+        if (!Files.isDirectory(dir))
+        {
+            return null;
+        }
+
+        String prefix = safeName + "_" + WorldId.safeDimension(dimension) + "_";
+        String suffix = ".census.json";
+        List<Path> matches = new ArrayList<>();
+
+        try (Stream<Path> stream = Files.list(dir))
+        {
+            stream.filter(p ->
+            {
+                String name = p.getFileName().toString();
+                return name.startsWith(prefix) && name.endsWith(suffix);
+            }).forEach(matches::add);
+        }
+        catch (IOException e)
+        {
+            Reference.logger().warn("Failed to list census reports", e);
+            return null;
+        }
+
+        if (matches.isEmpty())
+        {
+            return null;
+        }
+
+        matches.sort(Comparator.comparing(p -> p.getFileName().toString()));
+        return matches.get(matches.size() - 1);
     }
 
     public static boolean delete(Path file)

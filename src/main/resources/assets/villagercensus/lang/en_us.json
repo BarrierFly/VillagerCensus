@@ -1,5 +1,9 @@
 {
   "villagercensus.gui.title.configs": "Villager Census Configuration",
+  "villagercensus.gui.title.trade_categories": "Select Trade Categories",
+  "villagercensus.gui.button.trade_categories": "Select Trade Categories...",
+  "villagercensus.gui.button.select_all": "Select Filtered",
+  "villagercensus.gui.button.clear": "Clear",
   "villagercensus.hotkeys.category": "Villager Census",
 
   "villagercensus.config.generic.prettyName.triggerItem": "Trigger Item",
@@ -11,7 +15,7 @@
   "villagercensus.config.generic.name.recordAllTrades": "recordAllTrades",
 
   "villagercensus.config.generic.prettyName.selectedCategories": "Selected Categories",
-  "villagercensus.config.generic.comment.selectedCategories": "Category ids to record when 'Record All Trades' is off.",
+  "villagercensus.config.generic.comment.selectedCategories": "Category keys (profession/id) to record when 'Record All Trades' is off. Use the config screen's 'Select Trade Categories...' button.",
   "villagercensus.config.generic.name.selectedCategories": "selectedCategories",
 
   "villagercensus.config.generic.prettyName.glowingMarker": "Glowing Marker",
@@ -82,8 +86,17 @@
   "villagercensus.message.pending_update_cancelled": "Pending update cancelled.",
   "villagercensus.message.draft_found": "Census draft found: %s | villagers loaded: %s/%s (/census resume to continue, /census discard to archive).",
   "villagercensus.message.verified_all": "Verification complete: %s villagers checked.",
+  "villagercensus.message.fork_name_required": "You must give the name of an existing draft or report to fork.",
+  "villagercensus.message.fork_not_found": "No draft or JSON report named \"%s\" was found for this world and dimension.",
+  "villagercensus.message.fork_unreadable": "The fork source \"%s\" could not be read.",
+  "villagercensus.message.fork_started": "Forked \"%s\" started: %s villagers carried over in %s.",
+  "villagercensus.message.no_world": "You must be in a world to do that.",
+  "villagercensus.message.glowing_disabled": "Glowing markers are disabled in the config.",
+  "villagercensus.message.reverse_on": "Marker mode reversed: uncounted villagers glow.",
+  "villagercensus.message.reverse_off": "Marker mode restored: counted villagers glow.",
 
   "villagercensus.command.help.start": "/census start <name> - start a census in the current dimension",
+  "villagercensus.command.help.fork": "/census fork <name> - fork an existing draft/report and continue counting",
   "villagercensus.command.help.stop": "/census stop - finish and write the report",
   "villagercensus.command.help.abort": "/census abort - discard the current session",
   "villagercensus.command.help.undo": "/census undo - undo the last entry",
@@ -92,6 +105,7 @@
   "villagercensus.command.help.resume": "/census resume - continue the found draft",
   "villagercensus.command.help.discard": "/census discard - archive the found draft",
   "villagercensus.command.help.pause": "/census pause - pause/resume statistics",
+  "villagercensus.command.help.reverse": "/census reverse - toggle whether counted or uncounted villagers glow",
 
   "villagercensus.report.title": "Villager Census Report",
   "villagercensus.report.session_name": "Session",

@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundMerchantOffersPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.villagercensus.census.CensusManager;
 
@@ -19,6 +20,12 @@ public abstract class MixinClientPacketListener
     private void villagercensus$onMerchantOffers(ClientboundMerchantOffersPacket packet, CallbackInfo ci)
     {
         CensusManager.getInstance().onMerchantOffers(packet);
+    }
+
+    @Inject(method = "handleSetEntityData", at = @At("HEAD"))
+    private void villagercensus$onSetEntityData(ClientboundSetEntityDataPacket packet, CallbackInfo ci)
+    {
+        CensusManager.getInstance().onSetEntityData(packet);
     }
 
     @Inject(method = "handleOpenScreen", at = @At("HEAD"), cancellable = true)
