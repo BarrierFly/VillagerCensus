@@ -51,6 +51,9 @@ public class CensusManager
     private final Map<UUID, Boolean> originalGlow = new LinkedHashMap<>();
     private final Set<UUID> modGlowing = new HashSet<>();
 
+    private int verifyTotal;
+    private int verifyLoaded;
+
     private final java.util.concurrent.ConcurrentLinkedQueue<ClientboundMerchantOffersPacket> offersQueue =
             new java.util.concurrent.ConcurrentLinkedQueue<>();
 
@@ -293,9 +296,9 @@ public class CensusManager
         this.pending = null;
         this.pendingUpdate = null;
 
-        int[] verify = this.verifyLoaded(loaded);
+        this.startVerification(loaded);
         InfoUtils.showGuiOrInGameMessage(MessageType.SUCCESS, "villagercensus.message.resumed",
-                loaded.rawName, verify[0], verify[1]);
+                loaded.rawName, this.verifyLoaded, this.verifyTotal);
         return true;
     }
 
@@ -314,23 +317,79 @@ public class CensusManager
         InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.draft_discarded");
     }
 
-    private int[] verifyLoaded(CensusSession loaded)
+    private void startVerification(CensusSession loaded)
     {
-        Minecraft mc = Minecraft.getInstance();
-        int ok = 0;
-        int total = loaded.records.size();
+        this.verifyTotal = loaded.records.size();
+        this.verifyLoaded = 0;
+
+        Set<UUID> loadedIds = this.loadedVillagerIds();
 
         for (VillagerRecord record : loaded.records)
         {
-            Entity entity = findEntity(mc.level, record.uuid);
-
-            if (entity instanceof Villager)
+            if (record.uuid != null && loadedIds.contains(record.uuid))
             {
-                ok++;
+                record.status = record.hasTradeData
+                        ? (record.weakAssociation ? DataStatus.WEAK : DataStatus.FULL)
+                        : DataStatus.NO_TRADE_DATA;
+                this.verifyLoaded++;
+            }
+            else
+            {
+                record.status = DataStatus.NOT_VERIFIED;
+            }
+        }
+    }
+
+    private Set<UUID> loadedVillagerIds()
+    {
+        Set<UUID> ids = new HashSet<>();
+        Minecraft mc = Minecraft.getInstance();
+
+        if (mc.level != null)
+        {
+            for (Entity entity : mc.level.entitiesForRendering())
+            {
+                if (entity instanceof Villager)
+                {
+                    ids.add(entity.getUUID());
+                }
             }
         }
 
-        return new int[] { ok, total };
+        return ids;
+    }
+
+    private int updateVerification(CensusSession session)
+    {
+        Set<UUID> loadedIds = this.loadedVillagerIds();
+        int loaded = 0;
+
+        for (VillagerRecord record : session.records)
+        {
+            if (record.uuid != null && loadedIds.contains(record.uuid))
+            {
+                loaded++;
+
+                if (record.status == DataStatus.NOT_VERIFIED)
+                {
+                    record.status = record.hasTradeData
+                            ? (record.weakAssociation ? DataStatus.WEAK : DataStatus.FULL)
+                            : DataStatus.NO_TRADE_DATA;
+                }
+            }
+        }
+
+        return loaded;
+    }
+
+    public int getVerifyLoaded()
+    {
+        return this.verifyLoaded;
+    }
+
+    public int getVerifyTotal()
+    {
+        return this.verifyTotal;
     }
 
     // ------------------------------------------------------------------
@@ -585,6 +644,18 @@ public class CensusManager
         if (this.hasSession())
         {
             this.maintainMarkers(mc);
+
+            if (this.verifyTotal > 0 && this.tickCounter % 20L == 0L)
+            {
+                this.verifyLoaded = this.updateVerification(this.session);
+
+                if (this.verifyLoaded >= this.verifyTotal)
+                {
+                    this.verifyTotal = 0;
+                    InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.verified_all",
+                            this.verifyLoaded);
+                }
+            }
         }
     }
 
@@ -850,23 +921,40 @@ public class CensusManager
 
     private void maintainMarkers(Minecraft mc)
     {
-        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue() || mc.level == null)
+        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue() || mc.level == null || !this.hasSession())
         {
             return;
         }
 
+        Map<UUID, Villager> loaded = new java.util.HashMap<>();
+
+        for (Entity entity : mc.level.entitiesForRendering())
+        {
+            if (entity instanceof Villager villager)
+            {
+                loaded.put(entity.getUUID(), villager);
+            }
+        }
+
         for (VillagerRecord record : this.session.records)
         {
-            if (record.uuid == null || !this.modGlowing.contains(record.uuid))
+            if (record.uuid == null)
             {
                 continue;
             }
 
-            Entity entity = findEntity(mc.level, record.uuid);
+            Villager villager = loaded.get(record.uuid);
 
-            if (entity instanceof Villager villager && !villager.hasGlowingTag())
+            if (villager != null)
             {
-                villager.setGlowingTag(true);
+                this.originalGlow.putIfAbsent(record.uuid, villager.hasGlowingTag());
+
+                if (!villager.hasGlowingTag())
+                {
+                    villager.setGlowingTag(true);
+                }
+
+                this.modGlowing.add(record.uuid);
             }
         }
     }
@@ -884,11 +972,16 @@ public class CensusManager
                 DraftStorage.save(this.session);
             }
 
+            // The session must not silently continue into the next world; the saved draft is
+            // resumed explicitly with /census resume.
+            this.session = null;
             this.pending = null;
             this.pendingUpdate = null;
             this.offersQueue.clear();
             this.originalGlow.clear();
             this.modGlowing.clear();
+            this.verifyTotal = 0;
+            this.verifyLoaded = 0;
         }
     }
 
@@ -900,8 +993,11 @@ public class CensusManager
 
             if (this.resumeCandidate != null)
             {
+                CensusSession draft = DraftStorage.load(this.resumeCandidate);
+                int total = draft != null ? draft.records.size() : 0;
+                int loaded = draft != null ? this.updateVerification(draft) : 0;
                 InfoUtils.showGuiOrInGameMessage(MessageType.INFO, "villagercensus.message.draft_found",
-                        this.resumeCandidate.getFileName().toString());
+                        this.resumeCandidate.getFileName().toString(), loaded, total);
             }
         }
     }

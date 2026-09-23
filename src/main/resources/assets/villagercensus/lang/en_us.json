@@ -80,7 +80,8 @@
   "villagercensus.message.recorded": "Recorded %s (%s trades).",
   "villagercensus.message.updated": "Villager record updated.",
   "villagercensus.message.pending_update_cancelled": "Pending update cancelled.",
-  "villagercensus.message.draft_found": "Census draft found: %s (/census resume to continue, /census discard to archive).",
+  "villagercensus.message.draft_found": "Census draft found: %s | villagers loaded: %s/%s (/census resume to continue, /census discard to archive).",
+  "villagercensus.message.verified_all": "Verification complete: %s villagers checked.",
 
   "villagercensus.command.help.start": "/census start <name> - start a census in the current dimension",
   "villagercensus.command.help.stop": "/census stop - finish and write the report",

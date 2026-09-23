@@ -103,7 +103,10 @@ Hotkeys (all default `none`): `openConfigGui`, `toggleStats`, `undoLast`.
   / 本 Mod 从不取消 offers 包，不影响 offers-hud 预览；两者可能各发一次关窗包，无害。
 - Enchantment max level is resolved reflectively and may be `-1` (not shown) on some setups.
 - The draft continuation flow is command based (`/census resume` / `discard`) instead of a
-  custom confirmation screen. Loaded villagers are re-checked once on resume.
+  custom confirmation screen. Leaving a world ends the in-memory session (the unfinished
+  session is saved as a draft); re-entering does **not** auto-continue. Use `/census resume`
+  to reload it, after which recorded villagers are re-scanned (HUD shows `verify X/N`) and
+  glowing markers are re-applied.
 - Workstation coordinates are intentionally never recorded or inferred (only the villager's
   own position), per the design.
 

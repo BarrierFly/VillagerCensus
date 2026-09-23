@@ -62,6 +62,11 @@ public class CensusHud implements IRenderer
             lines.add("pending update: right-click again to confirm");
         }
 
+        if (manager.getVerifyTotal() > 0)
+        {
+            lines.add("verify " + manager.getVerifyLoaded() + "/" + manager.getVerifyTotal());
+        }
+
         VillagerRecord last = session.getLastTarget();
 
         if (last != null)

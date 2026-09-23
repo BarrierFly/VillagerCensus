@@ -80,7 +80,8 @@
   "villagercensus.message.recorded": "已记录 %s（%s 条交易）。",
   "villagercensus.message.updated": "村民记录已更新。",
   "villagercensus.message.pending_update_cancelled": "待确认更新已取消。",
-  "villagercensus.message.draft_found": "发现普查半成品：%s（/census resume 继续，/census discard 归档）。",
+  "villagercensus.message.draft_found": "发现普查半成品：%s｜已加载村民 %s/%s（/census resume 继续，/census discard 归档）。",
+  "villagercensus.message.verified_all": "复核完成：已核验 %s 只村民。",
 
   "villagercensus.command.help.start": "/census start <名称> - 在当前维度开始普查",
   "villagercensus.command.help.stop": "/census stop - 结束并输出报告",
