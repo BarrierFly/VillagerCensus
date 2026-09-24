@@ -72,6 +72,7 @@ public class TradeCatalog
                     category.cost1 = readStringList(categoryObject, "cost1");
                     category.cost2 = readStringList(categoryObject, "cost2");
                     category.result = readStringList(categoryObject, "result");
+                    category.aliases = readStringList(categoryObject, "aliases");
                     list.add(category);
                 }
 

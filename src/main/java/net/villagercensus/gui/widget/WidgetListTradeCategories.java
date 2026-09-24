@@ -49,6 +49,11 @@ public class WidgetListTradeCategories extends WidgetListBase<TradeCategory, Wid
             list.add(entry.label.toLowerCase());
         }
 
+        for (String alias : entry.aliases)
+        {
+            list.add(alias.toLowerCase());
+        }
+
         list.add(WidgetTradeCategoryEntry.tradeSummary(entry).toLowerCase());
         return list;
     }
@@ -59,7 +64,7 @@ public class WidgetListTradeCategories extends WidgetListBase<TradeCategory, Wid
 
         for (TradeCategory category : this.getAllEntries())
         {
-            if (keys.contains(key(category)))
+            if (category.selectedBy(keys))
             {
                 this.selectedEntries.add(category);
             }

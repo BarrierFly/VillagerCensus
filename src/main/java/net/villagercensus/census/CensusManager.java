@@ -864,10 +864,10 @@ public class CensusManager
 
             if (!recordAll)
             {
-                // Categories are keyed as "profession/id" by the selection GUI, but a bare id
-                // from an older config still matches every profession that uses it.
+                // Categories are keyed as "profession/id" by the selection GUI; bare ids and
+                // replaced variant ids (aliases) from older configs keep working as well.
                 boolean included = category != null
-                        ? selected.contains(category.profession + "/" + category.id) || selected.contains(category.id)
+                        ? category.selectedBy(selected)
                         : selected.contains(categoryId);
 
                 if (!included)
