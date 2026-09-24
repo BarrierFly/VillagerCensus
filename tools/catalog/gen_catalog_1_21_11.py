@@ -78,47 +78,50 @@ def strip_color(item_id):
 def parse_listing(ctor, args):
     try:
         if ctor == 'EmeraldForItems':
-            return (to_item(args[0]), '', [EMERALD])
+            return (to_item(args[0]), '', [EMERALD], False)
         if ctor == 'ItemsForEmeralds':
-            return (EMERALD, '', [to_item(args[0])])
+            return (EMERALD, '', [to_item(args[0])], False)
         if ctor == 'ItemsAndEmeraldsToItems':
-            return (to_item(args[0]), EMERALD, [to_item(args[3])])
+            return (to_item(args[0]), EMERALD, [to_item(args[3])], False)
         if ctor == 'EnchantedItemForEmeralds':
-            return (EMERALD, '', [to_item(args[0])])
+            return (EMERALD, '', [to_item(args[0])], True)
         if ctor == 'EnchantBookForEmeralds':
-            return (EMERALD, BOOK, [ENCHANTED_BOOK])
+            return (EMERALD, BOOK, [ENCHANTED_BOOK], False)
         if ctor == 'DyedArmorForEmeralds':
-            return (EMERALD, '', [to_item(args[0])])
+            return (EMERALD, '', [to_item(args[0])], False)
         if ctor == 'TippedArrowForItemsAndEmeralds':
-            return (to_item(args[0]), EMERALD, [to_item(args[2])])
+            return (to_item(args[0]), EMERALD, [to_item(args[2])], False)
         if ctor == 'TreasureMapForEmeralds':
-            return (EMERALD, COMPASS, [FILLED_MAP])
+            return (EMERALD, COMPASS, [FILLED_MAP], False)
         if ctor == 'SuspiciousStewForEmerald':
-            return (EMERALD, '', [STEW])
+            return (EMERALD, '', [STEW], False)
         if ctor == 'EmeraldsForVillagerTypeItem':
             if len(args) >= 4:
                 items = ['minecraft:' + n.lower() for _, n in re.findall(r'(Items|Blocks)\.([A-Z0-9_]+)', args[3])]
                 if items:
-                    return (EMERALD, '', items)
+                    return (EMERALD, '', items, False)
             return None
     except IndexError:
         return None
     return None
 
 
-def category_id(cost1, cost2, results):
+def category_id(cost1, cost2, results, enchanted=False):
     if len(results) > 1:
         return 'sell_' + strip_color(results[0]) + '_variants'
     result = results[0]
+    base = strip_color(result)
     if cost1 == EMERALD and cost2 == '':
-        return 'sell_' + strip_color(result)
+        if enchanted and not base.startswith('enchanted'):
+            base = 'enchanted_' + base
+        return 'sell_' + base
     if cost1 == EMERALD and cost2:
-        return 'sell_' + strip_color(result) + '_for_' + strip_color(cost2)
+        return 'sell_' + base + '_for_' + strip_color(cost2)
     if cost1 != EMERALD and cost2 == '':
         return 'buy_' + strip_color(cost1)
     if cost1 != EMERALD and cost2 == EMERALD:
         return 'buy_' + strip_color(cost1) + '_get_' + strip_color(result)
-    return 'trade_' + strip_color(cost1) + '_' + strip_color(cost2) + '_' + strip_color(result)
+    return 'trade_' + strip_color(cost1) + '_' + strip_color(cost2) + '_' + base
 
 
 def parse(src):
@@ -143,24 +146,29 @@ def parse(src):
             parsed = parse_listing(ctor, args)
             if not parsed:
                 continue
-            cost1, cost2, results = parsed
+            cost1, cost2, results, enchanted = parsed
             if not cost1 or any(r is None for r in results):
                 continue
-            seen[(cost1, cost2, tuple(sorted(results)))] = (cost1, cost2, results)
+            seen[(cost1, cost2, tuple(sorted(results)), enchanted)] = (cost1, cost2, results, enchanted)
 
         # Merge color variants that collapse to the same category id.
         merged = {}
-        for cost1, cost2, results in seen.values():
-            cid = category_id(cost1, cost2, results)
-            entry = merged.setdefault(cid, {'id': cid, 'cost1': set(), 'cost2': set(), 'result': set()})
+        for cost1, cost2, results, enchanted in seen.values():
+            cid = category_id(cost1, cost2, results, enchanted)
+            entry = merged.setdefault(cid, {'id': cid, 'cost1': set(), 'cost2': set(), 'result': set(),
+                                            'enchanted': enchanted})
             entry['cost1'].add(cost1)
             entry['cost2'].update([cost2] if cost2 else [])
             entry['result'].update(results)
 
-        result[profession] = [
-            {'id': e['id'], 'cost1': sorted(e['cost1']), 'cost2': sorted(e['cost2']), 'result': sorted(e['result'])}
-            for e in merged.values()
-        ]
+        cats = []
+        for e in merged.values():
+            cat = {'id': e['id'], 'cost1': sorted(e['cost1']), 'cost2': sorted(e['cost2']),
+                   'result': sorted(e['result'])}
+            if e['enchanted']:
+                cat['enchanted'] = True
+            cats.append(cat)
+        result[profession] = cats
 
     lib = result.setdefault('minecraft:librarian', [])
     if not any(c['id'] == 'sell_enchanted_book' for c in lib):
@@ -180,19 +188,19 @@ def main():
         cats = parsed[profession]
         if not cats:
             continue
-        out.append({
-            'profession': profession,
-            'categories': [
-                {
-                    'id': c['id'],
-                    'label': c['id'],
-                    'cost1': c['cost1'],
-                    'cost2': c['cost2'],
-                    'result': c['result'],
-                }
-                for c in cats
-            ],
-        })
+        categories = []
+        for c in cats:
+            cat = {
+                'id': c['id'],
+                'label': c['id'],
+                'cost1': c['cost1'],
+                'cost2': c['cost2'],
+                'result': c['result'],
+            }
+            if c.get('enchanted'):
+                cat['enchanted'] = True
+            categories.append(cat)
+        out.append({'profession': profession, 'categories': categories})
 
     with open(out_path, 'w', encoding='utf-8', newline='\n') as f:
         json.dump(out, f, indent=2, ensure_ascii=False)

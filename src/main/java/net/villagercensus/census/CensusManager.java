@@ -858,8 +858,9 @@ public class CensusManager
             String c1 = itemId(cost1);
             String c2 = cost2.isEmpty() ? "" : itemId(cost2);
             String res = itemId(result);
+            boolean resultEnchanted = result.is(Items.ENCHANTED_BOOK) || EnchantmentHelper.hasAnyEnchantments(result);
 
-            TradeCategory category = TradeCatalog.get().match(professionId, c1, c2, res);
+            TradeCategory category = TradeCatalog.get().match(professionId, c1, c2, res, resultEnchanted);
             String categoryId = category != null ? category.id : ("triple:" + c1 + ">" + res);
 
             if (!recordAll)

@@ -102,48 +102,52 @@
         ]
       },
       {
-        "id": "sell_diamond_boots",
-        "label": "sell_diamond_boots",
+        "id": "sell_enchanted_diamond_boots",
+        "label": "sell_enchanted_diamond_boots",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_boots"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_diamond_chestplate",
-        "label": "sell_diamond_chestplate",
+        "id": "sell_enchanted_diamond_chestplate",
+        "label": "sell_enchanted_diamond_chestplate",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_chestplate"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_diamond_helmet",
-        "label": "sell_diamond_helmet",
+        "id": "sell_enchanted_diamond_helmet",
+        "label": "sell_enchanted_diamond_helmet",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_helmet"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_diamond_leggings",
-        "label": "sell_diamond_leggings",
+        "id": "sell_enchanted_diamond_leggings",
+        "label": "sell_enchanted_diamond_leggings",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_leggings"
-        ]
+        ],
+        "enchanted": true
       },
       {
         "id": "sell_iron_boots",
@@ -889,15 +893,16 @@
         ]
       },
       {
-        "id": "sell_fishing_rod",
-        "label": "sell_fishing_rod",
+        "id": "sell_enchanted_fishing_rod",
+        "label": "sell_enchanted_fishing_rod",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:fishing_rod"
-        ]
+        ],
+        "enchanted": true
       }
     ]
   },
@@ -1022,6 +1027,30 @@
         "result": [
           "minecraft:crossbow"
         ]
+      },
+      {
+        "id": "sell_enchanted_bow",
+        "label": "sell_enchanted_bow",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:bow"
+        ],
+        "enchanted": true
+      },
+      {
+        "id": "sell_enchanted_crossbow",
+        "label": "sell_enchanted_crossbow",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:crossbow"
+        ],
+        "enchanted": true
       }
     ]
   },
@@ -1859,17 +1888,6 @@
         ]
       },
       {
-        "id": "sell_diamond_axe",
-        "label": "sell_diamond_axe",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:diamond_axe"
-        ]
-      },
-      {
         "id": "sell_diamond_hoe",
         "label": "sell_diamond_hoe",
         "cost1": [
@@ -1881,59 +1899,76 @@
         ]
       },
       {
-        "id": "sell_diamond_pickaxe",
-        "label": "sell_diamond_pickaxe",
+        "id": "sell_enchanted_diamond_axe",
+        "label": "sell_enchanted_diamond_axe",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:diamond_axe"
+        ],
+        "enchanted": true
+      },
+      {
+        "id": "sell_enchanted_diamond_pickaxe",
+        "label": "sell_enchanted_diamond_pickaxe",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_pickaxe"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_diamond_shovel",
-        "label": "sell_diamond_shovel",
+        "id": "sell_enchanted_diamond_shovel",
+        "label": "sell_enchanted_diamond_shovel",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_shovel"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_iron_axe",
-        "label": "sell_iron_axe",
+        "id": "sell_enchanted_iron_axe",
+        "label": "sell_enchanted_iron_axe",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:iron_axe"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_iron_pickaxe",
-        "label": "sell_iron_pickaxe",
+        "id": "sell_enchanted_iron_pickaxe",
+        "label": "sell_enchanted_iron_pickaxe",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:iron_pickaxe"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_iron_shovel",
-        "label": "sell_iron_shovel",
+        "id": "sell_enchanted_iron_shovel",
+        "label": "sell_enchanted_iron_shovel",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:iron_shovel"
-        ]
+        ],
+        "enchanted": true
       },
       {
         "id": "sell_stone_axe",
@@ -2040,26 +2075,40 @@
         ]
       },
       {
-        "id": "sell_diamond_axe",
-        "label": "sell_diamond_axe",
+        "id": "sell_enchanted_diamond_axe",
+        "label": "sell_enchanted_diamond_axe",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_axe"
-        ]
+        ],
+        "enchanted": true
       },
       {
-        "id": "sell_diamond_sword",
-        "label": "sell_diamond_sword",
+        "id": "sell_enchanted_diamond_sword",
+        "label": "sell_enchanted_diamond_sword",
         "cost1": [
           "minecraft:emerald"
         ],
         "cost2": [],
         "result": [
           "minecraft:diamond_sword"
-        ]
+        ],
+        "enchanted": true
+      },
+      {
+        "id": "sell_enchanted_iron_sword",
+        "label": "sell_enchanted_iron_sword",
+        "cost1": [
+          "minecraft:emerald"
+        ],
+        "cost2": [],
+        "result": [
+          "minecraft:iron_sword"
+        ],
+        "enchanted": true
       },
       {
         "id": "sell_iron_axe",
@@ -2070,17 +2119,6 @@
         "cost2": [],
         "result": [
           "minecraft:iron_axe"
-        ]
-      },
-      {
-        "id": "sell_iron_sword",
-        "label": "sell_iron_sword",
-        "cost1": [
-          "minecraft:emerald"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:iron_sword"
         ]
       }
     ]

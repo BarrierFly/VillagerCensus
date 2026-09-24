@@ -131,11 +131,13 @@ Interaction contract (do not break):
     with `ColorCollection` loops and `create*` helper methods, and assigns trades to
     professions through `data/minecraft/tags/villager_trade/<profession>/level_*.json`
     (recursively including `common_smith`).
-  - Both versions are fully parsed and merged (303 categories, 0 unresolved), then normalized
-    to 154 by `tools/catalog/normalize_catalog.py` (run it after `merge_catalog.py`). The
+  - Both versions are fully parsed and merged (305 categories, 0 unresolved), then normalized
+    to 156 by `tools/catalog/normalize_catalog.py` (run it after `merge_catalog.py`). The
     normalization collapses synonymous variants (colour variants, cost-order swaps, plain vs.
     explorer maps, boat wood types) and records the replaced ids in each entry's `aliases`
-    list, which the selection matcher accepts. Regenerate with the parser scripts (see commit
+    list, which the selection matcher accepts. Enchanted variants carry `"enchanted": true`
+    and are kept as separate categories; `TradeCatalog.match` takes the offer's enchantment
+    state so the right variant is selected. Regenerate with the parser scripts (see commit
     history) via `git -C <guardian> show <commit>:<path>`.
 
 ## Commits

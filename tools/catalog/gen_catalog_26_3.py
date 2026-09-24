@@ -99,13 +99,17 @@ def parse_builder_items(builder, subs):
             result = item_of(a)
     if result is None or not costs:
         return None
-    return (costs[0], costs[1] if len(costs) > 1 else '', result)
+    enchanted = 'enchantedItem(' in builder
+    return (costs[0], costs[1] if len(costs) > 1 else '', result, enchanted)
 
 
-def category_id(cost1, cost2, result):
+def category_id(cost1, cost2, result, enchanted=False):
     nm = lambda i: i.split(':', 1)[1]
     if cost1 == EMERALD and not cost2:
-        return 'sell_' + nm(result)
+        base = nm(result)
+        if enchanted and not base.startswith('enchanted'):
+            base = 'enchanted_' + base
+        return 'sell_' + base
     if cost1 != EMERALD and not cost2:
         return 'buy_' + nm(cost1)
     if cost1 == EMERALD and cost2:
@@ -194,7 +198,7 @@ def main():
             continue
         prefix, psuffix = coll[path_coll]
         for color in COLORS:
-            trades[prefix + color + psuffix] = (EMERALD, '', 'minecraft:' + color + '_' + suffix)
+            trades[prefix + color + psuffix] = (EMERALD, '', 'minecraft:' + color + '_' + suffix, False)
             stats['terracotta'] += 1
 
     # ---- profession mapping from tags ----
@@ -236,13 +240,16 @@ def main():
     out = []
     for prof in sorted(by_prof):
         cats, seen = [], set()
-        for (cost1, cost2, result) in by_prof[prof]:
-            cid = category_id(cost1, cost2, result)
+        for (cost1, cost2, result, enchanted) in by_prof[prof]:
+            cid = category_id(cost1, cost2, result, enchanted)
             if cid in seen:
                 continue
             seen.add(cid)
-            cats.append({'id': cid, 'label': cid, 'cost1': [cost1],
-                         'cost2': [cost2] if cost2 else [], 'result': [result]})
+            cat = {'id': cid, 'label': cid, 'cost1': [cost1],
+                   'cost2': [cost2] if cost2 else [], 'result': [result]}
+            if enchanted:
+                cat['enchanted'] = True
+            cats.append(cat)
         out.append({'profession': prof, 'categories': cats})
 
     with open(out_path, 'w', encoding='utf-8', newline='\n') as f:

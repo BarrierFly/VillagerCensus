@@ -19,6 +19,7 @@
   "villagercensus.trade_kind.candle": "Candles",
   "villagercensus.trade_kind.map": "Maps",
   "villagercensus.trade_kind.boat": "Boats",
+  "villagercensus.trade_kind.enchanted": "%s (enchanted)",
 
   "villagercensus.config.generic.prettyName.triggerItem": "Trigger Item",
   "villagercensus.config.generic.comment.triggerItem": "Held item used to right-click villagers (registry id). Default: minecraft:enchanted_book",

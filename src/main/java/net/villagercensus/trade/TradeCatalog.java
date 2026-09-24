@@ -73,6 +73,7 @@ public class TradeCatalog
                     category.cost2 = readStringList(categoryObject, "cost2");
                     category.result = readStringList(categoryObject, "result");
                     category.aliases = readStringList(categoryObject, "aliases");
+                    category.enchanted = categoryObject.has("enchanted") && categoryObject.get("enchanted").getAsBoolean();
                     list.add(category);
                 }
 
@@ -110,9 +111,11 @@ public class TradeCatalog
     }
 
     /**
-     * Returns the first matching semantic category for the trade, or null if none matches.
+     * Returns the best matching semantic category for the trade, or null if none matches.
+     * A category whose {@code enchanted} flag matches the offer is preferred; otherwise the
+     * first matching category is returned so trades still resolve if only one variant exists.
      */
-    public TradeCategory match(String professionId, String cost1, String cost2, String result)
+    public TradeCategory match(String professionId, String cost1, String cost2, String result, boolean enchanted)
     {
         this.ensureLoaded();
         List<TradeCategory> list = this.byProfession.get(professionId);
@@ -122,15 +125,25 @@ public class TradeCatalog
             return null;
         }
 
+        TradeCategory fallback = null;
+
         for (TradeCategory category : list)
         {
             if (category.matches(professionId, cost1, cost2, result))
             {
-                return category;
+                if (category.enchanted == enchanted)
+                {
+                    return category;
+                }
+
+                if (fallback == null)
+                {
+                    fallback = category;
+                }
             }
         }
 
-        return null;
+        return fallback;
     }
 
     public LinkedHashMap<String, TradeCategory> allCategories()

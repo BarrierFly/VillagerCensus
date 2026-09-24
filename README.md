@@ -139,18 +139,22 @@ abort; there is no background box.
 
 ## Trade category catalog / 交易类别目录
 
-`villagercensus/trade_categories.json` 覆盖全部 13 个职业、共 **154** 个类别，由反编译的
+`villagercensus/trade_categories.json` 覆盖全部 13 个职业、共 **156** 个类别，由反编译的
 原版交易表生成并合并 1.21.11 与 26.3，再经 `tools/catalog/normalize_catalog.py` 归一化
 （未命中的交易回退为物品三元组标签）。归一化会合并同义变体：彩色物品（旗帜、羊毛、地毯、
 床、染料、陶瓦、带釉陶瓦、蜡烛）、按价格顺序互换的同一交易（制箭师的箭/绿宝石）、以及普通
-地图与各生态探险地图、各材质船等。被合并掉的旧类别 id 作为别名保留，旧选择继续生效。
+地图与各生态探险地图、各材质船等；被合并掉的旧类别 id 作为别名保留，旧选择继续生效。
+同一物品的“有附魔/无附魔”两条交易**分开**成两个类别（如 2 级普通弓 `sell_bow` 与 4 级附魔弓
+`sell_enchanted_bow`、3 级普通弩与 5 级附魔弩），可分别选择是否记录。
 
 The catalog is generated from the decompiled vanilla villager trades, merged across 1.21.11
 and 26.3, then normalized by `tools/catalog/normalize_catalog.py`; trades that match no entry
 fall back to an item-triple label. Normalization collapses synonymous variants (colour variants
 such as banners/wool/carpet/bed/dye/terracotta/glazed terracotta/candles, cost-order swaps such
 as the fletcher's arrow/emerald, plain vs. explorer maps, and boat wood types). Replaced ids are
-kept as aliases so older selections keep working.
+kept as aliases so older selections keep working. The enchanted and unenchanted variants of the
+same item stay **separate** (e.g. the level-2 plain bow vs. the level-4 enchanted bow, and the
+plain/ enchanted crossbow), so each can be recorded independently.
 
 ## Build / 构建
 

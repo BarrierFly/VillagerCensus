@@ -7,8 +7,10 @@ This pass groups categories that describe the same logical trade and unions thei
 item lists, so the selection GUI shows one option per trade type.
 
 Grouping key: profession + the set of cost item "kinds" (colour stripped) + the
-set of result item "kinds". Map results collapse to the single kind "map" and
-ignore the cost shape, so empty maps and explorer maps become one option.
+set of result item "kinds" + the enchanted flag. Map results collapse to the single
+kind "map" and ignore the cost shape, so empty maps and explorer maps become one
+option. The enchanted flag is part of the key, so enchanted and unenchanted
+variants of the same item stay separate.
 
 Usage: normalize_catalog.py <input.json> [output.json]
 """
@@ -53,13 +55,14 @@ def item_kind(item_id):
 
 
 def key_for(cat):
+    enchanted = bool(cat.get('enchanted', False))
     result_kinds = tuple(sorted({item_kind(r) for r in cat['result']}))
 
     if result_kinds == ('map',):
-        return ('map',)
+        return ('map', enchanted)
 
     cost_kinds = tuple(sorted({item_kind(c) for c in (set(cat['cost1']) | set(cat['cost2']))}))
-    return (cost_kinds, result_kinds)
+    return (cost_kinds, result_kinds, enchanted)
 
 
 def has_color(cid):
@@ -97,12 +100,14 @@ def main():
             merged_away += len(members) - 1
 
             cost1, cost2, result = set(), set(), set()
+            enchanted = False
             for m in members:
                 cost1.update(m['cost1'])
                 cost2.update(m['cost2'])
                 result.update(m['result'])
+                enchanted = enchanted or bool(m.get('enchanted', False))
 
-            if k == ('map',):
+            if k[0] == 'map':
                 # Wildcard the second cost so both the plain map (emerald only)
                 # and the explorer maps (emerald + compass) match.
                 cost2 = set()
@@ -118,6 +123,9 @@ def main():
                 'cost2': sorted(cost2),
                 'result': sorted(result),
             }
+
+            if enchanted:
+                entry['enchanted'] = True
 
             if aliases:
                 entry['aliases'] = aliases

@@ -12,6 +12,9 @@ public class TradeCategory
     public List<String> cost1;
     public List<String> cost2;
     public List<String> result;
+    // True for the enchanted variant of an item (e.g. the level-4 enchanted bow), so it can be
+    // selected separately from the unenchanted variant.
+    public boolean enchanted;
     // Ids this category replaced when the catalog collapsed variant trades. They keep older
     // selections working after the catalog is normalized.
     public List<String> aliases = new ArrayList<>();

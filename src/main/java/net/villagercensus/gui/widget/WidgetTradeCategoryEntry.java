@@ -64,7 +64,14 @@ public class WidgetTradeCategoryEntry extends WidgetListEntryBase<TradeCategory>
 
     public static String buildDisplay(TradeCategory category)
     {
-        return Names.professionName(category.profession) + "  " + tradeSummary(category);
+        String summary = tradeSummary(category);
+
+        if (category.enchanted)
+        {
+            summary = StringUtils.translate("villagercensus.trade_kind.enchanted", summary);
+        }
+
+        return Names.professionName(category.profession) + "  " + summary;
     }
 
     public static String tradeSummary(TradeCategory category)
