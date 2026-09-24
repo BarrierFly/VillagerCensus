@@ -47,16 +47,60 @@ public class Names
             return "-";
         }
 
+        return professionName(professionId) + " (" + professionId + ")";
+    }
+
+    public static String professionName(String professionId)
+    {
+        if (professionId == null || professionId.isEmpty())
+        {
+            return "-";
+        }
+
         String path = professionId.contains(":") ? professionId.substring(professionId.indexOf(':') + 1) : professionId;
         String key = "entity.minecraft.villager." + path;
         String translated = StringUtils.translate(key);
 
-        if (translated == null || translated.equals(key))
+        return translated == null || translated.equals(key) ? path : translated;
+    }
+
+    /**
+     * Localized item name without the registry id, for compact GUIs.
+     */
+    public static String itemName(String itemId)
+    {
+        if (itemId == null || itemId.isEmpty())
         {
-            translated = path;
+            return "-";
         }
 
-        return translated + " (" + professionId + ")";
+        Identifier id = Identifier.tryParse(itemId);
+        Item item = null;
+
+        if (id != null)
+        {
+            item = BuiltInRegistries.ITEM.get(id).map(ref -> ref.value()).orElse(null);
+        }
+
+        if (item == null || item == Items.AIR)
+        {
+            return shortPath(itemId);
+        }
+
+        try
+        {
+            return new ItemStack(item).getHoverName().getString();
+        }
+        catch (Exception e)
+        {
+            return shortPath(itemId);
+        }
+    }
+
+    private static String shortPath(String id)
+    {
+        int colon = id.indexOf(':');
+        return colon >= 0 ? id.substring(colon + 1) : id;
     }
 
     public static String enchantment(String enchantmentId, int level, int maxLevel)

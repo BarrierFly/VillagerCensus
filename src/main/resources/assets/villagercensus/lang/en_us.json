@@ -8,55 +8,55 @@
 
   "villagercensus.config.generic.prettyName.triggerItem": "Trigger Item",
   "villagercensus.config.generic.comment.triggerItem": "Held item used to right-click villagers (registry id). Default: minecraft:enchanted_book",
-  "villagercensus.config.generic.name.triggerItem": "triggerItem",
+  "villagercensus.config.generic.name.triggerItem": "Trigger Item",
 
   "villagercensus.config.generic.prettyName.recordAllTrades": "Record All Trades",
   "villagercensus.config.generic.comment.recordAllTrades": "Record every trade. When off, only the selected categories are recorded.",
-  "villagercensus.config.generic.name.recordAllTrades": "recordAllTrades",
+  "villagercensus.config.generic.name.recordAllTrades": "Record All Trades",
 
   "villagercensus.config.generic.prettyName.selectedCategories": "Selected Categories",
   "villagercensus.config.generic.comment.selectedCategories": "Category keys (profession/id) to record when 'Record All Trades' is off. Use the config screen's 'Select Trade Categories...' button.",
-  "villagercensus.config.generic.name.selectedCategories": "selectedCategories",
+  "villagercensus.config.generic.name.selectedCategories": "Selected Categories",
 
   "villagercensus.config.generic.prettyName.glowingMarker": "Glowing Marker",
   "villagercensus.config.generic.comment.glowingMarker": "Mark already-recorded villagers with the Glowing effect.",
-  "villagercensus.config.generic.name.glowingMarker": "glowingMarker",
+  "villagercensus.config.generic.name.glowingMarker": "Glowing Marker",
 
   "villagercensus.config.generic.prettyName.recordCoordinates": "Record Coordinates",
   "villagercensus.config.generic.comment.recordCoordinates": "Record the villager's own block position (never a workstation).",
-  "villagercensus.config.generic.name.recordCoordinates": "recordCoordinates",
+  "villagercensus.config.generic.name.recordCoordinates": "Record Coordinates",
 
   "villagercensus.config.generic.prettyName.outputJson": "Also Output JSON",
   "villagercensus.config.generic.comment.outputJson": "Additionally write a machine-readable JSON report next to the TXT report.",
-  "villagercensus.config.generic.name.outputJson": "outputJson",
+  "villagercensus.config.generic.name.outputJson": "Also Output JSON",
 
   "villagercensus.config.generic.prettyName.hudEnabled": "Show HUD",
   "villagercensus.config.generic.comment.hudEnabled": "Show the census HUD while a session is active.",
-  "villagercensus.config.generic.name.hudEnabled": "hudEnabled",
+  "villagercensus.config.generic.name.hudEnabled": "Show HUD",
 
   "villagercensus.config.generic.prettyName.offersTimeoutTicks": "Offers Timeout (ticks)",
   "villagercensus.config.generic.comment.offersTimeoutTicks": "How long to wait for the merchant offers packet before falling back to client data.",
-  "villagercensus.config.generic.name.offersTimeoutTicks": "offersTimeoutTicks",
+  "villagercensus.config.generic.name.offersTimeoutTicks": "Offers Timeout (ticks)",
 
   "villagercensus.config.generic.prettyName.autoSaveDraft": "Auto-save Draft",
   "villagercensus.config.generic.comment.autoSaveDraft": "Save an unfinished session to disk when leaving the world.",
-  "villagercensus.config.generic.name.autoSaveDraft": "autoSaveDraft",
+  "villagercensus.config.generic.name.autoSaveDraft": "Auto-save Draft",
 
   "villagercensus.config.generic.prettyName.debugLog": "Debug Logging",
   "villagercensus.config.generic.comment.debugLog": "Print extra debug information to the game log.",
-  "villagercensus.config.generic.name.debugLog": "debugLog",
+  "villagercensus.config.generic.name.debugLog": "Debug Logging",
 
   "villagercensus.config.hotkeys.prettyName.openConfigGui": "Open Config GUI",
   "villagercensus.config.hotkeys.comment.openConfigGui": "Open the Villager Census configuration screen.",
-  "villagercensus.config.hotkeys.name.openConfigGui": "openConfigGui",
+  "villagercensus.config.hotkeys.name.openConfigGui": "Open Config GUI",
 
   "villagercensus.config.hotkeys.prettyName.toggleStats": "Pause/Resume Statistics",
   "villagercensus.config.hotkeys.comment.toggleStats": "Pause or resume right-click statistics for the current session.",
-  "villagercensus.config.hotkeys.name.toggleStats": "toggleStats",
+  "villagercensus.config.hotkeys.name.toggleStats": "Pause/Resume Statistics",
 
   "villagercensus.config.hotkeys.prettyName.undoLast": "Undo Last Entry",
   "villagercensus.config.hotkeys.comment.undoLast": "Undo the most recent successful record or update.",
-  "villagercensus.config.hotkeys.name.undoLast": "undoLast",
+  "villagercensus.config.hotkeys.name.undoLast": "Undo Last Entry",
 
   "villagercensus.message.name_required": "You must give the census a name.",
   "villagercensus.message.already_running": "A census is already running. Use /census stop or /census abort first.",

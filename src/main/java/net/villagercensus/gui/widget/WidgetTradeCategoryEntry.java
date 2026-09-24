@@ -6,6 +6,7 @@ import fi.dy.masa.malilib.gui.widgets.WidgetListEntryBase;
 import fi.dy.masa.malilib.render.GuiContext;
 import fi.dy.masa.malilib.render.RenderUtils;
 import net.villagercensus.trade.TradeCategory;
+import net.villagercensus.util.Names;
 
 public class WidgetTradeCategoryEntry extends WidgetListEntryBase<TradeCategory>
 {
@@ -53,12 +54,12 @@ public class WidgetTradeCategoryEntry extends WidgetListEntryBase<TradeCategory>
     public static String buildDisplay(TradeCategory category)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(shortId(category.profession)).append(": ").append(category.id);
+        sb.append(Names.professionName(category.profession));
         String summary = tradeSummary(category);
 
         if (!summary.isEmpty())
         {
-            sb.append("  (").append(summary).append(')');
+            sb.append("  ").append(summary);
         }
 
         return sb.toString();
@@ -94,20 +95,9 @@ public class WidgetTradeCategoryEntry extends WidgetListEntryBase<TradeCategory>
                 sb.append('/');
             }
 
-            sb.append(shortId(items.get(i)));
+            sb.append(Names.itemName(items.get(i)));
         }
 
         return sb.toString();
-    }
-
-    private static String shortId(String id)
-    {
-        if (id == null || id.isEmpty())
-        {
-            return "?";
-        }
-
-        int colon = id.indexOf(':');
-        return colon >= 0 ? id.substring(colon + 1) : id;
     }
 }
