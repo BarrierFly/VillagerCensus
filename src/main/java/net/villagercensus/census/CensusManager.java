@@ -250,14 +250,19 @@ public class CensusManager
             return StringUtils.translate("villagercensus.message.not_running");
         }
 
-        return this.session.rawName + " @ " + this.session.dimension
-                + " | count=" + this.session.totalCount()
-                + " | professions=" + this.session.professionCounts().size()
-                + " | babies=" + this.session.babyCount()
-                + " | paused=" + this.session.paused
-                + " | pending=" + (this.pending != null)
-                + " | pendingUpdate=" + (this.pendingUpdate != null);
+        return StringUtils.translate("villagercensus.status.line",
+                this.session.rawName, this.session.dimension,
+                this.session.totalCount(), this.session.professionCounts().size(), this.session.babyCount(),
+                yesNo(this.session.paused),
+                yesNo(this.pending != null),
+                yesNo(this.pendingUpdate != null));
     }
+
+    private static String yesNo(boolean value)
+    {
+        return StringUtils.translate(value ? "villagercensus.status.yes" : "villagercensus.status.no");
+    }
+
 
     // ------------------------------------------------------------------
     // Draft resume
@@ -679,7 +684,7 @@ public class CensusManager
             {
                 for (String line : record.diffLines(old))
                 {
-                    Messages.info( line);
+                    Messages.infoText(line);
                 }
             }
         }

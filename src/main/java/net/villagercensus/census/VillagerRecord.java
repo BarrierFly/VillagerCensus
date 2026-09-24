@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import fi.dy.masa.malilib.util.StringUtils;
+
 public class VillagerRecord
 {
     public UUID uuid;
@@ -124,46 +126,47 @@ public class VillagerRecord
 
         if (other == null)
         {
-            lines.add("no previous record");
+            lines.add(StringUtils.translate("villagercensus.diff.no_previous"));
             return lines;
         }
 
         if (!Objects.equals(this.professionId, other.professionId))
         {
-            lines.add("profession: " + other.professionId + " -> " + this.professionId);
+            lines.add(StringUtils.translate("villagercensus.diff.profession", other.professionId, this.professionId));
         }
         if (this.level != other.level)
         {
-            lines.add("level: " + other.level + " -> " + this.level);
+            lines.add(StringUtils.translate("villagercensus.diff.level", other.level, this.level));
         }
         if (this.hasTraded != other.hasTraded)
         {
-            lines.add("traded: " + other.hasTraded + " -> " + this.hasTraded);
+            lines.add(StringUtils.translate("villagercensus.diff.traded", other.hasTraded, this.hasTraded));
         }
         if (this.baby != other.baby)
         {
-            lines.add("baby: " + other.baby + " -> " + this.baby);
+            lines.add(StringUtils.translate("villagercensus.diff.baby", other.baby, this.baby));
         }
         if (Float.compare(this.health, other.health) != 0)
         {
-            lines.add("health: " + other.health + " -> " + this.health);
+            lines.add(StringUtils.translate("villagercensus.diff.health", other.health, this.health));
         }
         if (this.blockX != other.blockX || this.blockY != other.blockY || this.blockZ != other.blockZ)
         {
-            lines.add("pos: " + other.blockX + "," + other.blockY + "," + other.blockZ
-                    + " -> " + this.blockX + "," + this.blockY + "," + this.blockZ);
+            lines.add(StringUtils.translate("villagercensus.diff.pos",
+                    other.blockX, other.blockY, other.blockZ, this.blockX, this.blockY, this.blockZ));
         }
         if (!Objects.equals(this.customName, other.customName))
         {
-            lines.add("name: " + other.customName + " -> " + this.customName);
+            lines.add(StringUtils.translate("villagercensus.diff.name", String.valueOf(other.customName),
+                    String.valueOf(this.customName)));
         }
         if (this.hasTradeData != other.hasTradeData)
         {
-            lines.add("trade data: " + other.hasTradeData + " -> " + this.hasTradeData);
+            lines.add(StringUtils.translate("villagercensus.diff.trade_data", other.hasTradeData, this.hasTradeData));
         }
         if (!this.sameTrades(other))
         {
-            lines.add("trades: " + other.trades.size() + " -> " + this.trades.size() + " (changed)");
+            lines.add(StringUtils.translate("villagercensus.diff.trades", other.trades.size(), this.trades.size()));
         }
 
         return lines;

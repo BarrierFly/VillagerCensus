@@ -3,6 +3,7 @@ package net.villagercensus.render;
 import java.util.ArrayList;
 import java.util.List;
 
+import fi.dy.masa.malilib.util.StringUtils;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -71,44 +72,51 @@ public class CensusHud
         {
             if (manager.getDraftTotal() > 0)
             {
-                lines.add("Census draft: " + manager.getDraftName());
-                lines.add("loaded " + manager.getDraftLoaded() + "/" + manager.getDraftTotal());
-                lines.add("/census resume  |  /census discard");
+                lines.add(StringUtils.translate("villagercensus.hud.draft", manager.getDraftName()));
+                lines.add(StringUtils.translate("villagercensus.hud.draft_loaded",
+                        manager.getDraftLoaded(), manager.getDraftTotal()));
+                lines.add(StringUtils.translate("villagercensus.hud.draft_commands"));
             }
 
             return lines;
         }
 
-        lines.add("Census: " + session.rawName + " @ " + session.dimension + (session.paused ? " [paused]" : ""));
-        lines.add("count " + session.totalCount() + " | professions " + session.professionCounts().size()
-                + " | babies " + session.babyCount());
+        lines.add(StringUtils.translate("villagercensus.hud.session", session.rawName, session.dimension)
+                + (session.paused ? StringUtils.translate("villagercensus.hud.paused") : ""));
+        lines.add(StringUtils.translate("villagercensus.hud.count", session.totalCount(),
+                session.professionCounts().size(), session.babyCount()));
 
         if (Configs.Generic.GLOWING_MARKER.getBooleanValue())
         {
-            lines.add("marker: " + (manager.isReverseMarkers() ? "reversed (uncounted glow)" : "normal (counted glow)"));
+            lines.add(StringUtils.translate(manager.isReverseMarkers()
+                    ? "villagercensus.hud.marker_reversed"
+                    : "villagercensus.hud.marker_normal"));
         }
 
         if (manager.getPendingUpdate() != null)
         {
-            lines.add("pending update: right-click again to confirm");
+            lines.add(StringUtils.translate("villagercensus.hud.pending_update"));
         }
 
         if (manager.getVerifyTotal() > 0)
         {
-            lines.add("verify " + manager.getVerifyLoaded() + "/" + manager.getVerifyTotal());
+            lines.add(StringUtils.translate("villagercensus.hud.verify",
+                    manager.getVerifyLoaded(), manager.getVerifyTotal()));
         }
 
         VillagerRecord last = session.getLastTarget();
 
         if (last != null)
         {
-            lines.add(last.baby ? "last: baby" : "last: " + last.professionId + " Lv" + last.level);
-            lines.add("  pos " + last.blockX + "," + last.blockY + "," + last.blockZ
-                    + "  hp " + (int) last.health + "/" + (int) last.maxHealth);
+            lines.add(last.baby
+                    ? StringUtils.translate("villagercensus.hud.last_baby")
+                    : StringUtils.translate("villagercensus.hud.last", last.professionId, last.level));
+            lines.add(StringUtils.translate("villagercensus.hud.pos_hp",
+                    last.blockX, last.blockY, last.blockZ, (int) last.health, (int) last.maxHealth));
 
             if (last.remark != null && !last.remark.isEmpty())
             {
-                lines.add("  remark: " + last.remark);
+                lines.add(StringUtils.translate("villagercensus.hud.remark", last.remark));
             }
         }
 

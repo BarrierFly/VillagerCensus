@@ -21,6 +21,23 @@ public final class Messages
         send(key, 0xFFFFFF, args);
     }
 
+    /**
+     * Sends an already-formatted string (not a translation key) to the action bar.
+     */
+    public static void infoText(String text)
+    {
+        MutableComponent message = Component.literal(text).withColor(0xFFFFFF);
+
+        if (Minecraft.getInstance().level != null)
+        {
+            InfoUtils.sendVanillaMessage(message);
+        }
+        else
+        {
+            Reference.logger().info(text);
+        }
+    }
+
     public static void success(String key, Object... args)
     {
         send(key, 0x55FF55, args);
