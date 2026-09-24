@@ -143,6 +143,23 @@ public class WidgetTradeCategoryEntry extends WidgetListEntryBase<TradeCategory>
                     + StringUtils.translate("villagercensus.trade_kind.variants");
         }
 
+        boolean allBoats = true;
+
+        for (String id : unique)
+        {
+            if (!isBoat(id))
+            {
+                allBoats = false;
+                break;
+            }
+        }
+
+        if (allBoats)
+        {
+            return StringUtils.translate("villagercensus.trade_kind.boat")
+                    + StringUtils.translate("villagercensus.trade_kind.variants");
+        }
+
         String base = stripColor(path(unique.get(0)));
         boolean sameKind = true;
 
@@ -197,6 +214,12 @@ public class WidgetTradeCategoryEntry extends WidgetListEntryBase<TradeCategory>
     {
         String p = path(itemId);
         return p.equals("map") || p.equals("filled_map") || p.endsWith("_map");
+    }
+
+    private static boolean isBoat(String itemId)
+    {
+        String p = path(itemId);
+        return p.endsWith("_boat") || p.endsWith("_raft");
     }
 
     private static String stripColor(String p)

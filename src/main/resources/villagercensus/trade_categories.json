@@ -754,17 +754,6 @@
     "profession": "minecraft:fisherman",
     "categories": [
       {
-        "id": "buy_acacia_boat",
-        "label": "buy_acacia_boat",
-        "cost1": [
-          "minecraft:acacia_boat"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
         "id": "buy_coal",
         "label": "buy_coal",
         "cost1": [
@@ -800,36 +789,24 @@
         ]
       },
       {
-        "id": "buy_dark_oak_boat",
-        "label": "buy_dark_oak_boat",
-        "cost1": [
-          "minecraft:dark_oak_boat"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
-        "id": "buy_jungle_boat",
-        "label": "buy_jungle_boat",
-        "cost1": [
-          "minecraft:jungle_boat"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
-        ]
-      },
-      {
         "id": "buy_oak_boat",
         "label": "buy_oak_boat",
         "cost1": [
-          "minecraft:oak_boat"
+          "minecraft:acacia_boat",
+          "minecraft:dark_oak_boat",
+          "minecraft:jungle_boat",
+          "minecraft:oak_boat",
+          "minecraft:spruce_boat"
         ],
         "cost2": [],
         "result": [
           "minecraft:emerald"
+        ],
+        "aliases": [
+          "buy_acacia_boat",
+          "buy_dark_oak_boat",
+          "buy_jungle_boat",
+          "buy_spruce_boat"
         ]
       },
       {
@@ -865,17 +842,6 @@
         ],
         "result": [
           "minecraft:cooked_salmon"
-        ]
-      },
-      {
-        "id": "buy_spruce_boat",
-        "label": "buy_spruce_boat",
-        "cost1": [
-          "minecraft:spruce_boat"
-        ],
-        "cost2": [],
-        "result": [
-          "minecraft:emerald"
         ]
       },
       {

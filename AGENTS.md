@@ -63,8 +63,9 @@ command/    Fabric client commands
 census/     session state machine, records, undo stack, interaction manager
 trade/      trade category catalog + matching
 data/       report writer, draft storage, world-id/filename helpers
-mixin/      interact / offers / openScreen hooks
+mixin/      interact / offers / openScreen / entity-data hooks
 render/     HUD (Fabric HUD API: HudElementRegistry for 26.1+, HudRenderCallback below)
+gui/        config screen + searchable trade category picker
 config/     malilib config options and hotkeys
 event/      malilib init, keybind callbacks, world load listener
 util/       version shims and name formatting
@@ -77,11 +78,13 @@ Interaction contract (do not break):
 - `handleMerchantOffers` **never calls `ci.cancel()`** (offers-hud compatibility).
 - `handleOpenScreen` cancels only when a matching pending target exists and the type is
   `MenuType.MERCHANT`.
-- **Threading:** `handleMerchantOffers` / `handleOpenScreen` run on the Netty network thread.
-  They must only touch thread-safe state (the offers queue, `volatile` pending/tick fields)
-  and must never call malilib message/render helpers or mutate entities there. All record
-  building, messaging and entity access happens in `CensusManager.onClientTick` (client
-  thread), which drains the offers queue.
+- `handleSetEntityData` only decodes the shared-flags byte to track glow from non-census
+  sources; it never mutates anything.
+- **Threading:** `handleMerchantOffers` / `handleOpenScreen` / `handleSetEntityData` run on the
+  Netty network thread. They must only touch thread-safe state (the offers/base-glow queues,
+  `volatile` pending/tick flags) and must never call malilib message/render helpers or mutate
+  entities there. All record building, messaging and entity access happens in
+  `CensusManager.onClientTick` (client thread), which drains the queues.
 
 ## Markers, HUD and messages
 
@@ -89,10 +92,16 @@ Interaction contract (do not break):
   the shared flag and is a no-op client-side. `CensusManager.setGlow` calls the invoker mixin
   `IMixinEntity.villagercensus$setSharedFlag(6, value)` to toggle the glowing shared flag
   directly, and `maintainMarkers` re-applies it every tick (server data updates can clear it).
+- The visible glow is `baseGlow || censusGlow`: `baseGlow` is the glow coming from any other
+  source, captured from server `ClientboundSetEntityDataPacket`s (shared-flags byte, item id 0,
+  bit 6) and applied on the client thread in `drainBaseUpdates`. `/census reverse` flips which
+  villagers get the census glow (counted vs. uncounted) and the HUD shows the mode; on stop /
+  abort / world exit the base glow is restored, so other sources are never clobbered.
 - Feedback uses `util/Messages` which sends vanilla action-bar text, avoiding malilib's
   opaque on-screen message overlay.
 - HUD is drawn through the Fabric HUD API (`HudElementRegistry` on 26.1+, `HudRenderCallback`
-  below) with no background. It shows draft status when no session is active.
+  below) with no background. It shows draft status when no session is active, and the current
+  marker mode while a session is active.
 - ModMenu integration is `compat/modmenu/ModMenuImpl` (optional; the `modmenu` entrypoint is
   only read when ModMenu is installed).
 
@@ -109,7 +118,10 @@ Interaction contract (do not break):
 
 - `assets/villagercensus/lang/{en_us,zh_cn}.json` — follow game language for messages and
   reports. Config keys follow malilib's `ConfigBase.apply(prefix)` scheme:
-  `<prefix>.prettyName.<name>`, `.comment.<name>`, `.name.<name>`.
+  `<prefix>.prettyName.<name>`, `.comment.<name>`, `.name.<name>`. **The config GUI label is
+  `<prefix>.name.<name>`** (via `getTranslatedName`), so it must hold the real display name;
+  `.prettyName.<name>` is used for keybind/toggle messages. Keep both languages in sync and
+  avoid literal `%`.
 - `villagercensus/trade_categories.json` — semantic trade category catalog loaded at runtime.
   It was generated from the decompiled vanilla trade table in the `guardian` repository
   (branch `mojmap/vineflower`):
@@ -119,8 +131,12 @@ Interaction contract (do not break):
     with `ColorCollection` loops and `create*` helper methods, and assigns trades to
     professions through `data/minecraft/tags/villager_trade/<profession>/level_*.json`
     (recursively including `common_smith`).
-  - Both versions are fully parsed and merged (303 categories, 0 unresolved). Regenerate with
-    the parser scripts (see commit history) via `git -C <guardian> show <commit>:<path>`.
+  - Both versions are fully parsed and merged (303 categories, 0 unresolved), then normalized
+    to 154 by `tools/catalog/normalize_catalog.py` (run it after `merge_catalog.py`). The
+    normalization collapses synonymous variants (colour variants, cost-order swaps, plain vs.
+    explorer maps, boat wood types) and records the replaced ids in each entry's `aliases`
+    list, which the selection matcher accepts. Regenerate with the parser scripts (see commit
+    history) via `git -C <guardian> show <commit>:<path>`.
 
 ## Commits
 

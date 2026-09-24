@@ -39,8 +39,17 @@ def is_map(item_id):
     return p == 'map' or p == 'filled_map' or p.endswith('_map')
 
 
+def is_boat(item_id):
+    p = path(item_id)
+    return p.endswith('_boat') or p.endswith('_raft')
+
+
 def item_kind(item_id):
-    return 'map' if is_map(item_id) else strip_color(item_id)
+    if is_map(item_id):
+        return 'map'
+    if is_boat(item_id):
+        return 'boat'
+    return strip_color(item_id)
 
 
 def key_for(cat):
@@ -49,7 +58,7 @@ def key_for(cat):
     if result_kinds == ('map',):
         return ('map',)
 
-    cost_kinds = tuple(sorted({strip_color(c) for c in (set(cat['cost1']) | set(cat['cost2']))}))
+    cost_kinds = tuple(sorted({item_kind(c) for c in (set(cat['cost1']) | set(cat['cost2']))}))
     return (cost_kinds, result_kinds)
 
 

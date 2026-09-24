@@ -42,6 +42,7 @@ offers are captured and counted.
 
 ```
 /census start <name>    start a census / 开始普查
+/census fork <name>     fork an existing draft/report and keep counting / fork 已有记录并继续统计
 /census stop            finish and write the report / 结束并输出报告
 /census abort           discard the session / 放弃会话
 /census undo            undo the last entry / 撤销上一次
@@ -50,6 +51,7 @@ offers are captured and counted.
 /census resume          continue the found draft / 续接找到的半成品
 /census discard         archive the found draft / 归档半成品
 /census pause           pause/resume statistics / 暂停或恢复统计
+/census reverse         toggle whether counted or uncounted villagers glow / 切换已统计/未统计发光
 /census help            show help / 显示帮助
 ```
 
@@ -71,9 +73,12 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
   / held item used to right-click (registry id).
 - `recordAllTrades` — 记录全部交易；关闭时只记录被选中的类别
   / record every trade; when off only selected categories are recorded.
-- `selectedCategories` — 上述关闭时用于筛选的类别 id 列表
-  / category ids used when the above is off.
-- `glowingMarker` — 给已统计村民加发光描边 / mark recorded villagers with Glowing.
+- `selectedCategories` — 上述关闭时用于筛选的类别键（`职业/id`）；建议用配置界面的
+  “选择交易类别…”按钮编辑，界面已把同义变体（颜色、船、探险地图、价格顺序等）合并为一项
+  / category keys (`profession/id`) used when the above is off; edit them with the config
+  screen's "Select Trade Categories..." picker, which collapses variant trades into one entry.
+- `glowingMarker` — 给已统计村民加发光描边；`/census reverse` 可反转为“未统计发光”
+  / mark recorded villagers with Glowing; `/census reverse` flips it to mark uncounted ones.
 - `recordCoordinates` — 只记录村民自身坐标 / record the villager's own position only.
 - `outputJson` — 额外输出 JSON 报告 / also write a JSON report.
 - `hudEnabled` — 显示普查 HUD / show the census HUD.
@@ -88,13 +93,14 @@ Hotkeys (all default unbound): `openConfigGui`, `toggleStats`, `undoLast`.
 ## HUD / 界面显示
 
 While a session is running the HUD shows the session name and dimension, the villager count,
-profession count, baby count, any pending update, the `verify X/N` progress after resuming,
-and the last recorded villager (profession, position, health, remark). It is drawn through
-the Fabric HUD API and stays visible until you stop or abort; there is no background box.
+profession count, baby count, the current marker mode (`/census reverse`), any pending update,
+the `verify X/N` progress after resuming, and the last recorded villager (profession, position,
+health, remark). It is drawn through the Fabric HUD API and stays visible until you stop or
+abort; there is no background box.
 
-普查进行中 HUD 会显示：会话名与维度、已统计数量、职业数、幼年数、待确认更新、续普查时的
-`verify X/N` 复核进度，以及最近一只村民的职业、坐标、血量与备注。HUD 通过 Fabric HUD API
-绘制，会一直显示到 stop/abort，且没有背景色块。
+普查进行中 HUD 会显示：会话名与维度、已统计数量、职业数、幼年数、当前标记模式
+（`/census reverse`）、待确认更新、续普查时的 `verify X/N` 复核进度，以及最近一只村民的
+职业、坐标、血量与备注。HUD 通过 Fabric HUD API 绘制，会一直显示到 stop/abort，且没有背景色块。
 
 ## How it works / 工作原理
 
@@ -133,11 +139,18 @@ the Fabric HUD API and stays visible until you stop or abort; there is no backgr
 
 ## Trade category catalog / 交易类别目录
 
-`villagercensus/trade_categories.json` 覆盖全部 13 个职业、共 **303** 个类别，由反编译的
-原版交易表生成并合并 1.21.11 与 26.3（未命中的交易回退为物品三元组标签）。
+`villagercensus/trade_categories.json` 覆盖全部 13 个职业、共 **154** 个类别，由反编译的
+原版交易表生成并合并 1.21.11 与 26.3，再经 `tools/catalog/normalize_catalog.py` 归一化
+（未命中的交易回退为物品三元组标签）。归一化会合并同义变体：彩色物品（旗帜、羊毛、地毯、
+床、染料、陶瓦、带釉陶瓦、蜡烛）、按价格顺序互换的同一交易（制箭师的箭/绿宝石）、以及普通
+地图与各生态探险地图、各材质船等。被合并掉的旧类别 id 作为别名保留，旧选择继续生效。
 
-The catalog is generated from the decompiled vanilla villager trades and merged across
-1.21.11 and 26.3; trades that match no entry fall back to an item-triple label.
+The catalog is generated from the decompiled vanilla villager trades, merged across 1.21.11
+and 26.3, then normalized by `tools/catalog/normalize_catalog.py`; trades that match no entry
+fall back to an item-triple label. Normalization collapses synonymous variants (colour variants
+such as banners/wool/carpet/bed/dye/terracotta/glazed terracotta/candles, cost-order swaps such
+as the fletcher's arrow/emerald, plain vs. explorer maps, and boat wood types). Replaced ids are
+kept as aliases so older selections keep working.
 
 ## Build / 构建
 

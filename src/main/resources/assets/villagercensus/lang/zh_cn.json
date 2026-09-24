@@ -18,6 +18,7 @@
   "villagercensus.trade_kind.glazed_terracotta": "带釉陶瓦",
   "villagercensus.trade_kind.candle": "蜡烛",
   "villagercensus.trade_kind.map": "地图",
+  "villagercensus.trade_kind.boat": "船",
 
   "villagercensus.config.generic.prettyName.triggerItem": "触发物品",
   "villagercensus.config.generic.comment.triggerItem": "用于右键村民的触发物品（注册名）。默认：minecraft:enchanted_book",
