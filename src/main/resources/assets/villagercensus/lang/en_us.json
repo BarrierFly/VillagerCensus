@@ -2,6 +2,7 @@
   "villagercensus.gui.title.configs": "Villager Census Configuration",
   "villagercensus.gui.title.trade_categories": "Select Trade Categories",
   "villagercensus.gui.button.trade_categories": "Select Trade Categories...",
+  "villagercensus.gui.hint.record_all_trades": "Record All Trades is enabled. The selected categories take effect only after you turn it off.",
   "villagercensus.gui.button.select_all": "Select Filtered",
   "villagercensus.gui.button.clear": "Clear",
   "villagercensus.hotkeys.category": "Villager Census",

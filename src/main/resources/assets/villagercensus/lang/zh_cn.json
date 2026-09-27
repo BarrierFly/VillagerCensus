@@ -2,6 +2,7 @@
   "villagercensus.gui.title.configs": "村民普查 配置",
   "villagercensus.gui.title.trade_categories": "选择交易类别",
   "villagercensus.gui.button.trade_categories": "选择交易类别…",
+  "villagercensus.gui.hint.record_all_trades": "已开启“记录全部交易”，选定的交易类别需在关闭该选项后才会生效。",
   "villagercensus.gui.button.select_all": "选择筛选结果",
   "villagercensus.gui.button.clear": "清空",
   "villagercensus.hotkeys.category": "村民普查",

@@ -9,6 +9,7 @@ import fi.dy.masa.malilib.gui.GuiListBase;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
+import fi.dy.masa.malilib.render.GuiContext;
 import fi.dy.masa.malilib.util.StringUtils;
 import net.villagercensus.config.Configs;
 import net.villagercensus.gui.widget.WidgetListTradeCategories;
@@ -41,6 +42,18 @@ public class GuiTradeCategories extends GuiListBase<TradeCategory, WidgetTradeCa
     protected WidgetListTradeCategories createListWidget(int listX, int listY)
     {
         return new WidgetListTradeCategories(listX, listY, this.getBrowserWidth(), this.getBrowserHeight());
+    }
+
+    @Override
+    public void drawContents(GuiContext ctx, int mouseX, int mouseY, float partialTicks)
+    {
+        super.drawContents(ctx, mouseX, mouseY, partialTicks);
+
+        if (Configs.Generic.RECORD_ALL_TRADES.getBooleanValue())
+        {
+            String hint = StringUtils.translate("villagercensus.gui.hint.record_all_trades");
+            this.drawStringWithShadow(ctx, hint, 12, 20, 0xFFFFAA00);
+        }
     }
 
     @Override
