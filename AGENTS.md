@@ -86,6 +86,23 @@ Interaction contract (do not break):
   entities there. All record building, messaging and entity access happens in
   `CensusManager.onClientTick` (client thread), which drains the queues.
 
+## Reports, drafts and fork
+
+- `/census stop` always writes both `<name>_<dim>_<stamp>.census.txt` and `.census.json`. The
+  JSON is the machine-readable sidecar and the fork source; the old `outputJson` option was
+  removed.
+- `/census fork <name>` matches the recorded session name of any draft or `.census.json` in the
+  current world (not the file name prefix). Same-dimension sources are preferred; a
+  cross-dimension source forks anyway and emits `villagercensus.message.fork_cross_dimension`.
+  The source file is never modified.
+- A professed adult villager whose offers never arrive before `offersTimeoutTicks` is recorded
+  as `NO_TRADE_DATA` and warns with `villagercensus.message.trade_data_failed` (unemployed and
+  nitwit villagers do not warn). The `DataStatus` is the single source of the report's status
+  line; do not add a second weak-association field to the header.
+- Enchantment max levels call `Enchantment.getMaxLevel()` directly. Do **not** reintroduce a
+  reflection-by-name lookup: production remapping does not rewrite reflection strings, so it
+  silently returns `-1`.
+
 ## Markers, HUD and messages
 
 - Glowing markers: **do not** use `Entity#setGlowingTag` on the client — it only round-trips

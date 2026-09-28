@@ -42,7 +42,7 @@ offers are captured and counted.
 
 ```
 /census start <name>    start a census / 开始普查
-/census fork <name>     fork an existing draft/report and keep counting / fork 已有记录并继续统计
+/census fork <name>     fork a draft/report by session name and keep counting / 按会话名称 fork 已有记录并继续统计
 /census stop            finish and write the report / 结束并输出报告
 /census abort           discard the session / 放弃会话
 /census undo            undo the last entry / 撤销上一次
@@ -59,8 +59,11 @@ offers are captured and counted.
 
 ```
 <minecraft>/villager_census/<world>/<name>_<dimension>_<yyyyMMdd_HHmmss>.census.txt
-<minecraft>/villager_census/<world>/<name>_<dimension>_<yyyyMMdd_HHmmss>.census.json   (optional / 可选)
+<minecraft>/villager_census/<world>/<name>_<dimension>_<yyyyMMdd_HHmmss>.census.json
 <minecraft>/villager_census/<world>/<name>_<dimension>.census.draft.json               (draft / 半成品)
+
+Every `/census stop` writes both the TXT and the JSON report; the JSON is what `/census fork`
+reads back. / 每次 `/census stop` 都会同时写出 TXT 与 JSON 报告，JSON 供 `/census fork` 读回。
 ```
 
 ## Configuration / 配置
@@ -80,7 +83,6 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
 - `glowingMarker` — 给已统计村民加发光描边；`/census reverse` 可反转为“未统计发光”
   / mark recorded villagers with Glowing; `/census reverse` flips it to mark uncounted ones.
 - `recordCoordinates` — 只记录村民自身坐标 / record the villager's own position only.
-- `outputJson` — 额外输出 JSON 报告 / also write a JSON report.
 - `hudEnabled` — 显示普查 HUD / show the census HUD.
 - `offersTimeoutTicks` — 等待交易包的超时，超时后回退客户端数据
   / packet wait timeout before falling back to client data.
@@ -125,8 +127,16 @@ abort; there is no background box.
 - **与 offers-hud 共存。** 两者注入同样的方法。本 Mod 从不取消 offers 包，因此 offers-hud
   的预览不受影响；两者可能各发一次关窗包，无害。
   / This mod never cancels the offers packet, so offers-hud previews keep working.
-- 附魔最高等级通过反射获取，个别情况下可能取不到（不显示 `等级/最高`）。
-  / Enchantment max level is resolved reflectively and may be unavailable (`-1`).
+- `/census fork <name>` 按记录里的会话名称匹配半成品或已完成报告（不再要求当前维度一致）；
+  优先同维度来源，只匹配到跨维度来源时照常开始并在聊天栏警告，报告内的原有村民记录不受影响。
+  / `/census fork <name>` matches a draft or completed report by its recorded session name
+  (the current dimension is no longer required); a same-dimension source is preferred, and a
+  cross-dimension source still starts the fork with an action-bar warning.
+- 有职业的成年村民若在 `offersTimeoutTicks` 内没有收到交易包，会在记录时发出警告并标记
+  “未取得交易数据”，其余客户端字段照常记录。
+  / If a professed adult villager's offers do not arrive within `offersTimeoutTicks`, a warning
+  is shown and the record is marked "no trade data"; the other client-side fields are still
+  recorded.
 - 续普查为命令式：退出世界会结束内存中的会话（未完成会话已存为半成品），重进世界**不会**
   自动继续；用 `/census resume` 重新载入，之后会对已加载村民复核（HUD 显示 `verify X/N`）
   并重新施加发光标记。

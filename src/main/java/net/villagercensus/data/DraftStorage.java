@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -112,19 +111,27 @@ public class DraftStorage
         return null;
     }
 
-    /**
-     * Finds the source for a fork: the exact draft first, then the newest completed JSON report
-     * whose base name matches {@code <safeName>_<dimension>}.
-     */
-    public static Path findForkSource(String worldId, String dimension, String safeName)
+    public static final class ForkSource
     {
-        Path draft = findDraft(worldId, dimension, safeName);
+        public final Path path;
+        public final CensusSession session;
+        public final boolean crossDimension;
 
-        if (draft != null)
+        ForkSource(Path path, CensusSession session, boolean crossDimension)
         {
-            return draft;
+            this.path = path;
+            this.session = session;
+            this.crossDimension = crossDimension;
         }
+    }
 
+    /**
+     * Finds a fork source by the session name it recorded (draft or completed report). A source
+     * in the current dimension is preferred; if only a source recorded in another dimension
+     * exists, it is returned with {@link ForkSource#crossDimension} set.
+     */
+    public static ForkSource findForkSource(String worldId, String dimension, String rawName)
+    {
         Path dir = ReportWriter.reportDirectory(worldId);
 
         if (!Files.isDirectory(dir))
@@ -132,22 +139,38 @@ public class DraftStorage
             return null;
         }
 
-        String prefix = safeName + "_" + WorldId.safeDimension(dimension) + "_";
-        String suffix = ".census.json";
-        List<Path> matches = new ArrayList<>();
+        String safeName = WorldId.safe(rawName);
+        String safeDimension = WorldId.safeDimension(dimension);
+        String prefix = safeName + "_";
+        List<Path> candidates = new ArrayList<>(findDrafts(worldId));
 
         try (Stream<Path> stream = Files.list(dir))
         {
-            stream.filter(p ->
-            {
-                String name = p.getFileName().toString();
-                return name.startsWith(prefix) && name.endsWith(suffix);
-            }).forEach(matches::add);
+            stream.filter(p -> p.getFileName().toString().endsWith(".census.json")).forEach(candidates::add);
         }
         catch (IOException e)
         {
             Reference.logger().warn("Failed to list census reports", e);
-            return null;
+        }
+
+        List<ForkSource> matches = new ArrayList<>();
+
+        for (Path candidate : candidates)
+        {
+            if (!candidate.getFileName().toString().startsWith(prefix))
+            {
+                continue;
+            }
+
+            CensusSession session = load(candidate);
+
+            if (session == null || !matchesName(session, rawName, safeName))
+            {
+                continue;
+            }
+
+            boolean sameDimension = safeDimension.equals(WorldId.safeDimension(session.dimension));
+            matches.add(new ForkSource(candidate, session, !sameDimension));
         }
 
         if (matches.isEmpty())
@@ -155,8 +178,42 @@ public class DraftStorage
             return null;
         }
 
-        matches.sort(Comparator.comparing(p -> p.getFileName().toString()));
-        return matches.get(matches.size() - 1);
+        // Same dimension first, then drafts, then the newest file name.
+        matches.sort((a, b) ->
+        {
+            int cmp = Boolean.compare(a.crossDimension, b.crossDimension);
+
+            if (cmp != 0)
+            {
+                return cmp;
+            }
+
+            cmp = Boolean.compare(!isDraft(a.path), !isDraft(b.path));
+
+            if (cmp != 0)
+            {
+                return cmp;
+            }
+
+            return b.path.getFileName().toString().compareTo(a.path.getFileName().toString());
+        });
+
+        return matches.get(0);
+    }
+
+    private static boolean matchesName(CensusSession session, String rawName, String safeName)
+    {
+        if (session.safeName != null && session.safeName.equals(safeName))
+        {
+            return true;
+        }
+
+        return session.rawName != null && session.rawName.equals(rawName.trim());
+    }
+
+    private static boolean isDraft(Path file)
+    {
+        return file.getFileName().toString().endsWith(DRAFT_SUFFIX);
     }
 
     public static boolean delete(Path file)

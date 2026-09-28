@@ -40,6 +40,7 @@ import net.villagercensus.mixin.IMixinEntity;
 import net.villagercensus.trade.TradeCatalog;
 import net.villagercensus.trade.TradeCategory;
 import net.villagercensus.util.Messages;
+import net.villagercensus.util.Names;
 
 public class CensusManager
 {
@@ -150,7 +151,7 @@ public class CensusManager
         }
 
         this.session.endTime = System.currentTimeMillis();
-        java.nio.file.Path report = ReportWriter.writeReport(this.session, Configs.Generic.OUTPUT_JSON.getBooleanValue());
+        java.nio.file.Path report = ReportWriter.writeReport(this.session);
         java.nio.file.Path draft = DraftStorage.findDraft(this.session.worldId, this.session.dimension, this.session.safeName);
 
         if (draft != null)
@@ -378,8 +379,10 @@ public class CensusManager
     // ------------------------------------------------------------------
 
     /**
-     * Creates a new active session from an existing draft or completed JSON report in the current
-     * world and dimension, then starts counting immediately. The source record is left untouched.
+     * Creates a new active session from an existing draft or completed report whose recorded
+     * session name matches, then starts counting immediately. A same-dimension source is
+     * preferred; a cross-dimension match starts the fork anyway with a warning. The source is
+     * left untouched.
      */
     public boolean forkSession(String rawName)
     {
@@ -404,7 +407,7 @@ public class CensusManager
         String sourceName = rawName.trim();
         String worldId = WorldId.current();
         String dimension = currentDimension();
-        java.nio.file.Path source = DraftStorage.findForkSource(worldId, dimension, WorldId.safe(sourceName));
+        DraftStorage.ForkSource source = DraftStorage.findForkSource(worldId, dimension, sourceName);
 
         if (source == null)
         {
@@ -412,20 +415,7 @@ public class CensusManager
             return false;
         }
 
-        CensusSession base = DraftStorage.load(source);
-
-        if (base == null)
-        {
-            Messages.error( "villagercensus.message.fork_unreadable", source.getFileName().toString());
-            return false;
-        }
-
-        if (!WorldId.safeDimension(dimension).equals(WorldId.safeDimension(base.dimension)))
-        {
-            Messages.error( "villagercensus.message.dimension_mismatch");
-            return false;
-        }
-
+        CensusSession base = source.session;
         String baseName = base.rawName != null && !base.rawName.isEmpty() ? base.rawName : sourceName;
         String display = baseName + " (fork)";
         CensusSession fork = new CensusSession(display, WorldId.safe(display), worldId, dimension, System.currentTimeMillis());
@@ -460,6 +450,12 @@ public class CensusManager
         this.verifyLoaded = 0;
 
         Messages.success( "villagercensus.message.fork_started", display, fork.totalCount(), dimension);
+
+        if (source.crossDimension)
+        {
+            Messages.warn( "villagercensus.message.fork_cross_dimension", base.dimension);
+        }
+
         return true;
     }
 
@@ -665,6 +661,21 @@ public class CensusManager
         return true;
     }
 
+    private void warnMissingTradeData(VillagerRecord record)
+    {
+        if (record == null || record.baby || record.hasTradeData || record.professionId == null)
+        {
+            return;
+        }
+
+        if (record.professionId.equals("minecraft:none") || record.professionId.equals("minecraft:nitwit"))
+        {
+            return;
+        }
+
+        Messages.warn( "villagercensus.message.trade_data_failed", Names.profession(record.professionId));
+    }
+
     private void commitRecord(Villager villager, VillagerRecord record, boolean restat)
     {
         if (restat)
@@ -782,6 +793,7 @@ public class CensusManager
                         }
                     }
 
+                    this.warnMissingTradeData(record);
                     this.commitRecord(villager, record, restat);
                 }
             }
@@ -899,7 +911,11 @@ public class CensusManager
             {
                 Holder<Enchantment> holder = entry.getKey();
                 String id = holder.unwrapKey().map(key -> key.identifier().toString()).orElse("?");
-                list.add(new EnchantEntry(id, entry.getValue(), resolveMaxLevel(holder.value())));
+
+                // Direct call: Enchantment.getMaxLevel() exists in both target versions. A
+                // reflective lookup by string name breaks in production because remapping does
+                // not rewrite reflection names.
+                list.add(new EnchantEntry(id, entry.getValue(), holder.value().getMaxLevel()));
             }
         }
         catch (Exception e)
@@ -908,45 +924,6 @@ public class CensusManager
         }
 
         return list;
-    }
-
-    /**
-     * Reflective max-level lookup so the code compiles across mappings where the accessor
-     * moved between {@code Enchantment} and {@code Enchantment.EnchantmentDefinition}.
-     */
-    private static int resolveMaxLevel(Enchantment enchantment)
-    {
-        for (String method : new String[] { "getMaxLevel", "maxLevel" })
-        {
-            try
-            {
-                Object value = enchantment.getClass().getMethod(method).invoke(enchantment);
-
-                if (value instanceof Integer level)
-                {
-                    return level;
-                }
-            }
-            catch (Throwable ignored)
-            {
-            }
-        }
-
-        try
-        {
-            Object definition = enchantment.getClass().getMethod("definition").invoke(enchantment);
-            Object value = definition.getClass().getMethod("maxLevel").invoke(definition);
-
-            if (value instanceof Integer level)
-            {
-                return level;
-            }
-        }
-        catch (Throwable ignored)
-        {
-        }
-
-        return -1;
     }
 
     private static String itemId(ItemStack stack)

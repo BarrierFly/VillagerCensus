@@ -31,7 +31,6 @@ public class Configs implements IConfigHandler
         public static final ConfigStringList SELECTED_CATEGORIES = new ConfigStringList("selectedCategories", ImmutableList.of()).apply(GENERIC_KEY);
         public static final ConfigBoolean GLOWING_MARKER = new ConfigBoolean("glowingMarker", true).apply(GENERIC_KEY);
         public static final ConfigBoolean RECORD_COORDINATES = new ConfigBoolean("recordCoordinates", true).apply(GENERIC_KEY);
-        public static final ConfigBoolean OUTPUT_JSON = new ConfigBoolean("outputJson", false).apply(GENERIC_KEY);
         public static final ConfigBoolean HUD_ENABLED = new ConfigBoolean("hudEnabled", true).apply(GENERIC_KEY);
         public static final ConfigInteger OFFERS_TIMEOUT = new ConfigInteger("offersTimeoutTicks", 10, 1, 200).apply(GENERIC_KEY);
         public static final ConfigBoolean AUTO_SAVE_DRAFT = new ConfigBoolean("autoSaveDraft", true).apply(GENERIC_KEY);
@@ -43,7 +42,6 @@ public class Configs implements IConfigHandler
                 SELECTED_CATEGORIES,
                 GLOWING_MARKER,
                 RECORD_COORDINATES,
-                OUTPUT_JSON,
                 HUD_ENABLED,
                 OFFERS_TIMEOUT,
                 AUTO_SAVE_DRAFT,

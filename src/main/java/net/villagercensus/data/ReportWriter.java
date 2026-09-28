@@ -41,7 +41,7 @@ public class ReportWriter
         return session.safeName + "_" + WorldId.safeDimension(session.dimension);
     }
 
-    public static Path writeReport(CensusSession session, boolean json)
+    public static Path writeReport(CensusSession session)
     {
         Path dir = reportDirectory(session.worldId);
 
@@ -52,11 +52,10 @@ public class ReportWriter
             Path txt = dir.resolve(baseName(session) + "_" + stamp + ".census.txt");
             writeText(session, txt);
 
-            if (json)
-            {
-                Path jsonPath = dir.resolve(baseName(session) + "_" + stamp + ".census.json");
-                Files.writeString(jsonPath, toJson(session), StandardCharsets.UTF_8);
-            }
+            // The JSON report is always written: /census fork rebuilds a session from it, so a
+            // completed report must stay forkable regardless of user configuration.
+            Path jsonPath = dir.resolve(baseName(session) + "_" + stamp + ".census.json");
+            Files.writeString(jsonPath, toJson(session), StandardCharsets.UTF_8);
 
             return txt;
         }
@@ -146,11 +145,6 @@ public class ReportWriter
         if (record.status != null)
         {
             header.append(" | ").append(StringUtils.translate("villagercensus.report.status." + record.status.getId()));
-        }
-
-        if (record.weakAssociation)
-        {
-            header.append(" | ").append(StringUtils.translate("villagercensus.report.weak"));
         }
 
         writer.write(header.toString());
