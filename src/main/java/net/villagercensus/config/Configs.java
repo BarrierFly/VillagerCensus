@@ -27,24 +27,32 @@ public class Configs implements IConfigHandler
     public static class Generic
     {
         public static final ConfigString TRIGGER_ITEM = new ConfigString("triggerItem", "minecraft:enchanted_book").apply(GENERIC_KEY);
+        public static final ConfigStringList TRIGGER_ITEMS = new ConfigStringList("triggerItems", ImmutableList.of()).apply(GENERIC_KEY);
+        public static final ConfigString TRIGGER_ITEM_TAG = new ConfigString("triggerItemTag", "").apply(GENERIC_KEY);
         public static final ConfigBoolean RECORD_ALL_TRADES = new ConfigBoolean("recordAllTrades", true).apply(GENERIC_KEY);
         public static final ConfigStringList SELECTED_CATEGORIES = new ConfigStringList("selectedCategories", ImmutableList.of()).apply(GENERIC_KEY);
         public static final ConfigBoolean GLOWING_MARKER = new ConfigBoolean("glowingMarker", true).apply(GENERIC_KEY);
         public static final ConfigBoolean RECORD_COORDINATES = new ConfigBoolean("recordCoordinates", true).apply(GENERIC_KEY);
+        public static final ConfigBoolean OUTPUT_JSON = new ConfigBoolean("outputJson", false).apply(GENERIC_KEY);
         public static final ConfigBoolean HUD_ENABLED = new ConfigBoolean("hudEnabled", true).apply(GENERIC_KEY);
         public static final ConfigInteger OFFERS_TIMEOUT = new ConfigInteger("offersTimeoutTicks", 10, 1, 200).apply(GENERIC_KEY);
         public static final ConfigBoolean AUTO_SAVE_DRAFT = new ConfigBoolean("autoSaveDraft", true).apply(GENERIC_KEY);
+        public static final ConfigInteger AUTO_SAVE_INTERVAL = new ConfigInteger("autoSaveIntervalSeconds", 0, 0, 3600).apply(GENERIC_KEY);
         public static final ConfigBoolean DEBUG = new ConfigBoolean("debugLog", false).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 TRIGGER_ITEM,
+                TRIGGER_ITEMS,
+                TRIGGER_ITEM_TAG,
                 RECORD_ALL_TRADES,
                 SELECTED_CATEGORIES,
                 GLOWING_MARKER,
                 RECORD_COORDINATES,
+                OUTPUT_JSON,
                 HUD_ENABLED,
                 OFFERS_TIMEOUT,
                 AUTO_SAVE_DRAFT,
+                AUTO_SAVE_INTERVAL,
                 DEBUG
         );
     }

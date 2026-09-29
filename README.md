@@ -59,11 +59,14 @@ offers are captured and counted.
 
 ```
 <minecraft>/villager_census/<world>/<name>_<dimension>_<yyyyMMdd_HHmmss>.census.txt
-<minecraft>/villager_census/<world>/<name>_<dimension>_<yyyyMMdd_HHmmss>.census.json
+<minecraft>/villager_census/<world>/<name>_<dimension>_<yyyyMMdd_HHmmss>.census.json   (optional / 可选)
 <minecraft>/villager_census/<world>/<name>_<dimension>.census.draft.json               (draft / 半成品)
 
-Every `/census stop` writes both the TXT and the JSON report; the JSON is what `/census fork`
-reads back. / 每次 `/census stop` 都会同时写出 TXT 与 JSON 报告，JSON 供 `/census fork` 读回。
+Every `/census stop` writes the TXT report. The JSON sidecar is only written when
+`outputJson` is enabled (default off); `/census fork` reads it when present and otherwise
+falls back to the TXT report. /
+每次 `/census stop` 都会写出 TXT 报告；JSON 仅当启用 `outputJson`（默认关闭）时写出。
+`/census fork` 优先读 JSON，找不到时回退读取 TXT 报告。
 ```
 
 ## Configuration / 配置
@@ -74,6 +77,9 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
 
 - `triggerItem` — 右键村民所用的手持物品（注册名，默认 `minecraft:enchanted_book`）
   / held item used to right-click (registry id).
+- `triggerItems` — 额外的触发物品注册名列表（每行一个）/ extra trigger item registry ids, one per line.
+- `triggerItemTag` — 亦可触发统计的物品标签（如 `#minecraft:books`），留空不启用
+  / item tag that also triggers (e.g. `#minecraft:books`); empty disables it.
 - `recordAllTrades` — 记录全部交易；关闭时只记录被选中的类别
   / record every trade; when off only selected categories are recorded.
 - `selectedCategories` — 上述关闭时用于筛选的类别键（`职业/id`）；建议用配置界面的
@@ -82,11 +88,16 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
   screen's "Select Trade Categories..." picker, which collapses variant trades into one entry.
 - `glowingMarker` — 给已统计村民加发光描边；`/census reverse` 可反转为“未统计发光”
   / mark recorded villagers with Glowing; `/census reverse` flips it to mark uncounted ones.
-- `recordCoordinates` — 只记录村民自身坐标 / record the villager's own position only.
+- `recordCoordinates` — 记录村民自身坐标；关闭时报告省略坐标、且不比较坐标差异
+  / record the villager's own position; when off the report omits it and coord diffs are skipped.
+- `outputJson` — 结束统计时额外写出 `.census.json`（默认关闭；关闭后 fork 读 TXT）
+  / also write a `.census.json` sidecar on finish (default off; fork then reads the TXT).
 - `hudEnabled` — 显示普查 HUD / show the census HUD.
 - `offersTimeoutTicks` — 等待交易包的超时，超时后回退客户端数据
   / packet wait timeout before falling back to client data.
 - `autoSaveDraft` — 退出世界时保存未完成会话 / save an unfinished session on world exit.
+- `autoSaveIntervalSeconds` — 每 N 秒定时保存进行中的半成品（0=仅退出时保存，暂停时不保存）
+  / periodically save the running draft every N seconds (0 = only on exit; paused sessions are never saved).
 - `debugLog` — 输出调试日志 / extra logging.
 
 Hotkeys (all default unbound): `openConfigGui`, `toggleStats`, `undoLast`.
@@ -127,11 +138,19 @@ abort; there is no background box.
 - **与 offers-hud 共存。** 两者注入同样的方法。本 Mod 从不取消 offers 包，因此 offers-hud
   的预览不受影响；两者可能各发一次关窗包，无害。
   / This mod never cancels the offers packet, so offers-hud previews keep working.
-- `/census fork <name>` 按记录里的会话名称匹配半成品或已完成报告（不再要求当前维度一致）；
-  优先同维度来源，只匹配到跨维度来源时照常开始并在聊天栏警告，报告内的原有村民记录不受影响。
+- `/census fork <name>` 按记录里的会话名称匹配半成品或已完成报告（不再要求当前维度一致）。
+  来源优先级：同维度统一优先于跨维度（因此同维度的 TXT 优先于跨维度的 JSON）；同维度内
+  半成品 > JSON 报告 > TXT 报告，再按文件名最新优先。找不到 JSON 时直接解析 TXT 报告，
+  TXT 已内嵌物品/职业/附魔注册名，但**不含 UUID 与幼年明细**，fork 后会对当前已加载、
+  坐标与职业吻合的村民回填 UUID。只匹配到跨维度来源时照常开始并在聊天栏警告，源文件不改动。
   / `/census fork <name>` matches a draft or completed report by its recorded session name
-  (the current dimension is no longer required); a same-dimension source is preferred, and a
-  cross-dimension source still starts the fork with an action-bar warning.
+  (the current dimension is no longer required). Same-dimension sources always win over
+  cross-dimension ones (so a same-dimension TXT beats a cross-dimension JSON); within the same
+  dimension: draft > JSON report > TXT report, newest first. When no JSON exists the TXT report
+  is parsed directly; it embeds item/profession/enchantment registry ids but has **no UUIDs or
+  baby details**, so loaded villagers matching by position and profession recover their UUID.
+  A cross-dimension source still starts the fork with an action-bar warning, and the source is
+  never modified.
 - 有职业的成年村民若在 `offersTimeoutTicks` 内没有收到交易包，会在记录时发出警告并标记
   “未取得交易数据”，其余客户端字段照常记录。
   / If a professed adult villager's offers do not arrive within `offersTimeoutTicks`, a warning

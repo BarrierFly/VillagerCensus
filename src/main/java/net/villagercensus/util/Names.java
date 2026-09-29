@@ -119,8 +119,14 @@ public class Names
             name = String.valueOf(enchantmentId);
         }
 
-        String roman = toRoman(level);
-        StringBuilder sb = new StringBuilder(name).append(' ').append(roman);
+        StringBuilder sb = new StringBuilder(name);
+
+        if (enchantmentId != null && !enchantmentId.isEmpty())
+        {
+            sb.append(" (").append(enchantmentId).append(')');
+        }
+
+        sb.append(' ').append(toRoman(level));
 
         if (maxLevel > 0)
         {

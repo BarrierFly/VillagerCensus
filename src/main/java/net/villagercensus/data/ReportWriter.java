@@ -19,6 +19,7 @@ import net.villagercensus.census.CensusSession;
 import net.villagercensus.census.EnchantEntry;
 import net.villagercensus.census.TradeEntry;
 import net.villagercensus.census.VillagerRecord;
+import net.villagercensus.config.Configs;
 import net.villagercensus.util.Names;
 
 public class ReportWriter
@@ -52,10 +53,13 @@ public class ReportWriter
             Path txt = dir.resolve(baseName(session) + "_" + stamp + ".census.txt");
             writeText(session, txt);
 
-            // The JSON report is always written: /census fork rebuilds a session from it, so a
-            // completed report must stay forkable regardless of user configuration.
-            Path jsonPath = dir.resolve(baseName(session) + "_" + stamp + ".census.json");
-            Files.writeString(jsonPath, toJson(session), StandardCharsets.UTF_8);
+            // The JSON sidecar is optional. Without it /census fork falls back to reading the
+            // TXT report, which carries the registry ids needed to rebuild the session.
+            if (Configs.Generic.OUTPUT_JSON.getBooleanValue())
+            {
+                Path jsonPath = dir.resolve(baseName(session) + "_" + stamp + ".census.json");
+                Files.writeString(jsonPath, toJson(session), StandardCharsets.UTF_8);
+            }
 
             return txt;
         }
@@ -80,8 +84,8 @@ public class ReportWriter
             writer.write(kv("villagercensus.report.session_name", session.rawName));
             writer.write(kv("villagercensus.report.world", session.worldId));
             writer.write(kv("villagercensus.report.dimension", session.dimension));
-            writer.write(kv("villagercensus.report.start", format(session.startTime)));
-            writer.write(kv("villagercensus.report.end", format(session.endTime == 0L ? System.currentTimeMillis() : session.endTime)));
+            writer.write(kv("villagercensus.report.start", formatTime(session.startTime)));
+            writer.write(kv("villagercensus.report.end", formatTime(session.endTime == 0L ? System.currentTimeMillis() : session.endTime)));
             writer.write(kv("villagercensus.report.total", String.valueOf(session.totalCount())));
             writer.newLine();
 
@@ -139,8 +143,11 @@ public class ReportWriter
             header.append(" | \"").append(record.customName).append('"');
         }
 
-        header.append(" | ").append(StringUtils.translate("villagercensus.report.coords",
-                record.blockX, record.blockY, record.blockZ));
+        if (record.hasCoordinates)
+        {
+            header.append(" | ").append(StringUtils.translate("villagercensus.report.coords",
+                    record.blockX, record.blockY, record.blockZ));
+        }
 
         if (record.status != null)
         {
@@ -236,7 +243,7 @@ public class ReportWriter
         return StringUtils.translate(key) + ": " + value + System.lineSeparator();
     }
 
-    private static String format(long time)
+    public static String formatTime(long time)
     {
         return READABLE.format(Instant.ofEpochMilli(time).atZone(ZoneId.systemDefault()));
     }

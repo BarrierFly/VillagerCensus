@@ -111,8 +111,11 @@ public class CensusHud
             lines.add(last.baby
                     ? StringUtils.translate("villagercensus.hud.last_baby")
                     : StringUtils.translate("villagercensus.hud.last", last.professionId, last.level));
-            lines.add(StringUtils.translate("villagercensus.hud.pos_hp",
-                    last.blockX, last.blockY, last.blockZ, (int) last.health, (int) last.maxHealth));
+            lines.add(last.hasCoordinates
+                    ? StringUtils.translate("villagercensus.hud.pos_hp",
+                            last.blockX, last.blockY, last.blockZ, (int) last.health, (int) last.maxHealth)
+                    : StringUtils.translate("villagercensus.hud.hp",
+                            (int) last.health, (int) last.maxHealth));
 
             if (last.remark != null && !last.remark.isEmpty())
             {

@@ -26,6 +26,14 @@
   "villagercensus.config.generic.comment.triggerItem": "Held item used to right-click villagers (registry id). Default: minecraft:enchanted_book",
   "villagercensus.config.generic.name.triggerItem": "Trigger Item",
 
+  "villagercensus.config.generic.prettyName.triggerItems": "Extra Trigger Items",
+  "villagercensus.config.generic.comment.triggerItems": "Additional trigger items by registry id, one per line.",
+  "villagercensus.config.generic.name.triggerItems": "Extra Trigger Items",
+
+  "villagercensus.config.generic.prettyName.triggerItemTag": "Trigger Item Tag",
+  "villagercensus.config.generic.comment.triggerItemTag": "Item tag that also triggers the census, e.g. #minecraft:books. Empty disables it.",
+  "villagercensus.config.generic.name.triggerItemTag": "Trigger Item Tag",
+
   "villagercensus.config.generic.prettyName.recordAllTrades": "Record All Trades",
   "villagercensus.config.generic.comment.recordAllTrades": "Record every trade. When off, only the selected categories are recorded.",
   "villagercensus.config.generic.name.recordAllTrades": "Record All Trades",
@@ -39,8 +47,12 @@
   "villagercensus.config.generic.name.glowingMarker": "Glowing Marker",
 
   "villagercensus.config.generic.prettyName.recordCoordinates": "Record Coordinates",
-  "villagercensus.config.generic.comment.recordCoordinates": "Record the villager's own block position (never a workstation).",
+  "villagercensus.config.generic.comment.recordCoordinates": "Record the villager's own block position (never a workstation). When off the report omits the position and coordinate diffs are not compared.",
   "villagercensus.config.generic.name.recordCoordinates": "Record Coordinates",
+
+  "villagercensus.config.generic.prettyName.outputJson": "Write JSON Report",
+  "villagercensus.config.generic.comment.outputJson": "Also write a .census.json sidecar for every finished report. When off, /census fork reads the .census.txt report instead.",
+  "villagercensus.config.generic.name.outputJson": "Write JSON Report",
 
   "villagercensus.config.generic.prettyName.hudEnabled": "Show HUD",
   "villagercensus.config.generic.comment.hudEnabled": "Show the census HUD while a session is active.",
@@ -53,6 +65,10 @@
   "villagercensus.config.generic.prettyName.autoSaveDraft": "Auto-save Draft",
   "villagercensus.config.generic.comment.autoSaveDraft": "Save an unfinished session to disk when leaving the world.",
   "villagercensus.config.generic.name.autoSaveDraft": "Auto-save Draft",
+
+  "villagercensus.config.generic.prettyName.autoSaveIntervalSeconds": "Auto-save Interval (s)",
+  "villagercensus.config.generic.comment.autoSaveIntervalSeconds": "Periodically save the running draft every N seconds. 0 saves only on world exit; paused sessions are never saved.",
+  "villagercensus.config.generic.name.autoSaveIntervalSeconds": "Auto-save Interval (s)",
 
   "villagercensus.config.generic.prettyName.debugLog": "Debug Logging",
   "villagercensus.config.generic.comment.debugLog": "Print extra debug information to the game log.",
@@ -133,9 +149,10 @@
   "villagercensus.hud.last_baby": "last: baby",
   "villagercensus.hud.last": "last: %s Lv%s",
   "villagercensus.hud.pos_hp": "  pos %s,%s,%s  hp %s/%s",
+  "villagercensus.hud.hp": "  hp %s/%s",
   "villagercensus.hud.remark": "  remark: %s",
 
-  "villagercensus.status.line": "%s @ %s | count=%s | professions=%s | babies=%s | paused=%s | pending=%s | pendingUpdate=%s",
+  "villagercensus.status.line": "%s @ %s | start=%s | count=%s | professions=%s | babies=%s | paused=%s | pending=%s | pendingUpdate=%s",
   "villagercensus.status.yes": "yes",
   "villagercensus.status.no": "no",
 

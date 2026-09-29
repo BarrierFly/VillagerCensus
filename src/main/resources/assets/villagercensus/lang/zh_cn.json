@@ -26,6 +26,14 @@
   "villagercensus.config.generic.comment.triggerItem": "用于右键村民的触发物品（注册名）。默认：minecraft:enchanted_book",
   "villagercensus.config.generic.name.triggerItem": "触发物品",
 
+  "villagercensus.config.generic.prettyName.triggerItems": "额外触发物品",
+  "villagercensus.config.generic.comment.triggerItems": "额外的触发物品注册名，每行一个。",
+  "villagercensus.config.generic.name.triggerItems": "额外触发物品",
+
+  "villagercensus.config.generic.prettyName.triggerItemTag": "触发物品标签",
+  "villagercensus.config.generic.comment.triggerItemTag": "同样可作为触发物品的物品标签，例如 #minecraft:books。留空则不启用。",
+  "villagercensus.config.generic.name.triggerItemTag": "触发物品标签",
+
   "villagercensus.config.generic.prettyName.recordAllTrades": "记录全部交易",
   "villagercensus.config.generic.comment.recordAllTrades": "记录每一条交易；关闭时只记录被选中的交易类别。",
   "villagercensus.config.generic.name.recordAllTrades": "记录全部交易",
@@ -39,8 +47,12 @@
   "villagercensus.config.generic.name.glowingMarker": "发光标记",
 
   "villagercensus.config.generic.prettyName.recordCoordinates": "记录坐标",
-  "villagercensus.config.generic.comment.recordCoordinates": "只记录村民自身所在方块坐标（不记录工作方块）。",
+  "villagercensus.config.generic.comment.recordCoordinates": "只记录村民自身所在方块坐标（不记录工作方块）。关闭后报告省略坐标，也不再比较坐标差异。",
   "villagercensus.config.generic.name.recordCoordinates": "记录坐标",
+
+  "villagercensus.config.generic.prettyName.outputJson": "输出 JSON 报告",
+  "villagercensus.config.generic.comment.outputJson": "每次结束统计时额外写出 .census.json。关闭时 /census fork 改为读取 .census.txt 报告。",
+  "villagercensus.config.generic.name.outputJson": "输出 JSON 报告",
 
   "villagercensus.config.generic.prettyName.hudEnabled": "显示 HUD",
   "villagercensus.config.generic.comment.hudEnabled": "普查进行中显示 HUD 信息。",
@@ -53,6 +65,10 @@
   "villagercensus.config.generic.prettyName.autoSaveDraft": "自动保存半成品",
   "villagercensus.config.generic.comment.autoSaveDraft": "退出世界时把未完成的会话保存到磁盘。",
   "villagercensus.config.generic.name.autoSaveDraft": "自动保存半成品",
+
+  "villagercensus.config.generic.prettyName.autoSaveIntervalSeconds": "自动保存间隔（秒）",
+  "villagercensus.config.generic.comment.autoSaveIntervalSeconds": "每 N 秒定时保存进行中的半成品。0 表示仅在退出世界时保存；暂停中的会话不保存。",
+  "villagercensus.config.generic.name.autoSaveIntervalSeconds": "自动保存间隔（秒）",
 
   "villagercensus.config.generic.prettyName.debugLog": "调试日志",
   "villagercensus.config.generic.comment.debugLog": "向游戏日志输出额外调试信息。",
@@ -133,9 +149,10 @@
   "villagercensus.hud.last_baby": "上一只：幼年",
   "villagercensus.hud.last": "上一只：%s Lv%s",
   "villagercensus.hud.pos_hp": "  坐标 %s,%s,%s  血量 %s/%s",
+  "villagercensus.hud.hp": "  血量 %s/%s",
   "villagercensus.hud.remark": "  备注：%s",
 
-  "villagercensus.status.line": "%s @ %s | 数量=%s | 职业=%s | 幼年=%s | 暂停=%s | 待关联=%s | 待确认=%s",
+  "villagercensus.status.line": "%s @ %s | 开始=%s | 数量=%s | 职业=%s | 幼年=%s | 暂停=%s | 待关联=%s | 待确认=%s",
   "villagercensus.status.yes": "是",
   "villagercensus.status.no": "否",
 

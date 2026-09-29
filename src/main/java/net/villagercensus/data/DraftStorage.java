@@ -22,6 +22,8 @@ public class DraftStorage
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final DateTimeFormatter ARCHIVE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     private static final String DRAFT_SUFFIX = ".census.draft.json";
+    private static final String REPORT_JSON_SUFFIX = ".census.json";
+    private static final String REPORT_TXT_SUFFIX = ".census.txt";
 
     public static Path draftPath(CensusSession session)
     {
@@ -126,9 +128,10 @@ public class DraftStorage
     }
 
     /**
-     * Finds a fork source by the session name it recorded (draft or completed report). A source
-     * in the current dimension is preferred; if only a source recorded in another dimension
-     * exists, it is returned with {@link ForkSource#crossDimension} set.
+     * Finds a fork source by the session name it recorded. Drafts, completed JSON reports and
+     * completed TXT reports are all considered. A same-dimension source is always preferred over
+     * a cross-dimension one (so a same-dimension TXT beats a cross-dimension JSON); within the
+     * same dimension a JSON source is preferred over a TXT one, drafts first.
      */
     public static ForkSource findForkSource(String worldId, String dimension, String rawName)
     {
@@ -146,7 +149,11 @@ public class DraftStorage
 
         try (Stream<Path> stream = Files.list(dir))
         {
-            stream.filter(p -> p.getFileName().toString().endsWith(".census.json")).forEach(candidates::add);
+            stream.filter(p ->
+            {
+                String name = p.getFileName().toString();
+                return name.endsWith(REPORT_JSON_SUFFIX) || name.endsWith(REPORT_TXT_SUFFIX);
+            }).forEach(candidates::add);
         }
         catch (IOException e)
         {
@@ -162,7 +169,7 @@ public class DraftStorage
                 continue;
             }
 
-            CensusSession session = load(candidate);
+            CensusSession session = loadSource(candidate);
 
             if (session == null || !matchesName(session, rawName, safeName))
             {
@@ -178,7 +185,7 @@ public class DraftStorage
             return null;
         }
 
-        // Same dimension first, then drafts, then the newest file name.
+        // Same dimension first, then drafts / JSON over TXT, then the newest file name.
         matches.sort((a, b) ->
         {
             int cmp = Boolean.compare(a.crossDimension, b.crossDimension);
@@ -188,7 +195,7 @@ public class DraftStorage
                 return cmp;
             }
 
-            cmp = Boolean.compare(!isDraft(a.path), !isDraft(b.path));
+            cmp = Integer.compare(kindRank(a.path), kindRank(b.path));
 
             if (cmp != 0)
             {
@@ -201,6 +208,39 @@ public class DraftStorage
         return matches.get(0);
     }
 
+    /**
+     * Loads a session from a fork source file: JSON (draft or report) directly, or a TXT report
+     * through {@link ReportReader} when no JSON sidecar exists.
+     */
+    public static CensusSession loadSource(Path file)
+    {
+        return file.getFileName().toString().endsWith(REPORT_TXT_SUFFIX)
+                ? ReportReader.readText(file)
+                : load(file);
+    }
+
+    private static int kindRank(Path file)
+    {
+        String name = file.getFileName().toString();
+
+        if (name.endsWith(DRAFT_SUFFIX))
+        {
+            return 0;
+        }
+
+        if (name.endsWith(REPORT_JSON_SUFFIX))
+        {
+            return 1;
+        }
+
+        if (name.endsWith(REPORT_TXT_SUFFIX))
+        {
+            return 2;
+        }
+
+        return 3;
+    }
+
     private static boolean matchesName(CensusSession session, String rawName, String safeName)
     {
         if (session.safeName != null && session.safeName.equals(safeName))
@@ -209,11 +249,6 @@ public class DraftStorage
         }
 
         return session.rawName != null && session.rawName.equals(rawName.trim());
-    }
-
-    private static boolean isDraft(Path file)
-    {
-        return file.getFileName().toString().endsWith(DRAFT_SUFFIX);
     }
 
     public static boolean delete(Path file)

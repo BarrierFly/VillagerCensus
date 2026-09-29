@@ -88,13 +88,19 @@ Interaction contract (do not break):
 
 ## Reports, drafts and fork
 
-- `/census stop` always writes both `<name>_<dim>_<stamp>.census.txt` and `.census.json`. The
-  JSON is the machine-readable sidecar and the fork source; the old `outputJson` option was
-  removed.
-- `/census fork <name>` matches the recorded session name of any draft or `.census.json` in the
-  current world (not the file name prefix). Same-dimension sources are preferred; a
+- `/census stop` always writes `<name>_<dim>_<stamp>.census.txt`. The `.census.json` sidecar is
+  written only when the `outputJson` option is on (default off). The TXT report embeds item,
+  profession and enchantment registry ids so it can be rebuilt without JSON.
+- `/census fork <name>` matches the recorded session name of any draft, `.census.json` or
+  `.census.txt` in the current world (not the file name prefix). Source priority: same dimension
+  always beats cross dimension (so a same-dimension TXT beats a cross-dimension JSON); within a
+  dimension it is draft > JSON report > TXT report, newest file name first. JSON is parsed by
+  Gson; TXT is parsed by `data/ReportReader` (no UUIDs or baby detail lines, so loaded villagers
+  matching position/profession recover their UUID in `CensusManager.resolveMissingUuids`). A
   cross-dimension source forks anyway and emits `villagercensus.message.fork_cross_dimension`.
   The source file is never modified.
+- `recordCoordinates` is honoured in `buildRecord`: when off, `VillagerRecord.hasCoordinates` is
+  false, the report omits the `pos` field and coordinate diffs are skipped.
 - A professed adult villager whose offers never arrive before `offersTimeoutTicks` is recorded
   as `NO_TRADE_DATA` and warns with `villagercensus.message.trade_data_failed` (unemployed and
   nitwit villagers do not warn). The `DataStatus` is the single source of the report's status

@@ -19,6 +19,7 @@ public class VillagerRecord
     public int blockX;
     public int blockY;
     public int blockZ;
+    public boolean hasCoordinates = true;
     public String dimension = "";
     public String customName;
     public boolean hasTradeData;
@@ -45,6 +46,7 @@ public class VillagerRecord
         r.blockX = this.blockX;
         r.blockY = this.blockY;
         r.blockZ = this.blockZ;
+        r.hasCoordinates = this.hasCoordinates;
         r.dimension = this.dimension;
         r.customName = this.customName;
         r.hasTradeData = this.hasTradeData;
@@ -86,13 +88,16 @@ public class VillagerRecord
                 && this.hasTraded == other.hasTraded
                 && Float.compare(this.health, other.health) == 0
                 && Float.compare(this.maxHealth, other.maxHealth) == 0
-                && this.blockX == other.blockX
-                && this.blockY == other.blockY
-                && this.blockZ == other.blockZ
+                && (!this.hasCoordinates || !other.hasCoordinates || this.samePosition(other))
                 && Objects.equals(this.dimension, other.dimension)
                 && Objects.equals(this.customName, other.customName)
                 && this.hasTradeData == other.hasTradeData
                 && this.sameTrades(other);
+    }
+
+    private boolean samePosition(VillagerRecord other)
+    {
+        return this.blockX == other.blockX && this.blockY == other.blockY && this.blockZ == other.blockZ;
     }
 
     private boolean sameTrades(VillagerRecord other)
@@ -150,7 +155,7 @@ public class VillagerRecord
         {
             lines.add(StringUtils.translate("villagercensus.diff.health", other.health, this.health));
         }
-        if (this.blockX != other.blockX || this.blockY != other.blockY || this.blockZ != other.blockZ)
+        if (this.hasCoordinates && other.hasCoordinates && !this.samePosition(other))
         {
             lines.add(StringUtils.translate("villagercensus.diff.pos",
                     other.blockX, other.blockY, other.blockZ, this.blockX, this.blockY, this.blockZ));

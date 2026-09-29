@@ -14,6 +14,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.network.protocol.game.ClientboundMerchantOffersPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
@@ -50,6 +52,7 @@ public class CensusManager
     private volatile PendingTarget pending;
     private PendingUpdate pendingUpdate;
     private volatile long tickCounter;
+    private long lastAutoSaveTick;
 
     // Glowing markers. baseGlow is the glow state coming from any source other than this mod
     // (the server's shared flag). managed is the set of villagers whose glow this mod controls.
@@ -253,6 +256,7 @@ public class CensusManager
 
         return StringUtils.translate("villagercensus.status.line",
                 this.session.rawName, this.session.dimension,
+                ReportWriter.formatTime(this.session.startTime),
                 this.session.totalCount(), this.session.professionCounts().size(), this.session.babyCount(),
                 yesNo(this.session.paused),
                 yesNo(this.pending != null),
@@ -432,6 +436,8 @@ public class CensusManager
             }
         }
 
+        this.resolveMissingUuids(fork);
+
         this.session = fork;
         this.pending = null;
         this.pendingUpdate = null;
@@ -480,6 +486,78 @@ public class CensusManager
                 record.status = DataStatus.NOT_VERIFIED;
             }
         }
+    }
+
+    /**
+     * TXT fork sources carry no UUIDs. Records that exactly match a single currently loaded
+     * villager (position, profession and baby flag) recover its UUID so re-statting still
+     * replaces the carried-over record instead of adding a duplicate.
+     */
+    private void resolveMissingUuids(CensusSession session)
+    {
+        Minecraft mc = Minecraft.getInstance();
+
+        if (mc.level == null)
+        {
+            return;
+        }
+
+        List<Villager> loaded = new ArrayList<>();
+
+        for (Entity entity : mc.level.entitiesForRendering())
+        {
+            if (entity instanceof Villager villager)
+            {
+                loaded.add(villager);
+            }
+        }
+
+        for (VillagerRecord record : session.records)
+        {
+            if (record.uuid != null || !record.hasCoordinates)
+            {
+                continue;
+            }
+
+            Villager match = null;
+            int matches = 0;
+
+            for (Villager villager : loaded)
+            {
+                if (!villagerMatches(record, villager))
+                {
+                    continue;
+                }
+
+                match = villager;
+                matches++;
+            }
+
+            if (matches == 1 && match != null)
+            {
+                record.uuid = match.getUUID();
+                session.byUuid.put(record.uuid, record);
+            }
+        }
+    }
+
+    private static boolean villagerMatches(VillagerRecord record, Villager villager)
+    {
+        BlockPos pos = villager.blockPosition();
+
+        if (pos.getX() != record.blockX || pos.getY() != record.blockY || pos.getZ() != record.blockZ)
+        {
+            return false;
+        }
+
+        if (villager.isBaby() != record.baby)
+        {
+            return false;
+        }
+
+        String profession = villager.getVillagerData().profession().unwrapKey()
+                .map(key -> key.identifier().toString()).orElse("minecraft:none");
+        return profession.equals(record.professionId);
     }
 
     private Set<UUID> loadedVillagerIds()
@@ -819,6 +897,35 @@ public class CensusManager
         {
             this.draftLoaded = this.updateVerification(this.resumeDraft);
         }
+
+        this.autoSaveDraft();
+    }
+
+    private void autoSaveDraft()
+    {
+        int interval = Configs.Generic.AUTO_SAVE_INTERVAL.getIntegerValue();
+
+        if (!this.hasSession() || this.session.paused || interval <= 0)
+        {
+            this.lastAutoSaveTick = this.tickCounter;
+            return;
+        }
+
+        if (this.tickCounter - this.lastAutoSaveTick < interval * 20L)
+        {
+            return;
+        }
+
+        this.lastAutoSaveTick = this.tickCounter;
+
+        try
+        {
+            DraftStorage.save(this.session);
+        }
+        catch (Exception e)
+        {
+            Reference.logger().warn("Automatic draft save failed", e);
+        }
     }
 
     // ------------------------------------------------------------------
@@ -837,10 +944,20 @@ public class CensusManager
         record.hasTraded = villagerXp > 0;
         record.health = villager.getHealth();
         record.maxHealth = villager.getMaxHealth();
-        BlockPos pos = villager.blockPosition();
-        record.blockX = pos.getX();
-        record.blockY = pos.getY();
-        record.blockZ = pos.getZ();
+
+        if (Configs.Generic.RECORD_COORDINATES.getBooleanValue())
+        {
+            BlockPos pos = villager.blockPosition();
+            record.blockX = pos.getX();
+            record.blockY = pos.getY();
+            record.blockZ = pos.getZ();
+            record.hasCoordinates = true;
+        }
+        else
+        {
+            record.hasCoordinates = false;
+        }
+
         record.dimension = currentDimension();
         record.customName = villager.getCustomName() != null ? villager.getCustomName().getString() : null;
         record.hasTradeData = hasTradeData && offers != null;
@@ -950,7 +1067,30 @@ public class CensusManager
             return false;
         }
 
-        Identifier id = Identifier.tryParse(Configs.Generic.TRIGGER_ITEM.getStringValue().trim());
+        if (matchesItem(stack, Configs.Generic.TRIGGER_ITEM.getStringValue()))
+        {
+            return true;
+        }
+
+        for (String entry : Configs.Generic.TRIGGER_ITEMS.getStrings())
+        {
+            if (matchesItem(stack, entry))
+            {
+                return true;
+            }
+        }
+
+        return matchesTag(stack, Configs.Generic.TRIGGER_ITEM_TAG.getStringValue());
+    }
+
+    private static boolean matchesItem(ItemStack stack, String rawId)
+    {
+        if (rawId == null || rawId.trim().isEmpty())
+        {
+            return false;
+        }
+
+        Identifier id = Identifier.tryParse(rawId.trim());
 
         if (id == null)
         {
@@ -959,6 +1099,38 @@ public class CensusManager
 
         Item item = BuiltInRegistries.ITEM.get(id).map(ref -> ref.value()).orElse(Items.AIR);
         return item != Items.AIR && stack.is(item);
+    }
+
+    private static boolean matchesTag(ItemStack stack, String rawTag)
+    {
+        if (rawTag == null || rawTag.trim().isEmpty())
+        {
+            return false;
+        }
+
+        String value = rawTag.trim();
+
+        if (value.startsWith("#"))
+        {
+            value = value.substring(1);
+        }
+
+        try
+        {
+            Identifier id = Identifier.tryParse(value);
+
+            if (id == null)
+            {
+                return false;
+            }
+
+            return stack.is(TagKey.create(Registries.ITEM, id));
+        }
+        catch (Exception e)
+        {
+            Reference.logger().warn("Invalid trigger item tag '{}'", rawTag);
+            return false;
+        }
     }
 
     private static String currentDimension()
