@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.util.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -38,15 +39,23 @@ import net.villagercensus.config.Configs;
 import net.villagercensus.data.DraftStorage;
 import net.villagercensus.data.ReportWriter;
 import net.villagercensus.data.WorldId;
+import net.villagercensus.gui.GuiDraftResume;
+import net.villagercensus.gui.GuiStartConflict;
 import net.villagercensus.mixin.IMixinEntity;
 import net.villagercensus.trade.TradeCatalog;
 import net.villagercensus.trade.TradeCategory;
+import net.villagercensus.util.Compat;
 import net.villagercensus.util.Messages;
 import net.villagercensus.util.Names;
 
 public class CensusManager
 {
     private static final CensusManager INSTANCE = new CensusManager();
+
+    // The resume screen and the "loaded X/N" counter are refreshed twice a second (Q31: 10 gt).
+    private static final long VERIFY_REFRESH_TICKS = 10L;
+    // Ticks to wait after joining a world before the resume screen may open.
+    private static final int DRAFT_PROMPT_DELAY_TICKS = 20;
 
     private volatile CensusSession session;
     private volatile PendingTarget pending;
@@ -71,6 +80,13 @@ public class CensusManager
     private String draftName;
     private int draftLoaded;
     private int draftTotal;
+
+    // Deferred confirmation flows (planning Q31 / Q37). The command channel and the screens share
+    // the same state machine, so /census resume|discard keep working next to the screens.
+    private String pendingStartName;
+    private DraftStorage.NameConflict pendingConflict;
+    private int draftPromptDelay;
+    private boolean draftPromptShown;
 
     private final java.util.concurrent.ConcurrentLinkedQueue<ClientboundMerchantOffersPacket> offersQueue =
             new java.util.concurrent.ConcurrentLinkedQueue<>();
@@ -106,11 +122,58 @@ public class CensusManager
         return this.resumeCandidate;
     }
 
+    public static String currentDimension()
+    {
+        Minecraft mc = Minecraft.getInstance();
+
+        if (mc.level == null)
+        {
+            return "unknown";
+        }
+
+        try
+        {
+            return mc.level.dimension().identifier().toString();
+        }
+        catch (Exception e)
+        {
+            return "unknown";
+        }
+    }
+
     // ------------------------------------------------------------------
     // Session lifecycle
     // ------------------------------------------------------------------
 
-    public boolean startSession(String rawName)
+    /**
+     * Entry point for {@code /census start}. Starts right away when nothing collides with the
+     * name; otherwise the collision is classified and offered on the confirmation screen (see
+     * {@link GuiStartConflict}). With {@code startConflictPrompt} off the old behaviour applies:
+     * start anyway and only warn about an existing draft.
+     */
+    public void requestStart(String rawName)
+    {
+        if (!this.validateStart(rawName))
+        {
+            return;
+        }
+
+        String name = rawName.trim();
+        DraftStorage.NameConflict conflict = DraftStorage.findConflicts(
+                WorldId.current(), currentDimension(), WorldId.safe(name));
+
+        if (conflict.isNone() || !Configs.Generic.START_CONFLICT_PROMPT.getBooleanValue())
+        {
+            this.beginStart(name, conflict);
+            return;
+        }
+
+        this.pendingStartName = name;
+        this.pendingConflict = conflict;
+        GuiBase.openGui(new GuiStartConflict(this));
+    }
+
+    private boolean validateStart(String rawName)
     {
         if (rawName == null || rawName.trim().isEmpty())
         {
@@ -124,25 +187,121 @@ public class CensusManager
             return false;
         }
 
-        String safeName = WorldId.safe(rawName.trim());
+        return true;
+    }
+
+    /**
+     * Creates the session itself. A same-name draft is never silently overwritten: the caller has
+     * already resolved the conflict (or the confirmation prompt is disabled).
+     */
+    private void beginStart(String rawName, DraftStorage.NameConflict conflict)
+    {
+        String safeName = WorldId.safe(rawName);
         String worldId = WorldId.current();
         String dimension = currentDimension();
-        java.nio.file.Path draft = DraftStorage.findDraft(worldId, dimension, safeName);
 
-        this.session = new CensusSession(rawName.trim(), safeName, worldId, dimension, System.currentTimeMillis());
+        this.session = new CensusSession(rawName, safeName, worldId, dimension, System.currentTimeMillis());
         this.pending = null;
         this.pendingUpdate = null;
+        this.clearPendingStart();
 
-        if (draft != null)
+        if (conflict != null && conflict.kind == DraftStorage.ConflictKind.DRAFT)
         {
             Messages.warn( "villagercensus.message.draft_exists", safeName);
         }
         else
         {
-            Messages.info( "villagercensus.message.started", rawName.trim(), dimension);
+            Messages.info( "villagercensus.message.started", rawName, dimension);
+        }
+    }
+
+    public DraftStorage.NameConflict getPendingConflict()
+    {
+        return this.pendingConflict;
+    }
+
+    public String getPendingStartName()
+    {
+        return this.pendingStartName;
+    }
+
+    /**
+     * Applies the choice made on the start-conflict screen.
+     */
+    public void resolveStartConflict(StartChoice choice, String newName)
+    {
+        DraftStorage.NameConflict conflict = this.pendingConflict;
+        String name = this.pendingStartName;
+
+        this.clearPendingStart();
+
+        if (choice == StartChoice.CANCEL || conflict == null || name == null)
+        {
+            Messages.info( "villagercensus.message.conflict_cancelled");
+            return;
         }
 
-        return true;
+        switch (choice)
+        {
+            case CONTINUE_DRAFT -> this.adoptDraft(conflict.path, false);
+            case FORCE_CONTINUE -> this.adoptDraft(conflict.path, true);
+            case RESTART -> {
+                if (conflict.path != null && !DraftStorage.delete(conflict.path))
+                {
+                    Messages.error( "villagercensus.message.conflict_action_failed");
+                    return;
+                }
+
+                this.beginStart(name, DraftStorage.NameConflict.NONE);
+            }
+            case ARCHIVE_AND_START -> {
+                if (conflict.path != null)
+                {
+                    DraftStorage.archive(conflict.path);
+                }
+
+                this.beginStart(name, DraftStorage.NameConflict.NONE);
+            }
+            case KEEP_NAME -> this.beginStart(name, DraftStorage.NameConflict.NONE);
+            case RENAME -> {
+                if (newName == null || newName.trim().isEmpty())
+                {
+                    Messages.error( "villagercensus.message.name_required");
+                    return;
+                }
+
+                this.beginStart(newName.trim(), DraftStorage.NameConflict.NONE);
+            }
+        }
+    }
+
+    private void clearPendingStart()
+    {
+        this.pendingStartName = null;
+        this.pendingConflict = null;
+    }
+
+    public enum StartChoice
+    {
+        CONTINUE_DRAFT("villagercensus.gui.button.conflict_continue"),
+        FORCE_CONTINUE("villagercensus.gui.button.conflict_force_continue"),
+        RESTART("villagercensus.gui.button.conflict_restart"),
+        ARCHIVE_AND_START("villagercensus.gui.button.conflict_archive"),
+        KEEP_NAME("villagercensus.gui.button.conflict_keep_name"),
+        RENAME("villagercensus.gui.button.conflict_rename"),
+        CANCEL("malilib.gui.button.cancel");
+
+        private final String translationKey;
+
+        StartChoice(String translationKey)
+        {
+            this.translationKey = translationKey;
+        }
+
+        public String getKey()
+        {
+            return this.translationKey;
+        }
     }
 
     public java.nio.file.Path stopSession()
@@ -324,34 +483,52 @@ public class CensusManager
             return false;
         }
 
-        CensusSession loaded = DraftStorage.load(this.resumeCandidate);
+        return this.adoptDraft(this.resumeCandidate, false);
+    }
+
+    /**
+     * Loads a draft into a fresh in-memory session and starts re-verifying it. Records whose
+     * villagers are not loaded keep their previous data and are marked "not verified this time";
+     * they are never dropped. With {@code forceDimension} the draft is accepted even when it was
+     * recorded in another dimension.
+     */
+    private boolean adoptDraft(java.nio.file.Path file, boolean forceDimension)
+    {
+        CensusSession loaded = DraftStorage.load(file);
 
         if (loaded == null)
         {
-            DraftStorage.archive(this.resumeCandidate);
-            this.resumeCandidate = null;
+            DraftStorage.archive(file);
+            this.clearResumeCandidate();
             Messages.error( "villagercensus.message.draft_corrupt");
             return false;
         }
 
-        if (!WorldId.safeDimension(currentDimension()).equals(WorldId.safeDimension(loaded.dimension)))
+        if (!forceDimension
+                && !WorldId.safeDimension(currentDimension()).equals(WorldId.safeDimension(loaded.dimension)))
         {
             Messages.error( "villagercensus.message.dimension_mismatch");
             return false;
         }
 
+        if (forceDimension)
+        {
+            Messages.warn( "villagercensus.message.dimension_override", loaded.dimension);
+        }
+
         loaded.endTime = 0L;
         loaded.paused = false;
         loaded.worldId = WorldId.current();
+        loaded.dimension = currentDimension();
+        loaded.safeName = WorldId.safe(loaded.rawName != null && !loaded.rawName.isEmpty()
+                ? loaded.rawName
+                : file.getFileName().toString());
         this.session = loaded;
         this.pending = null;
         this.pendingUpdate = null;
 
-        this.resumeCandidate = null;
-        this.resumeDraft = null;
-        this.draftName = null;
-        this.draftTotal = 0;
-        this.draftLoaded = 0;
+        this.clearResumeCandidate();
+        this.clearPendingStart();
 
         this.startVerification(loaded);
         Messages.success( "villagercensus.message.resumed",
@@ -370,12 +547,28 @@ public class CensusManager
         }
 
         DraftStorage.archive(this.resumeCandidate);
+        this.clearResumeCandidate();
+        Messages.info("villagercensus.message.draft_discarded");
+    }
+
+    /**
+     * Closes the resume screen keeping the draft on disk, so it can be continued later.
+     */
+    public void deferDraft()
+    {
+        String name = this.draftName != null ? this.draftName : "";
+        this.clearResumeCandidate();
+        this.draftPromptShown = true;
+        Messages.info( "villagercensus.message.draft_deferred", name);
+    }
+
+    private void clearResumeCandidate()
+    {
         this.resumeCandidate = null;
         this.resumeDraft = null;
         this.draftName = null;
         this.draftTotal = 0;
         this.draftLoaded = 0;
-        Messages.info("villagercensus.message.draft_discarded");
     }
 
     // ------------------------------------------------------------------
@@ -447,11 +640,8 @@ public class CensusManager
         this.baseUpdates.clear();
         this.trackingMarkers = false;
         this.reverseMarkers = false;
-        this.resumeCandidate = null;
-        this.resumeDraft = null;
-        this.draftName = null;
-        this.draftTotal = 0;
-        this.draftLoaded = 0;
+        this.clearResumeCandidate();
+        this.clearPendingStart();
         this.verifyTotal = 0;
         this.verifyLoaded = 0;
 
@@ -881,7 +1071,7 @@ public class CensusManager
         {
             this.maintainMarkers(mc);
 
-            if (this.verifyTotal > 0 && this.tickCounter % 20L == 0L)
+            if (this.verifyTotal > 0 && this.tickCounter % VERIFY_REFRESH_TICKS == 0L)
             {
                 this.verifyLoaded = this.updateVerification(this.session);
 
@@ -893,12 +1083,40 @@ public class CensusManager
             }
         }
 
-        if (!this.hasSession() && this.resumeDraft != null && this.tickCounter % 20L == 0L)
+        if (!this.hasSession() && this.resumeDraft != null && this.tickCounter % VERIFY_REFRESH_TICKS == 0L)
         {
             this.draftLoaded = this.updateVerification(this.resumeDraft);
         }
 
+        this.openDraftPromptWhenReady(mc);
         this.autoSaveDraft();
+    }
+
+    /**
+     * Opens the resume screen shortly after joining a world that still holds a draft (Q31). The
+     * delay keeps the screen from fighting the loading screen, and nothing is opened while another
+     * screen is up.
+     */
+    private void openDraftPromptWhenReady(Minecraft mc)
+    {
+        if (this.draftPromptDelay <= 0 || this.hasSession() || this.resumeCandidate == null)
+        {
+            return;
+        }
+
+        if (--this.draftPromptDelay > 0)
+        {
+            return;
+        }
+
+        if (Compat.currentScreen(mc) != null)
+        {
+            this.draftPromptDelay = 20;
+            return;
+        }
+
+        this.draftPromptShown = true;
+        GuiBase.openGui(new GuiDraftResume(this));
     }
 
     private void autoSaveDraft()
@@ -1133,25 +1351,6 @@ public class CensusManager
         }
     }
 
-    private static String currentDimension()
-    {
-        Minecraft mc = Minecraft.getInstance();
-
-        if (mc.level == null)
-        {
-            return "unknown";
-        }
-
-        try
-        {
-            return mc.level.dimension().identifier().toString();
-        }
-        catch (Exception e)
-        {
-            return "unknown";
-        }
-    }
-
     private static Entity findEntity(ClientLevel level, UUID uuid)
     {
         if (level == null || uuid == null)
@@ -1227,6 +1426,59 @@ public class CensusManager
         return this.reverseMarkers;
     }
 
+    /**
+     * Whether glowing markers should currently be applied. With {@code markWhenNotHolding} off the
+     * markers are suppressed while the trigger item is not in the main hand.
+     */
+    public boolean markersVisible(Minecraft mc)
+    {
+        if (Configs.Generic.MARK_WHEN_NOT_HOLDING.getBooleanValue())
+        {
+            return true;
+        }
+
+        return mc != null && mc.player != null && isTriggerItem(mc.player.getMainHandItem());
+    }
+
+    public boolean isWaitingForOffers()
+    {
+        return this.hasSession() && !this.session.paused && this.pending != null;
+    }
+
+    public int getWaitingTicks()
+    {
+        return this.pending == null ? 0 : (int) (this.tickCounter - this.pending.tick);
+    }
+
+    /**
+     * True when the pick ray should skip this entity because it is a villager this session already
+     * counted. Requires the pass-through option, a running session and the trigger item in hand.
+     */
+    public boolean isPassThroughTarget(Entity entity)
+    {
+        if (!Configs.Generic.PASS_THROUGH.getBooleanValue()
+                || !this.hasSession()
+                || this.session.paused
+                || !(entity instanceof Villager))
+        {
+            return false;
+        }
+
+        Minecraft mc = Minecraft.getInstance();
+
+        if (mc.player == null || !isTriggerItem(mc.player.getMainHandItem()))
+        {
+            return false;
+        }
+
+        return this.session.getByUuid(entity.getUUID()) != null;
+    }
+
+    public boolean isDraftPromptPending()
+    {
+        return this.draftPromptDelay > 0 || (this.draftPromptShown && this.resumeCandidate != null);
+    }
+
     public void toggleReverseMarkers()
     {
         if (!this.hasSession())
@@ -1254,7 +1506,7 @@ public class CensusManager
             return;
         }
 
-        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue())
+        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue() || !this.markersVisible(mc))
         {
             if (!this.managed.isEmpty())
             {
@@ -1392,11 +1644,10 @@ public class CensusManager
             this.reverseMarkers = false;
             this.verifyTotal = 0;
             this.verifyLoaded = 0;
-            this.resumeCandidate = null;
-            this.resumeDraft = null;
-            this.draftName = null;
-            this.draftTotal = 0;
-            this.draftLoaded = 0;
+            this.clearResumeCandidate();
+            this.clearPendingStart();
+            this.draftPromptDelay = 0;
+            this.draftPromptShown = false;
         }
     }
 
@@ -1408,11 +1659,17 @@ public class CensusManager
 
             if (this.resumeCandidate != null)
             {
-                CensusSession draft = DraftStorage.load(this.resumeCandidate);
-                int total = draft != null ? draft.records.size() : 0;
-                int loaded = draft != null ? this.updateVerification(draft) : 0;
-                Messages.info( "villagercensus.message.draft_found",
-                        this.resumeCandidate.getFileName().toString(), loaded, total);
+                if (Configs.Generic.RESUME_PROMPT.getBooleanValue())
+                {
+                    // Opened from the client tick so the loading screen is already gone.
+                    this.draftPromptDelay = DRAFT_PROMPT_DELAY_TICKS;
+                }
+                else
+                {
+                    Messages.info( "villagercensus.message.draft_found",
+                            this.resumeCandidate.getFileName().toString(),
+                            this.draftLoaded, this.draftTotal);
+                }
             }
         }
     }

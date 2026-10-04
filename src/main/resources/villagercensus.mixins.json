@@ -8,7 +8,8 @@
   ],
   "client": [
     "MixinMultiPlayerGameMode",
-    "MixinClientPacketListener"
+    "MixinClientPacketListener",
+    "MixinProjectileUtil"
   ],
   "injectors": {
     "defaultRequire": 1

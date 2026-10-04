@@ -42,6 +42,25 @@ public class ReportWriter
         return session.safeName + "_" + WorldId.safeDimension(session.dimension);
     }
 
+    /**
+     * The timestamp segment appended to report file names. Exposed so the confirmation screens can
+     * preview the exact name a session will write before it is started.
+     */
+    public static String fileStamp()
+    {
+        return FILE_TIME.format(Instant.now().atZone(ZoneId.systemDefault()));
+    }
+
+    public static Path reportPath(CensusSession session)
+    {
+        return reportDirectory(session.worldId).resolve(baseName(session) + "_" + fileStamp() + ".census.txt");
+    }
+
+    public static Path jsonReportPath(CensusSession session)
+    {
+        return reportDirectory(session.worldId).resolve(baseName(session) + "_" + fileStamp() + ".census.json");
+    }
+
     public static Path writeReport(CensusSession session)
     {
         Path dir = reportDirectory(session.worldId);
@@ -49,16 +68,14 @@ public class ReportWriter
         try
         {
             Files.createDirectories(dir);
-            String stamp = FILE_TIME.format(Instant.now().atZone(ZoneId.systemDefault()));
-            Path txt = dir.resolve(baseName(session) + "_" + stamp + ".census.txt");
+            Path txt = reportPath(session);
             writeText(session, txt);
 
             // The JSON sidecar is optional. Without it /census fork falls back to reading the
             // TXT report, which carries the registry ids needed to rebuild the session.
             if (Configs.Generic.OUTPUT_JSON.getBooleanValue())
             {
-                Path jsonPath = dir.resolve(baseName(session) + "_" + stamp + ".census.json");
-                Files.writeString(jsonPath, toJson(session), StandardCharsets.UTF_8);
+                Files.writeString(jsonReportPath(session), toJson(session), StandardCharsets.UTF_8);
             }
 
             return txt;

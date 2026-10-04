@@ -119,6 +119,22 @@ tasks.withType<JavaCompile>().configureEach {
     options.release.set(javaInt)
 }
 
+// Pure-logic unit tests (planning 9.11). Stonecutter already mirrors src/test/java into every
+// registered version (versions/<mc>/build/generated/stonecutter/test), so the same suite runs for
+// each target. The tests must not touch Minecraft classes.
+dependencies {
+    "testImplementation"("org.junit.jupiter:junit-jupiter:5.11.4")
+    "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}
+
 extensions.configure<JavaPluginExtension> {
     toolchain.languageVersion.set(JavaLanguageVersion.of(javaInt))
     withSourcesJar()

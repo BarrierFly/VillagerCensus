@@ -3,6 +3,7 @@ package net.villagercensus.render;
 import java.util.ArrayList;
 import java.util.List;
 
+import fi.dy.masa.malilib.config.HudAlignment;
 import fi.dy.masa.malilib.util.StringUtils;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -21,33 +22,87 @@ import net.villagercensus.util.Compat;
 public class CensusHud
 {
     private static final int COLOR = 0xFFFFFFFF;
+    private static final int SHADOW = 0xFF000000;
+    private static final int LINE_HEIGHT = 10;
 
     //? if >= 26.1 {
     public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker)
     {
-        Font font = Minecraft.getInstance().font;
-        int y = 4;
+        List<String> lines = this.buildLines();
 
-        for (String line : this.buildLines())
+        if (lines.isEmpty())
         {
-            graphics.text(font, line, 5, y + 1, 0xFF000000);
-            graphics.text(font, line, 4, y, COLOR);
-            y += 10;
+            return;
+        }
+
+        Font font = Minecraft.getInstance().font;
+        Layout layout = this.layout(font, lines, graphics.guiWidth(), graphics.guiHeight());
+
+        for (int i = 0; i < lines.size(); i++)
+        {
+            int y = layout.y + i * LINE_HEIGHT;
+            graphics.text(font, lines.get(i), layout.x + 1, y + 1, SHADOW);
+            graphics.text(font, lines.get(i), layout.x, y, COLOR);
         }
     }
     //?} else {
     /*public void render(GuiGraphics graphics, DeltaTracker deltaTracker)
     {
-        Font font = Minecraft.getInstance().font;
-        int y = 4;
+        List<String> lines = this.buildLines();
 
-        for (String line : this.buildLines())
+        if (lines.isEmpty())
         {
-            graphics.drawString(font, line, 4, y, COLOR, true);
-            y += 10;
+            return;
+        }
+
+        Font font = Minecraft.getInstance().font;
+        Layout layout = this.layout(font, lines, graphics.guiWidth(), graphics.guiHeight());
+
+        for (int i = 0; i < lines.size(); i++)
+        {
+            int y = layout.y + i * LINE_HEIGHT;
+            graphics.drawString(font, lines.get(i), layout.x + 1, y + 1, SHADOW, false);
+            graphics.drawString(font, lines.get(i), layout.x, y, COLOR, false);
         }
     }
     *//*?}*/
+
+    private Layout layout(Font font, List<String> lines, int screenWidth, int screenHeight)
+    {
+        HudAlignment alignment = (HudAlignment) Configs.Generic.HUD_POSITION.getOptionListValue();
+        int offsetX = Configs.Generic.HUD_OFFSET_X.getIntegerValue();
+        int offsetY = Configs.Generic.HUD_OFFSET_Y.getIntegerValue();
+        int maxWidth = 0;
+
+        for (String line : lines)
+        {
+            maxWidth = Math.max(maxWidth, font.width(line));
+        }
+
+        int blockHeight = lines.size() * LINE_HEIGHT;
+        int x;
+        int y;
+
+        switch (alignment)
+        {
+            case TOP_RIGHT, BOTTOM_RIGHT -> x = screenWidth - offsetX - maxWidth;
+            case CENTER -> x = (screenWidth - maxWidth) / 2 + offsetX;
+            default -> x = offsetX;
+        }
+
+        switch (alignment)
+        {
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> y = screenHeight - offsetY - blockHeight;
+            case CENTER -> y = (screenHeight - blockHeight) / 2 + offsetY;
+            default -> y = offsetY;
+        }
+
+        return new Layout(x, y);
+    }
+
+    private record Layout(int x, int y)
+    {
+    }
 
     private List<String> buildLines()
     {
@@ -70,7 +125,7 @@ public class CensusHud
 
         if (session == null)
         {
-            if (manager.getDraftTotal() > 0)
+            if (manager.getDraftTotal() > 0 && !manager.isDraftPromptPending())
             {
                 lines.add(StringUtils.translate("villagercensus.hud.draft", manager.getDraftName()));
                 lines.add(StringUtils.translate("villagercensus.hud.draft_loaded",
@@ -86,11 +141,17 @@ public class CensusHud
         lines.add(StringUtils.translate("villagercensus.hud.count", session.totalCount(),
                 session.professionCounts().size(), session.babyCount()));
 
-        if (Configs.Generic.GLOWING_MARKER.getBooleanValue())
+        if (Configs.Generic.GLOWING_MARKER.getBooleanValue() && manager.markersVisible(mc))
         {
             lines.add(StringUtils.translate(manager.isReverseMarkers()
                     ? "villagercensus.hud.marker_reversed"
                     : "villagercensus.hud.marker_normal"));
+        }
+
+        if (manager.isWaitingForOffers())
+        {
+            lines.add(StringUtils.translate("villagercensus.hud.waiting_offers",
+                    manager.getWaitingTicks(), Configs.Generic.OFFERS_TIMEOUT.getIntegerValue()));
         }
 
         if (manager.getPendingUpdate() != null)

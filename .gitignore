@@ -27,6 +27,7 @@ bin/
 run/
 remappedSrc/
 loom-cache/
+logs/
 
 # Windows reserved-name junk
 /nul

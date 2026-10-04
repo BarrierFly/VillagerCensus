@@ -55,6 +55,30 @@ offers are captured and counted.
 /census help            show help / 显示帮助
 ```
 
+### Confirmation screens / 确认界面
+
+- **重名冲突。** `/census start <名称>` 与当前世界中已有的半成品或报告重名时会弹出确认界面，
+  按冲突类型给出选项，并预览最终落盘的报告文件名：
+  - 存在同名半成品：**继续半成品** / **重新开始**（删除旧半成品）/ 取消；
+  - 仅有同名已完成报告：**沿用此名**（新时间戳另存）/ **改名新建** / 取消；
+  - 半成品来自其他维度：**强行继续** / **归档并开始** / 取消；
+  - 半成品损坏：**归档并开始** / 取消。
+  关闭 `startConflictPrompt` 后恢复旧行为：直接开始，仅在存在半成品时提示一次。
+  A name that collides with a draft or report in the current world opens a confirmation screen with
+  options per collision type and a preview of the exact report file name. Turning
+  `startConflictPrompt` off restores the previous behaviour (start immediately, warn only about a
+  draft).
+- **续接半成品。** 进入仍有半成品的世界时，约 1 秒后弹出续接界面，显示半成品文件、当前世界与
+  维度、`已加载 / 已记录 X / Y`（每 10 gt 刷新）：**继续统计** / **保存半成品**（留在磁盘上稍后
+  再续）/ **放弃**（归档为 `_orphan_<时间戳>`）。未加载的村民保留原有数据并标记“本次未复核”，
+  不会被判失败或删除。命令 `/census resume`、`/census discard` 仍然可用，与界面共享同一状态机；
+  关闭 `resumePrompt` 后只发 action bar 提示。
+  Joining a world that still holds a draft opens a resume screen (after ~1 s, so it does not fight
+  the loading screen) showing the file, the current world/dimension and `loaded / recorded X / Y`
+  refreshed every 10 gt. Unloaded villagers keep their data and are only marked "not verified this
+  time". The commands remain available and share the same state machine; turning `resumePrompt` off
+  falls back to the action-bar hint.
+
 ## Output files / 输出文件
 
 ```
@@ -88,16 +112,34 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
   screen's "Select Trade Categories..." picker, which collapses variant trades into one entry.
 - `glowingMarker` — 给已统计村民加发光描边；`/census reverse` 可反转为“未统计发光”
   / mark recorded villagers with Glowing; `/census reverse` flips it to mark uncounted ones.
+- `markWhenNotHolding` — 关闭后主手持的不是触发物品时不再显示发光标记
+  / when off, glowing markers are hidden unless the trigger item is in the main hand.
+- `passThrough` — 普查中手持触发物品时，准星跳过本次已统计的村民以选中其后方实体（默认关闭；
+  其后没有实体时仍选中该村民）
+  / while a census runs and the trigger item is held, the crosshair skips villagers this session
+  already counted so the entity behind them can be targeted (default off; the counted villager stays
+  selected when there is nothing behind it).
 - `recordCoordinates` — 记录村民自身坐标；关闭时报告省略坐标、且不比较坐标差异
   / record the villager's own position; when off the report omits it and coord diffs are skipped.
 - `outputJson` — 结束统计时额外写出 `.census.json`（默认关闭；关闭后 fork 读 TXT）
   / also write a `.census.json` sidecar on finish (default off; fork then reads the TXT).
 - `hudEnabled` — 显示普查 HUD / show the census HUD.
+- `hudPosition` / `hudOffsetX` / `hudOffsetY` — HUD 贴靠的边角（top/bottom × left/right、center）
+  与像素偏移
+  / the corner or center the HUD anchors to, and its pixel offset.
 - `offersTimeoutTicks` — 等待交易包的超时，超时后回退客户端数据
   / packet wait timeout before falling back to client data.
 - `autoSaveDraft` — 退出世界时保存未完成会话 / save an unfinished session on world exit.
 - `autoSaveIntervalSeconds` — 每 N 秒定时保存进行中的半成品（0=仅退出时保存，暂停时不保存）
   / periodically save the running draft every N seconds (0 = only on exit; paused sessions are never saved).
+- `offersHudCompat` — 装了 offers-hud 时由它关闭被拦截的交易界面，保证只发一次关窗包；关闭后
+  始终由本 Mod 自己发送
+  / with offers-hud installed, let it close the suppressed merchant container so exactly one close
+  packet is sent; when off this mod always closes it itself.
+- `resumePrompt` — 进世界时弹出续接确认界面
+  / show the resume confirmation screen when joining a world that still holds a draft.
+- `startConflictPrompt` — `/census start` 重名时弹出确认界面
+  / ask for confirmation when `/census start` collides with an existing draft or report.
 - `debugLog` — 输出调试日志 / extra logging.
 
 Hotkeys (all default unbound): `openConfigGui`, `toggleStats`, `undoLast`.
@@ -106,14 +148,18 @@ Hotkeys (all default unbound): `openConfigGui`, `toggleStats`, `undoLast`.
 ## HUD / 界面显示
 
 While a session is running the HUD shows the session name and dimension, the villager count,
-profession count, baby count, the current marker mode (`/census reverse`), any pending update,
-the `verify X/N` progress after resuming, and the last recorded villager (profession, position,
-health, remark). It is drawn through the Fabric HUD API and stays visible until you stop or
-abort; there is no background box.
+profession count, baby count, the current marker mode (`/census reverse`), any pending update, a
+`waiting for offers X/Y ticks` line while a villager is being captured, the `verify X/N` progress
+after resuming, and the last recorded villager (profession, position, health, remark). It is drawn
+through the Fabric HUD API, stays visible until you stop or abort, and has no background box. The
+anchor corner and pixel offset are configurable (`hudPosition`, `hudOffsetX`, `hudOffsetY`). With no
+active session but a draft present it shows the draft name and `loaded X/N` plus the commands.
 
 普查进行中 HUD 会显示：会话名与维度、已统计数量、职业数、幼年数、当前标记模式
-（`/census reverse`）、待确认更新、续普查时的 `verify X/N` 复核进度，以及最近一只村民的
-职业、坐标、血量与备注。HUD 通过 Fabric HUD API 绘制，会一直显示到 stop/abort，且没有背景色块。
+（`/census reverse`）、待确认更新、抓取中的 `等待交易回包 X/Y tick`、续普查时的 `verify X/N` 复核进度，
+以及最近一只村民的职业、坐标、血量与备注。HUD 通过 Fabric HUD API 绘制，会一直显示到 stop/abort，
+没有背景色块，贴靠的边角与偏移可通过 `hudPosition`、`hudOffsetX`、`hudOffsetY` 调整。没有会话但存在
+半成品时显示半成品名与 `loaded X/N` 及命令提示。
 
 ## How it works / 工作原理
 
@@ -129,15 +175,43 @@ abort; there is no background box.
 - `ClientPacketListener.handleOpenScreen` (HEAD, cancellable) 记录 container id、拦截交易界面，
   并回发一个 `ServerboundContainerClosePacket`。
   / records the container id, suppresses the merchant screen and sends one close packet.
+- `ProjectileUtil.getEntityHitResult` (RETURN) 只在开启 `passThrough`、普查进行中且主手持触发物品时
+  生效：若命中的是本次已统计的村民，就排除它重跑一次射线，改为返回其后方实体；后方没有实体时保留
+  原命中。
+  / only active with `passThrough` on, a running session and the trigger item in hand: if the hit is
+  a villager this session already counted, the ray is repeated without it so the entity behind wins;
+  the original hit is kept when there is nothing behind.
+
+## Compatibility / 兼容性
+
+- **offers-hud。** 本 Mod 注入的 `handleOpenScreen` 优先级为 900（早于 offers-hud 的默认 1000），
+  因此 container id 一定会在任何人取消包之前被记录；本 Mod **从不取消** offers 包，offers-hud 的
+  预览不受影响。两者都会在拦截后发一次关窗包，因此 `compat/offershud/OffersHudCompat` 会只读探测
+  offers-hud 的 `openWindow` 标志：当它会自己发关窗包时本 Mod 不再发第二次，保证**只发一次**；反射
+  探测失败时回退为自关闭，绝不会把容器留在打开状态。用 `offersHudCompat` 关闭该兼容可强制始终由
+  本 Mod 发送。
+  / Our `handleOpenScreen` hook runs at priority 900 so the container id is always recorded, and the
+  offers packet is never cancelled. Both mods would otherwise send a container close, so
+  `compat/offershud/OffersHudCompat` read-probes offers-hud's `openWindow` flag and skips the second
+  close packet; if the reflective probe fails it falls back to closing the container itself.
+  `offersHudCompat` forces the self-contained path.
+- **itemscroller-sakura。** `MultiPlayerGameMode.interact` 只在 HEAD 登记待关联目标，不取消交互，
+  不抢交互包。
+- **未纳入本版本的规划项。** offers-hud 的“暂停其准星拉包”开关没有实现：要阻止它发
+  `ServerboundInteractPacket` 就得改写另一个 Mod 的客户端 tick 处理，风险与维护成本都不划算；
+  需要时用 `passThrough` 或直接关掉 offers-hud 的射线功能即可。真正的半透明渲染（规划 M8 /
+  9.4）与 1.21.1 / 1.21.10 / 1.19.4 三个额外版本同样暂缓，理由见 `AGENTS.md` 与
+  `HANDOVER.md`。
 
 ## Notes & limitations / 说明与限制
 
 - **服务器规则 / 反作弊。** 拦截交易界面并关闭容器并非原版交互模式，在多人服务器上使用
   风险自负。/ Suppressing the merchant GUI is not a vanilla interaction pattern; use at
   your own risk on multiplayer servers.
-- **与 offers-hud 共存。** 两者注入同样的方法。本 Mod 从不取消 offers 包，因此 offers-hud
-  的预览不受影响；两者可能各发一次关窗包，无害。
-  / This mod never cancels the offers packet, so offers-hud previews keep working.
+- **与 offers-hud 共存。** 两者注入同样的方法。本 Mod 从不取消 offers 包，也不取消其他 Mod 的
+  处理结果；关窗包只由一方发出（见“兼容性”）。
+  / This mod never cancels the offers packet, so offers-hud previews keep working, and only one of
+  the two mods sends the container close.
 - `/census fork <name>` 按记录里的会话名称匹配半成品或已完成报告（不再要求当前维度一致）。
   来源优先级：同维度统一优先于跨维度（因此同维度的 TXT 优先于跨维度的 JSON）；同维度内
   半成品 > JSON 报告 > TXT 报告，再按文件名最新优先。找不到 JSON 时直接解析 TXT 报告，
@@ -156,11 +230,15 @@ abort; there is no background box.
   / If a professed adult villager's offers do not arrive within `offersTimeoutTicks`, a warning
   is shown and the record is marked "no trade data"; the other client-side fields are still
   recorded.
-- 续普查为命令式：退出世界会结束内存中的会话（未完成会话已存为半成品），重进世界**不会**
-  自动继续；用 `/census resume` 重新载入，之后会对已加载村民复核（HUD 显示 `verify X/N`）
-  并重新施加发光标记。
-  / Leaving a world ends the in-memory session (an unfinished session is saved as a draft);
-  re-entering does not auto-continue. Use `/census resume` to reload, re-check and re-mark.
+- 续普查为命令式：退出世界会结束内存中的会话（未完成会话已存为半成品），重进世界**不会**自动继续；
+  默认会弹出续接确认界面（见“确认界面”），也可以随时用 `/census resume` 重新载入，之后会对已加载
+  村民复核（HUD 显示 `verify X/N`）并重新施加发光标记。
+  / Leaving a world ends the in-memory session (an unfinished session is saved as a draft); re-entering
+  never continues silently. A resume screen is shown by default (see "Confirmation screens"), and
+  `/census resume` still reloads, re-checks and re-marks on demand.
+- 归档过的半成品（文件名含 `_orphan_`）不会再被当作续接候选、fork 来源或重名冲突。
+  / Archived drafts (`_orphan_` in the file name) are never offered again as a resume candidate, a
+  fork source or a name conflict.
 - 只记录村民自身坐标，不查询、不推断工作方块坐标。
   / Only the villager's own position is recorded; workstations are never inferred.
 - 首版仅支持 Fabric（无 NeoForge）。
@@ -188,7 +266,8 @@ plain/ enchanted crossbow), so each can be recorded independently.
 ## Build / 构建
 
 ```bash
-./gradlew build
+./gradlew build      # compile and package every registered version
+./gradlew test       # pure-logic unit tests (run for every registered version)
 ```
 
 Stonecutter 的活动版本在 `stonecutter.gradle.kts` 中配置；构建会编译并打包**全部**已注册
@@ -199,6 +278,26 @@ packages **all** registered versions.
 ```bash
 ./gradlew stonecutterSwitch   # change the active version / 切换活动版本
 ```
+
+单元测试位于 `src/test/java`，只覆盖与 Minecraft 无关的纯逻辑（交易类别匹配、会话/撤销/比较、
+`WorldId` 文件名、`DraftStorage` 的续接/fork/重名查找）。带条件注释的测试源码同样由 Stonecutter
+按版本生成，因此每个注册版本都会跑同一套用例。
+The unit tests live in `src/test/java` and only cover Minecraft-independent logic (trade category
+matching, session/undo/comparison, `WorldId` file names, and `DraftStorage`'s resume/fork/conflict
+lookups). Stonecutter mirrors `src/test/java` into every registered version, so each target runs the
+same suite.
+
+## Known gaps / 暂缓项
+
+- **真半透明渲染**（规划 9.4 / Q3 / Q24 / M8）暂缓：需要按版本处理实体渲染状态，且必须在
+  Sodium/Iris 上单独验证；失败时回退到现有的 Glowing 描边。
+- **额外版本 1.21.1 / 1.21.10 / 1.19.4** 暂缓：这三个目标的 API 漂移面很大（`Holder<VillagerProfession>`、
+  `ResourceLocation`/`Identifier`、`MerchantOffer` 成本类型、 Enchantment 访问器、客户端命令、
+  malilib 分支差异），需要逐版本闭环，代价高于当前收益。
+- **offers-hud 准星拉包开关** 暂缓，理由见“兼容性”。
+- 三项均记录在仓库外的《未完成部分实现计划》与 `HANDOVER.md` 中。
+  Semi-transparent rendering and the three extra Minecraft targets are deferred; the reasoning is
+  recorded in `AGENTS.md` and `HANDOVER.md`.
 
 ## Acknowledgements / 致谢
 

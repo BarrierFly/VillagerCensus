@@ -22,12 +22,54 @@ public class DraftStorage
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final DateTimeFormatter ARCHIVE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     private static final String DRAFT_SUFFIX = ".census.draft.json";
+    private static final String ORPHAN_MARKER = "_orphan_";
     private static final String REPORT_JSON_SUFFIX = ".census.json";
     private static final String REPORT_TXT_SUFFIX = ".census.txt";
 
+    public enum ConflictKind
+    {
+        NONE,
+        DRAFT,
+        DIMENSION_MISMATCH,
+        CORRUPT,
+        COMPLETED_REPORT
+    }
+
+    /**
+     * What {@code /census start <name>} would collide with in the current world.
+     */
+    public static final class NameConflict
+    {
+        public static final NameConflict NONE = new NameConflict(ConflictKind.NONE, null, null, null, 0);
+
+        public final ConflictKind kind;
+        // The existing draft (DRAFT / DIMENSION_MISMATCH / CORRUPT) or the newest colliding report.
+        public final Path path;
+        // Session name recorded inside the colliding file, when it could be read.
+        public final String recordedName;
+        // Dimension recorded inside the colliding draft, when it could be read.
+        public final String recordedDimension;
+        // How many files with the same name prefix were found (reports only).
+        public final int reportCount;
+
+        NameConflict(ConflictKind kind, Path path, String recordedName, String recordedDimension, int reportCount)
+        {
+            this.kind = kind;
+            this.path = path;
+            this.recordedName = recordedName;
+            this.recordedDimension = recordedDimension;
+            this.reportCount = reportCount;
+        }
+
+        public boolean isNone()
+        {
+            return this.kind == ConflictKind.NONE;
+        }
+    }
+
     public static Path draftPath(CensusSession session)
     {
-        return ReportWriter.reportDirectory(session.worldId)
+        return reportDirectory(session.worldId)
                 .resolve(ReportWriter.baseName(session) + DRAFT_SUFFIX);
     }
 
@@ -69,10 +111,19 @@ public class DraftStorage
         }
     }
 
+    public static Path reportDirectory(String worldId)
+    {
+        return ReportWriter.reportDirectory(worldId);
+    }
+
     public static List<Path> findDrafts(String worldId)
     {
+        return findDrafts(reportDirectory(worldId));
+    }
+
+    public static List<Path> findDrafts(Path dir)
+    {
         List<Path> result = new ArrayList<>();
-        Path dir = ReportWriter.reportDirectory(worldId);
 
         if (!Files.isDirectory(dir))
         {
@@ -81,7 +132,7 @@ public class DraftStorage
 
         try (Stream<Path> stream = Files.list(dir))
         {
-            stream.filter(p -> p.getFileName().toString().endsWith(DRAFT_SUFFIX)).forEach(result::add);
+            stream.filter(p -> isLiveDraft(p.getFileName().toString())).forEach(result::add);
         }
         catch (IOException e)
         {
@@ -91,16 +142,34 @@ public class DraftStorage
         return result;
     }
 
+    /**
+     * Archived drafts carry an {@code _orphan_<stamp>} segment and must never be offered again as a
+     * resume candidate, a start conflict or a fork source.
+     */
+    private static boolean isLiveDraft(String name)
+    {
+        return name.endsWith(DRAFT_SUFFIX) && !name.contains(ORPHAN_MARKER);
+    }
+
     public static Path findDraft(String worldId, String dimension, String safeName)
     {
-        Path dir = ReportWriter.reportDirectory(worldId);
+        return findDraft(reportDirectory(worldId), dimension, safeName);
+    }
+
+    public static Path findDraft(Path dir, String dimension, String safeName)
+    {
         Path file = dir.resolve(safeName + "_" + WorldId.safeDimension(dimension) + DRAFT_SUFFIX);
         return Files.exists(file) ? file : null;
     }
 
     public static Path findAnyDraft(String worldId, String dimension)
     {
-        for (Path draft : findDrafts(worldId))
+        return findAnyDraft(reportDirectory(worldId), dimension);
+    }
+
+    public static Path findAnyDraft(Path dir, String dimension)
+    {
+        for (Path draft : findDrafts(dir))
         {
             CensusSession session = load(draft);
 
@@ -111,6 +180,103 @@ public class DraftStorage
         }
 
         return null;
+    }
+
+    /**
+     * Classifies what a {@code /census start <name>} would run into. Drafts win over completed
+     * reports; among drafts the one for the current dimension wins, then one from another
+     * dimension, then an unreadable one.
+     */
+    public static NameConflict findConflicts(String worldId, String dimension, String safeName)
+    {
+        return findConflicts(reportDirectory(worldId), dimension, safeName);
+    }
+
+    public static NameConflict findConflicts(Path dir, String dimension, String safeName)
+    {
+        if (!Files.isDirectory(dir))
+        {
+            return NameConflict.NONE;
+        }
+
+        String safeDimension = WorldId.safeDimension(dimension);
+        String prefix = safeName + "_";
+        NameConflict mismatch = null;
+        NameConflict corrupt = null;
+
+        for (Path draft : findDrafts(dir))
+        {
+            if (!draft.getFileName().toString().startsWith(prefix))
+            {
+                continue;
+            }
+
+            CensusSession session = load(draft);
+
+            if (session == null)
+            {
+                corrupt = corrupt != null ? corrupt : new NameConflict(ConflictKind.CORRUPT, draft, null, null, 0);
+                continue;
+            }
+
+            if (safeDimension.equals(WorldId.safeDimension(session.dimension)))
+            {
+                return new NameConflict(ConflictKind.DRAFT, draft, session.rawName, session.dimension, 0);
+            }
+
+            if (mismatch == null)
+            {
+                mismatch = new NameConflict(ConflictKind.DIMENSION_MISMATCH, draft,
+                        session.rawName, session.dimension, 0);
+            }
+        }
+
+        if (mismatch != null)
+        {
+            return mismatch;
+        }
+
+        if (corrupt != null)
+        {
+            return corrupt;
+        }
+
+        List<Path> reports = findReports(dir, prefix);
+
+        if (reports.isEmpty())
+        {
+            return NameConflict.NONE;
+        }
+
+        Path newest = reports.get(0);
+        CensusSession session = loadSource(newest);
+        return new NameConflict(ConflictKind.COMPLETED_REPORT, newest,
+                session != null ? session.rawName : null,
+                session != null ? session.dimension : null,
+                reports.size());
+    }
+
+    private static List<Path> findReports(Path dir, String prefix)
+    {
+        List<Path> result = new ArrayList<>();
+
+        try (Stream<Path> stream = Files.list(dir))
+        {
+            stream.filter(p ->
+            {
+                String name = p.getFileName().toString();
+                return name.startsWith(prefix)
+                        && (name.endsWith(REPORT_JSON_SUFFIX) || name.endsWith(REPORT_TXT_SUFFIX));
+            }).forEach(result::add);
+        }
+        catch (IOException e)
+        {
+            Reference.logger().warn("Failed to list census reports", e);
+        }
+
+        // Newest first, so the JSON sidecar of a report wins over its TXT counterpart.
+        result.sort((a, b) -> b.getFileName().toString().compareTo(a.getFileName().toString()));
+        return result;
     }
 
     public static final class ForkSource
@@ -135,8 +301,11 @@ public class DraftStorage
      */
     public static ForkSource findForkSource(String worldId, String dimension, String rawName)
     {
-        Path dir = ReportWriter.reportDirectory(worldId);
+        return findForkSource(reportDirectory(worldId), dimension, rawName);
+    }
 
+    public static ForkSource findForkSource(Path dir, String dimension, String rawName)
+    {
         if (!Files.isDirectory(dir))
         {
             return null;
@@ -145,19 +314,11 @@ public class DraftStorage
         String safeName = WorldId.safe(rawName);
         String safeDimension = WorldId.safeDimension(dimension);
         String prefix = safeName + "_";
-        List<Path> candidates = new ArrayList<>(findDrafts(worldId));
+        List<Path> candidates = new ArrayList<>(findDrafts(dir));
 
-        try (Stream<Path> stream = Files.list(dir))
+        for (Path report : findReports(dir, prefix))
         {
-            stream.filter(p ->
-            {
-                String name = p.getFileName().toString();
-                return name.endsWith(REPORT_JSON_SUFFIX) || name.endsWith(REPORT_TXT_SUFFIX);
-            }).forEach(candidates::add);
-        }
-        catch (IOException e)
-        {
-            Reference.logger().warn("Failed to list census reports", e);
+            candidates.add(report);
         }
 
         List<ForkSource> matches = new ArrayList<>();
@@ -268,7 +429,7 @@ public class DraftStorage
         String stamp = ARCHIVE_TIME.format(Instant.now().atZone(ZoneId.systemDefault()));
         String name = file.getFileName().toString();
         String base = name.endsWith(DRAFT_SUFFIX) ? name.substring(0, name.length() - DRAFT_SUFFIX.length()) : name;
-        Path target = file.resolveSibling(base + "_orphan_" + stamp + DRAFT_SUFFIX);
+        Path target = file.resolveSibling(base + ORPHAN_MARKER + stamp + DRAFT_SUFFIX);
 
         try
         {

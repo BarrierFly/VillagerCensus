@@ -9,10 +9,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import fi.dy.masa.malilib.config.ConfigUtils;
+import fi.dy.masa.malilib.config.HudAlignment;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
+import fi.dy.masa.malilib.config.options.ConfigOptionList;
 import fi.dy.masa.malilib.config.options.ConfigString;
 import fi.dy.masa.malilib.config.options.ConfigStringList;
 import fi.dy.masa.malilib.util.FileUtils;
@@ -38,6 +40,14 @@ public class Configs implements IConfigHandler
         public static final ConfigInteger OFFERS_TIMEOUT = new ConfigInteger("offersTimeoutTicks", 10, 1, 200).apply(GENERIC_KEY);
         public static final ConfigBoolean AUTO_SAVE_DRAFT = new ConfigBoolean("autoSaveDraft", true).apply(GENERIC_KEY);
         public static final ConfigInteger AUTO_SAVE_INTERVAL = new ConfigInteger("autoSaveIntervalSeconds", 0, 0, 3600).apply(GENERIC_KEY);
+        public static final ConfigOptionList HUD_POSITION = new ConfigOptionList("hudPosition", HudAlignment.TOP_LEFT).apply(GENERIC_KEY);
+        public static final ConfigInteger HUD_OFFSET_X = new ConfigInteger("hudOffsetX", 0, -1000, 1000).apply(GENERIC_KEY);
+        public static final ConfigInteger HUD_OFFSET_Y = new ConfigInteger("hudOffsetY", 0, -1000, 1000).apply(GENERIC_KEY);
+        public static final ConfigBoolean MARK_WHEN_NOT_HOLDING = new ConfigBoolean("markWhenNotHolding", true).apply(GENERIC_KEY);
+        public static final ConfigBoolean PASS_THROUGH = new ConfigBoolean("passThrough", false).apply(GENERIC_KEY);
+        public static final ConfigBoolean OFFERSHUD_COMPAT = new ConfigBoolean("offersHudCompat", true).apply(GENERIC_KEY);
+        public static final ConfigBoolean RESUME_PROMPT = new ConfigBoolean("resumePrompt", true).apply(GENERIC_KEY);
+        public static final ConfigBoolean START_CONFLICT_PROMPT = new ConfigBoolean("startConflictPrompt", true).apply(GENERIC_KEY);
         public static final ConfigBoolean DEBUG = new ConfigBoolean("debugLog", false).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
@@ -47,12 +57,20 @@ public class Configs implements IConfigHandler
                 RECORD_ALL_TRADES,
                 SELECTED_CATEGORIES,
                 GLOWING_MARKER,
+                MARK_WHEN_NOT_HOLDING,
+                PASS_THROUGH,
                 RECORD_COORDINATES,
                 OUTPUT_JSON,
                 HUD_ENABLED,
+                HUD_POSITION,
+                HUD_OFFSET_X,
+                HUD_OFFSET_Y,
                 OFFERS_TIMEOUT,
                 AUTO_SAVE_DRAFT,
                 AUTO_SAVE_INTERVAL,
+                OFFERSHUD_COMPAT,
+                RESUME_PROMPT,
+                START_CONFLICT_PROMPT,
                 DEBUG
         );
     }

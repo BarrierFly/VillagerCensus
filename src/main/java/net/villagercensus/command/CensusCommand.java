@@ -35,7 +35,7 @@ public class CensusCommand
                             .then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("name", StringArgumentType.greedyString())
                                     .executes(ctx ->
                                     {
-                                        CensusManager.getInstance().startSession(StringArgumentType.getString(ctx, "name"));
+                                        CensusManager.getInstance().requestStart(StringArgumentType.getString(ctx, "name"));
                                         return 1;
                                     }))
                             .executes(ctx ->

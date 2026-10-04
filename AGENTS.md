@@ -21,8 +21,21 @@ Guidance for maintainers and automation working in this repository.
 
 Per-version artifacts: `versions/<mc>/build/libs/villagercensus-<modver>+<mc>.jar`.
 
-There is currently **no automated test task** (no test sources). Verify changes by building
-all versions and by in-game manual testing.
+```bash
+./gradlew build                 # builds every registered version
+./gradlew test                  # pure-logic unit tests, per registered version
+./gradlew clean build
+./gradlew stonecutterSwitch     # switch the active version (see stonecutter.gradle.kts)
+```
+
+There are unit tests in `src/test/java` (JUnit 5, wired in the central `build.gradle.kts`).
+Stonecutter mirrors `src/test/java` into `versions/<mc>/build/generated/stonecutter/test`, so
+**every registered version compiles and runs the same suite**. Do **not** add
+`sourceSets.test.java.srcDir(rootProject.file("src/test/java"))` — the sources would be compiled
+twice ("duplicate class"). Tests must not touch Minecraft classes: anything reached through
+`malilib`'s `StringUtils.translate` / `Minecraft.getInstance()` needs a bootstrapped game and
+therefore cannot be unit tested. Everything else (trade matching, session/undo/comparison, file-name
+sanitizing, draft/fork/conflict lookups) must stay reachable from a plain JVM.
 
 ## Stonecutter rules — IMPORTANT
 
@@ -62,10 +75,11 @@ the other branch in the `/* ... */` block. Then build all versions.
 command/    Fabric client commands
 census/     session state machine, records, undo stack, interaction manager
 trade/      trade category catalog + matching
-data/       report writer, draft storage, world-id/filename helpers
-mixin/      interact / offers / openScreen / entity-data hooks
+data/       report writer, report reader, draft storage, world-id/filename helpers
+mixin/      interact / offers / openScreen / entity-data / pick-ray hooks
+compat/     optional integrations (ModMenu entry point, offers-hud probe)
 render/     HUD (Fabric HUD API: HudElementRegistry for 26.1+, HudRenderCallback below)
-gui/        config screen + searchable trade category picker
+gui/        config screen, trade category picker, draft resume + start-conflict screens
 config/     malilib config options and hotkeys
 event/      malilib init, keybind callbacks, world load listener
 util/       version shims and name formatting
@@ -80,6 +94,17 @@ Interaction contract (do not break):
   `MenuType.MERCHANT`.
 - `handleSetEntityData` only decodes the shared-flags byte to track glow from non-census
   sources; it never mutates anything.
+- `MixinClientPacketListener` carries `@Mixin(priority = 900)` so all three packet hooks run ahead
+  of offers-hud (default 1000) and the container id is recorded before anyone can cancel. Mixin
+  0.8.5's `@Inject` has **no** `priority` attribute — do not try to add one per injector.
+- Exactly one mod sends `ServerboundContainerClosePacket`: `compat/offershud/OffersHudCompat`
+  probes offers-hud's static `openWindow` flag reflectively and returns `true` when offers-hud will
+  close the container itself. If the probe throws, it returns `false` and this mod closes the
+  container itself — never leave a container open.
+- `mixin/MixinProjectileUtil` re-runs `ProjectileUtil.getEntityHitResult` without the hit entity
+  for `passThrough`. It is guarded by a static re-entry flag and by
+  `CensusManager.isPassThroughTarget` (option on, session running and not paused, trigger item in
+  the main hand, entity already recorded). Keep it off by default.
 - **Threading:** `handleMerchantOffers` / `handleOpenScreen` / `handleSetEntityData` run on the
   Netty network thread. They must only touch thread-safe state (the offers/base-glow queues,
   `volatile` pending/tick flags) and must never call malilib message/render helpers or mutate
@@ -99,6 +124,24 @@ Interaction contract (do not break):
   matching position/profession recover their UUID in `CensusManager.resolveMissingUuids`). A
   cross-dimension source forks anyway and emits `villagercensus.message.fork_cross_dimension`.
   The source file is never modified.
+- `DraftStorage` search methods take the report directory as a `Path` so they are unit-testable
+  without a `Minecraft` instance; the `String worldId` overloads just resolve it via
+  `ReportWriter.reportDirectory`.
+- Files whose name contains `_orphan_` (produced by `DraftStorage.archive`) are **excluded** from
+  `findDrafts`, so an archived draft is never offered again as a resume candidate, a fork source or
+  a start conflict. Keep that filter.
+- `DraftStorage.findConflicts(dir, dimension, safeName)` classifies a `/census start` collision as
+  `DRAFT` / `DIMENSION_MISMATCH` / `CORRUPT` / `COMPLETED_REPORT` / `NONE`, in that priority order.
+  `gui/GuiStartConflict` maps each kind to a button set and previews the final file name through
+  `ReportWriter.reportPath`, which is the same helper the writer uses, so the preview cannot drift.
+- `/census start` goes through `CensusManager.requestStart`, which validates, classifies the
+  collision and either starts right away or opens `gui/GuiStartConflict`. With
+  `startConflictPrompt` off it falls back to the old "start and warn" behaviour. Do not delete the
+  pending-conflict state (`pendingStartName` / `pendingConflict`) without also updating
+  `GuiStartConflict`.
+- Joining a world that holds a draft sets `draftPromptDelay`; the resume screen is opened from
+  `onClientTick` after the delay (never from `onWorldLoadPost`, which would fight the loading
+  screen) and only when no other screen is open. `VERIFY_REFRESH_TICKS` is 10 gt, per Q31.
 - `recordCoordinates` is honoured in `buildRecord`: when off, `VillagerRecord.hasCoordinates` is
   false, the report omits the `pos` field and coordinate diffs are skipped.
 - A professed adult villager whose offers never arrive before `offersTimeoutTicks` is recorded
@@ -119,12 +162,21 @@ Interaction contract (do not break):
   source, captured from server `ClientboundSetEntityDataPacket`s (shared-flags byte, item id 0,
   bit 6) and applied on the client thread in `drainBaseUpdates`. `/census reverse` flips which
   villagers get the census glow (counted vs. uncounted) and the HUD shows the mode; on stop /
-  abort / world exit the base glow is restored, so other sources are never clobbered.
+  abort / world exit the base glow is restored, so other sources are never clobbered. When
+  `markWhenNotHolding` is off, `markersVisible` suppresses the markers (and restores them) unless
+  the trigger item is in the main hand.
+- HUD placement is resolved by `CensusHud.layout` from `hudPosition` (malilib's `HudAlignment`,
+  also used for the config option list), `hudOffsetX` and `hudOffsetY`. Both HUD branches must use
+  `graphics.guiWidth()` / `graphics.guiHeight()`, which exist in 1.21.11's `GuiGraphics` and in
+  26.1+'s `GuiGraphicsExtractor`.
 - Feedback uses `util/Messages` which sends vanilla action-bar text, avoiding malilib's
   opaque on-screen message overlay.
 - HUD is drawn through the Fabric HUD API (`HudElementRegistry` on 26.1+, `HudRenderCallback`
   below) with no background. It shows draft status when no session is active, and the current
   marker mode while a session is active.
+- The confirmation screens are malilib `GuiBase` subclasses (`gui/GuiDraftResume`,
+  `gui/GuiStartConflict`) and use only `GuiBase`/`GuiTextFieldGeneric`/`ButtonGeneric` APIs that
+  exist in both the 1.21.11 and 26.3 malilib branches. Close them with `GuiBase.openGui(null)`.
 - ModMenu integration is `compat/modmenu/ModMenuImpl` (optional; the `modmenu` entrypoint is
   only read when ModMenu is installed).
 
