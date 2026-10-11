@@ -52,8 +52,34 @@ offers are captured and counted.
 /census discard         archive the found draft / 归档半成品
 /census pause           pause/resume statistics / 暂停或恢复统计
 /census reverse         toggle whether counted or uncounted villagers glow / 切换已统计/未统计发光
+/census books           toggle librarian book-competitiveness markers / 切换图书管理员附魔书竞争力标记
 /census help            show help / 显示帮助
 ```
+
+### Marker modes / 标记模式
+
+While a census runs, glowing markers have three modes; `/census reverse` and `/census books`
+switch between them and the HUD always shows the active one. The book mode stashes the
+normal/reversed state and restores it when turned off.
+
+普查进行中发光标记有三种模式；`/census reverse` 与 `/census books` 负责切换，HUD 始终显示
+当前模式。附魔书竞争力模式开启期间会暂存常规/反转状态，关闭后恢复原状态。
+
+- **Normal（常规）** — counted villagers glow. / 已统计的村民发光。
+- **Reversed（反转）** — uncounted villagers glow. / 未统计的村民发光。
+- **Book competitiveness（附魔书竞争力）** — only adult librarians glow: green when at least one
+  of their enchanted-book trades has no cheaper equal offer anywhere in the session, red otherwise
+  (equal prices do not eliminate each other; librarians whose offers were never captured show red
+  as a reminder). The comparison covers every record in the session regardless of dimension and
+  never touches reports or drafts. The glow outline is tinted via client-only fake teams
+  (`vc_book_good` / `vc_book_bad`), which can also change the villagers' name-tag color as a known
+  side effect; with `recordAllTrades` off and the librarian enchanted-book category unselected the
+  mode warns once because the verdict would be unreliable.
+  仅成年图书管理员发光：会话内不存在更低价的同附魔组合、同币种交易即为“有竞争力”（绿），
+  否则“无竞争力”（红）；同价并列不互相淘汰，未采到交易数据的图书管理员按红色提醒重试。
+  比较范围为会话内全部记录（不分维度），不影响报告与半成品。描边颜色通过纯客户端假队伍
+  （`vc_book_good` / `vc_book_bad`）实现，可能连带改变村民名牌颜色（已知附带效果）；若
+  `recordAllTrades` 关闭且未选择图书管理员附魔书类别，开启时会警告一次（此时判定不可靠）。
 
 ### Confirmation screens / 确认界面
 
@@ -110,8 +136,10 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
   “选择交易类别…”按钮编辑，界面已把同义变体（颜色、船、探险地图、价格顺序等）合并为一项
   / category keys (`profession/id`) used when the above is off; edit them with the config
   screen's "Select Trade Categories..." picker, which collapses variant trades into one entry.
-- `glowingMarker` — 给已统计村民加发光描边；`/census reverse` 可反转为“未统计发光”
-  / mark recorded villagers with Glowing; `/census reverse` flips it to mark uncounted ones.
+- `glowingMarker` — 给已统计村民加发光描边；`/census reverse` 反转为“未统计发光”，
+  `/census books` 切换为图书管理员附魔书竞争力双色标记（见“标记模式”）
+  / mark recorded villagers with Glowing; `/census reverse` flips it to mark uncounted ones and
+  `/census books` switches to the librarian book-competitiveness mode (see "Marker modes").
 - `markWhenNotHolding` — 关闭后主手持的不是触发物品时不再显示发光标记
   / when off, glowing markers are hidden unless the trigger item is in the main hand.
 - `passThrough` — 普查中手持触发物品时，准星跳过本次已统计的村民以选中其后方实体（默认关闭；
@@ -142,24 +170,25 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
   / ask for confirmation when `/census start` collides with an existing draft or report.
 - `debugLog` — 输出调试日志 / extra logging.
 
-Hotkeys (all default unbound): `openConfigGui`, `toggleStats`, `undoLast`.
-快捷键（默认均无绑定）：打开配置界面、暂停/恢复统计、撤销上一次。
+Hotkeys (all default unbound): `openConfigGui`, `toggleStats`, `undoLast`, `toggleBookMarker`.
+快捷键（默认均无绑定）：打开配置界面、暂停/恢复统计、撤销上一次、切换附魔书竞争力标记。
 
 ## HUD / 界面显示
 
 While a session is running the HUD shows the session name and dimension, the villager count,
-profession count, baby count, the current marker mode (`/census reverse`), any pending update, a
-`waiting for offers X/Y ticks` line while a villager is being captured, the `verify X/N` progress
-after resuming, and the last recorded villager (profession, position, health, remark). It is drawn
-through the Fabric HUD API, stays visible until you stop or abort, and has no background box. The
-anchor corner and pixel offset are configurable (`hudPosition`, `hudOffsetX`, `hudOffsetY`). With no
-active session but a draft present it shows the draft name and `loaded X/N` plus the commands.
+profession count, baby count, the current marker mode (normal / reversed / book competitiveness),
+any pending update, a `waiting for offers X/Y ticks` line while a villager is being captured, the
+`verify X/N` progress after resuming, and the last recorded villager (profession, position, health,
+remark). It is drawn through the Fabric HUD API, stays visible until you stop or abort, and has no
+background box. The anchor corner and pixel offset are configurable (`hudPosition`, `hudOffsetX`,
+`hudOffsetY`). With no active session but a draft present it shows the draft name and `loaded X/N`
+plus the commands.
 
 普查进行中 HUD 会显示：会话名与维度、已统计数量、职业数、幼年数、当前标记模式
-（`/census reverse`）、待确认更新、抓取中的 `等待交易回包 X/Y tick`、续普查时的 `verify X/N` 复核进度，
-以及最近一只村民的职业、坐标、血量与备注。HUD 通过 Fabric HUD API 绘制，会一直显示到 stop/abort，
-没有背景色块，贴靠的边角与偏移可通过 `hudPosition`、`hudOffsetX`、`hudOffsetY` 调整。没有会话但存在
-半成品时显示半成品名与 `loaded X/N` 及命令提示。
+（常规 / 反转 / 附魔书竞争力）、待确认更新、抓取中的 `等待交易回包 X/Y tick`、续普查时的
+`verify X/N` 复核进度，以及最近一只村民的职业、坐标、血量与备注。HUD 通过 Fabric HUD API 绘制，
+会一直显示到 stop/abort，没有背景色块，贴靠的边角与偏移可通过 `hudPosition`、`hudOffsetX`、
+`hudOffsetY` 调整。没有会话但存在半成品时显示半成品名与 `loaded X/N` 及命令提示。
 
 ## How it works / 工作原理
 
@@ -181,6 +210,13 @@ active session but a draft present it shows the draft name and `loaded X/N` plus
   / only active with `passThrough` on, a running session and the trigger item in hand: if the hit is
   a villager this session already counted, the ray is repeated without it so the entity behind wins;
   the original hit is kept when there is nothing behind.
+- 附魔书竞争力模式的绿/红描边来自纯客户端假队伍：发光描边颜色取 `Entity#getTeamColor`，本 Mod 在
+  客户端记分板上建 `vc_book_good`/`vc_book_bad` 两个队伍并写入成员，不向服务端发包；队伍对象随世界
+  销毁，村民被释放或退出模式时移出队伍。
+  / The green/red outlines of the book-competitiveness mode come from client-only fake teams: the
+  glow outline color is `Entity#getTeamColor`, so the mod joins librarians into `vc_book_good` /
+  `vc_book_bad` on the client scoreboard. Nothing is sent to the server; teams die with the world and
+  members are released when their marker is.
 
 ## Compatibility / 兼容性
 

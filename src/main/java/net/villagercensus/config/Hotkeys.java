@@ -12,10 +12,12 @@ public class Hotkeys
     public static final ConfigHotkey OPEN_CONFIG_GUI = new ConfigHotkey("openConfigGui", "").apply(HOTKEY_KEY);
     public static final ConfigHotkey TOGGLE_STATS = new ConfigHotkey("toggleStats", "").apply(HOTKEY_KEY);
     public static final ConfigHotkey UNDO_LAST = new ConfigHotkey("undoLast", "").apply(HOTKEY_KEY);
+    public static final ConfigHotkey TOGGLE_BOOK_MARKER = new ConfigHotkey("toggleBookMarker", "").apply(HOTKEY_KEY);
 
     public static final ImmutableList<ConfigHotkey> HOTKEY_LIST = ImmutableList.of(
             OPEN_CONFIG_GUI,
             TOGGLE_STATS,
-            UNDO_LAST
+            UNDO_LAST,
+            TOGGLE_BOOK_MARKER
     );
 }

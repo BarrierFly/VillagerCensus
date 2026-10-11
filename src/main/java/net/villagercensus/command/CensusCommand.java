@@ -101,6 +101,11 @@ public class CensusCommand
                     {
                         CensusManager.getInstance().toggleReverseMarkers();
                         return 1;
+                    }))
+                    .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("books").executes(ctx ->
+                    {
+                        CensusManager.getInstance().toggleBookMarkers();
+                        return 1;
                     }));
 
             dispatcher.register(root);
@@ -120,6 +125,7 @@ public class CensusCommand
         send(source, "villagercensus.command.help.discard");
         send(source, "villagercensus.command.help.pause");
         send(source, "villagercensus.command.help.reverse");
+        send(source, "villagercensus.command.help.books");
     }
 
     private static void send(FabricClientCommandSource source, String key)

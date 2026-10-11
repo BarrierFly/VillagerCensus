@@ -145,6 +145,10 @@
   "villagercensus.config.hotkeys.comment.undoLast": "Undo the most recent successful record or update.",
   "villagercensus.config.hotkeys.name.undoLast": "Undo Last Entry",
 
+  "villagercensus.config.hotkeys.prettyName.toggleBookMarker": "Toggle Book Competitiveness Markers",
+  "villagercensus.config.hotkeys.comment.toggleBookMarker": "Toggle the librarian book-competitiveness marker mode: competitive librarians glow green, the others red.",
+  "villagercensus.config.hotkeys.name.toggleBookMarker": "Toggle Book Competitiveness Markers",
+
   "villagercensus.message.name_required": "You must give the census a name.",
   "villagercensus.message.already_running": "A census is already running. Use /census stop or /census abort first.",
   "villagercensus.message.draft_exists": "A draft named %s already exists. Use /census resume to continue it.",
@@ -186,6 +190,9 @@
   "villagercensus.message.glowing_disabled": "Glowing markers are disabled in the config.",
   "villagercensus.message.reverse_on": "Marker mode reversed: uncounted villagers glow.",
   "villagercensus.message.reverse_off": "Marker mode restored: counted villagers glow.",
+  "villagercensus.message.books_on": "Book competitiveness markers on: librarians glow green when competitive, red when not.",
+  "villagercensus.message.books_off": "Book competitiveness markers off.",
+  "villagercensus.message.books_filter_warning": "Record All Trades is off and the librarian enchanted-book category is not selected; the filtered trades make the competitiveness markers unreliable.",
 
   "villagercensus.command.help.start": "/census start <name> - start a census in the current dimension",
   "villagercensus.command.help.fork": "/census fork <name> - fork an existing draft/report and continue counting",
@@ -198,6 +205,7 @@
   "villagercensus.command.help.discard": "/census discard - archive the found draft",
   "villagercensus.command.help.pause": "/census pause - pause/resume statistics",
   "villagercensus.command.help.reverse": "/census reverse - toggle whether counted or uncounted villagers glow",
+  "villagercensus.command.help.books": "/census books - toggle librarian book-competitiveness markers (green = competitive, red = not)",
 
   "villagercensus.hud.draft": "Census draft: %s",
   "villagercensus.hud.draft_loaded": "loaded %s/%s",
@@ -207,6 +215,7 @@
   "villagercensus.hud.count": "count %s | professions %s | babies %s",
   "villagercensus.hud.marker_normal": "marker: normal (counted glow)",
   "villagercensus.hud.marker_reversed": "marker: reversed (uncounted glow)",
+  "villagercensus.hud.marker_books": "marker: book competitiveness (green = competitive / red = not)",
   "villagercensus.hud.pending_update": "pending update: right-click again to confirm",
   "villagercensus.hud.waiting_offers": "waiting for offers %s/%s ticks...",
   "villagercensus.hud.verify": "verify %s/%s",

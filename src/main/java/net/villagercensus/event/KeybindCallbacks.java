@@ -50,6 +50,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             CensusManager.getInstance().undo();
             return true;
         }
+        else if (key == Hotkeys.TOGGLE_BOOK_MARKER.getKeybind())
+        {
+            CensusManager.getInstance().toggleBookMarkers();
+            return true;
+        }
 
         return false;
     }

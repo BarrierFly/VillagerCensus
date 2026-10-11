@@ -143,9 +143,11 @@ public class CensusHud
 
         if (Configs.Generic.GLOWING_MARKER.getBooleanValue() && manager.markersVisible(mc))
         {
-            lines.add(StringUtils.translate(manager.isReverseMarkers()
-                    ? "villagercensus.hud.marker_reversed"
-                    : "villagercensus.hud.marker_normal"));
+            lines.add(StringUtils.translate(manager.isBookMarkers()
+                    ? "villagercensus.hud.marker_books"
+                    : manager.isReverseMarkers()
+                            ? "villagercensus.hud.marker_reversed"
+                            : "villagercensus.hud.marker_normal"));
         }
 
         if (manager.isWaitingForOffers())

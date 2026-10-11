@@ -62,6 +62,8 @@ Key version boundaries used:
   - Fabric API client commands (`ClientCommandManager` vs `ClientCommands`) — avoided by
     using Brigadier directly.
 - `< 26.2` vs `>= 26.2`: `Minecraft.screen` field vs `mc.gui.screen()`.
+- `< 26.2` vs `>= 26.2`: `PlayerTeam.setColor(ChatFormatting)` vs
+  `setColor(Optional<TeamColor>)` (TeamColor enum) — go through `Compat.setTeamColor`.
 - `ResourceKey.location()` is **`ResourceKey.identifier()`** in these mappings.
 - `1.20.6+`: `MerchantOffer` uses `ItemCost` (not relevant to the shared code, which reads
   `getBaseCostA()`/`getCostB()`/`getResult()`).
@@ -165,6 +167,17 @@ Interaction contract (do not break):
   abort / world exit the base glow is restored, so other sources are never clobbered. When
   `markWhenNotHolding` is off, `markersVisible` suppresses the markers (and restores them) unless
   the trigger item is in the main hand.
+- Book-competitiveness mode (`/census books`, `CensusManager.bookMarkers`): while on, only adult
+  librarian records glow, tinted green (`vc_book_good`) or red (`vc_book_bad`) by
+  `census/BookCompetitiveness` — a pure per-session verdict (same enchantment combo + cost items,
+  strictly lower price wins, equal prices coexist; dimension is ignored; adults without trade data
+  are deliberately red). The tint uses client-side fake teams on `mc.level.getScoreboard()`
+  (`PlayerTeam` + `addPlayerToTeam(uuid-string, team)`, colors via `Compat.setTeamColor`): nothing
+  is networked, the teams die with the world, and every team join/leave happens inside
+  `maintainMarkers` / `restoreAllMarkers` on the client thread. The index is cached in `bookIndex`
+  and invalidated by `bookIndexDirty` at every session mutation (add/update/undo/adopt/fork); it
+  never feeds reports or drafts. While the mode is on, `reverseMarkers` keeps its value untouched
+  and resumes when the mode is turned off.
 - HUD placement is resolved by `CensusHud.layout` from `hudPosition` (malilib's `HudAlignment`,
   also used for the config option list), `hudOffsetX` and `hudOffsetY`. Both HUD branches must use
   `graphics.guiWidth()` / `graphics.guiHeight()`, which exist in 1.21.11's `GuiGraphics` and in

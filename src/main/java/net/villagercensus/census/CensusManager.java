@@ -1,6 +1,7 @@
 package net.villagercensus.census;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +35,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import net.villagercensus.Reference;
 import net.villagercensus.config.Configs;
 import net.villagercensus.data.DraftStorage;
@@ -72,6 +75,14 @@ public class CensusManager
     private volatile boolean trackingMarkers;
     private final java.util.concurrent.ConcurrentLinkedQueue<BaseGlowUpdate> baseUpdates =
             new java.util.concurrent.ConcurrentLinkedQueue<>();
+
+    // Book-competitiveness mode (plan section 1). While on, only adult librarian records glow and
+    // are tinted green/red through client-side fake teams; reverseMarkers keeps its value and
+    // resumes untouched when the mode is turned off.
+    private volatile boolean bookMarkers;
+    private Map<UUID, Boolean> bookIndex = java.util.Collections.emptyMap();
+    private boolean bookIndexDirty = true;
+    private final Map<UUID, String> bookTeams = new HashMap<>();
 
     private int verifyTotal;
     private int verifyLoaded;
@@ -203,6 +214,7 @@ public class CensusManager
         this.session = new CensusSession(rawName, safeName, worldId, dimension, System.currentTimeMillis());
         this.pending = null;
         this.pendingUpdate = null;
+        this.bookIndexDirty = true;
         this.clearPendingStart();
 
         if (conflict != null && conflict.kind == DraftStorage.ConflictKind.DRAFT)
@@ -323,6 +335,7 @@ public class CensusManager
 
         this.restoreAllMarkers();
         this.reverseMarkers = false;
+        this.bookMarkers = false;
         Messages.success( "villagercensus.message.stopped",
                 this.session.rawName, this.session.totalCount(),
                 report != null ? report.toAbsolutePath().toString() : "-");
@@ -343,6 +356,7 @@ public class CensusManager
 
         this.restoreAllMarkers();
         this.reverseMarkers = false;
+        this.bookMarkers = false;
         Messages.info( "villagercensus.message.aborted", this.session.rawName);
         this.session = null;
         this.pending = null;
@@ -380,6 +394,7 @@ public class CensusManager
             return null;
         }
 
+        this.bookIndexDirty = true;
         Messages.info( "villagercensus.message.undone");
         return entry;
     }
@@ -526,6 +541,7 @@ public class CensusManager
         this.session = loaded;
         this.pending = null;
         this.pendingUpdate = null;
+        this.bookIndexDirty = true;
 
         this.clearResumeCandidate();
         this.clearPendingStart();
@@ -638,8 +654,11 @@ public class CensusManager
         this.baseGlow.clear();
         this.managed.clear();
         this.baseUpdates.clear();
+        this.bookTeams.clear();
+        this.bookIndexDirty = true;
         this.trackingMarkers = false;
         this.reverseMarkers = false;
+        this.bookMarkers = false;
         this.clearResumeCandidate();
         this.clearPendingStart();
         this.verifyTotal = 0;
@@ -970,6 +989,7 @@ public class CensusManager
         else
         {
             this.session.addRecord(record);
+            this.bookIndexDirty = true;
             Messages.success( "villagercensus.message.recorded",
                     villager.getVillagerData().profession().unwrapKey()
                             .map(key -> key.identifier().toString()).orElse("minecraft:none"),
@@ -992,10 +1012,12 @@ public class CensusManager
         if (old == null)
         {
             this.session.addRecord(update.record);
+            this.bookIndexDirty = true;
         }
         else
         {
             this.session.updateRecord(old, update.record.copy());
+            this.bookIndexDirty = true;
         }
 
         Messages.success( "villagercensus.message.updated");
@@ -1378,6 +1400,11 @@ public class CensusManager
     private static final int SHARED_FLAGS_DATA_ID = 0;
     private static final int GLOWING_FLAG_BIT = 6;
 
+    // Client-only fake teams tinting the glow outline of book-competitive (green) and
+    // non-competitive (red) librarians. The visible glow color is Entity#getTeamColor.
+    private static final String TEAM_BOOK_GOOD = "vc_book_good";
+    private static final String TEAM_BOOK_BAD = "vc_book_bad";
+
     /**
      * Called from the network thread by the mixin for entity-data updates. The server sends the
      * full shared-flags byte whenever any of its bits change, so the glowing bit in it is the
@@ -1424,6 +1451,81 @@ public class CensusManager
     public boolean isReverseMarkers()
     {
         return this.reverseMarkers;
+    }
+
+    public boolean isBookMarkers()
+    {
+        return this.bookMarkers;
+    }
+
+    /**
+     * Toggles the book-competitiveness marker mode. Turning it on only warns once when trade
+     * filtering would make the verdict unreliable; the reverse-marker state is left untouched and
+     * takes effect again when the mode is turned off.
+     */
+    public void toggleBookMarkers()
+    {
+        if (!this.hasSession())
+        {
+            Messages.error( "villagercensus.message.not_running");
+            return;
+        }
+
+        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue())
+        {
+            Messages.error( "villagercensus.message.glowing_disabled");
+            return;
+        }
+
+        this.bookMarkers = !this.bookMarkers;
+
+        if (this.bookMarkers)
+        {
+            this.ensureBookIndex();
+            this.warnBookFilterIfNeeded();
+        }
+
+        Messages.info(this.bookMarkers
+                ? "villagercensus.message.books_on"
+                : "villagercensus.message.books_off");
+    }
+
+    /**
+     * With Record All Trades off and the librarian enchanted-book category not selected, book
+     * trades are filtered out of the records and every librarian would show red.
+     */
+    private void warnBookFilterIfNeeded()
+    {
+        if (Configs.Generic.RECORD_ALL_TRADES.getBooleanValue())
+        {
+            return;
+        }
+
+        List<String> selected = Configs.Generic.SELECTED_CATEGORIES.getStrings();
+
+        for (TradeCategory category : TradeCatalog.get().allCategories().values())
+        {
+            if (BookCompetitiveness.LIBRARIAN.equals(category.profession)
+                    && "sell_enchanted_book".equals(category.id)
+                    && category.selectedBy(selected))
+            {
+                return;
+            }
+        }
+
+        Messages.warn( "villagercensus.message.books_filter_warning");
+    }
+
+    private void ensureBookIndex()
+    {
+        if (this.bookIndexDirty)
+        {
+            CensusSession current = this.session;
+            this.bookIndex = current != null
+                    ? BookCompetitiveness.compute(current.records)
+                    : java.util.Collections.emptyMap();
+            this.bookIndexDirty = false;
+        }
     }
 
     /**
@@ -1527,9 +1629,24 @@ public class CensusManager
         }
 
         boolean reverse = this.reverseMarkers;
+        boolean books = this.bookMarkers;
         Set<UUID> targets = new HashSet<>();
 
-        if (reverse)
+        if (books)
+        {
+            this.ensureBookIndex();
+
+            for (VillagerRecord record : this.session.records)
+            {
+                if (record.uuid != null && !record.baby
+                        && BookCompetitiveness.LIBRARIAN.equals(record.professionId)
+                        && loaded.containsKey(record.uuid))
+                {
+                    targets.add(record.uuid);
+                }
+            }
+        }
+        else if (reverse)
         {
             // In reverse mode every loaded villager is managed so that the uncounted ones glow.
             targets.addAll(loaded.keySet());
@@ -1545,15 +1662,26 @@ public class CensusManager
             }
         }
 
+        if (!books)
+        {
+            this.clearBookTeams();
+        }
+
         this.trackingMarkers = true;
 
         for (UUID uuid : targets)
         {
             Villager villager = loaded.get(uuid);
             boolean recorded = this.session.getByUuid(uuid) != null;
-            boolean censusGlow = reverse ? !recorded : recorded;
+            boolean censusGlow = books || (reverse ? !recorded : recorded);
             boolean base = this.baseGlow.computeIfAbsent(uuid, key -> villager.isCurrentlyGlowing());
             setGlow(villager, base || censusGlow);
+
+            if (books)
+            {
+                this.updateBookTeam(villager, this.bookIndex.getOrDefault(uuid, false));
+            }
+
             this.managed.add(uuid);
         }
 
@@ -1569,6 +1697,7 @@ public class CensusManager
                     setGlow(villager, this.baseGlow.getOrDefault(uuid, false));
                 }
 
+                this.releaseBookTeam(uuid);
                 this.managed.remove(uuid);
                 this.baseGlow.remove(uuid);
             }
@@ -1594,10 +1723,78 @@ public class CensusManager
             }
         }
 
+        this.clearBookTeams();
         this.managed.clear();
         this.baseGlow.clear();
         this.baseUpdates.clear();
         this.trackingMarkers = false;
+    }
+
+    /**
+     * Puts a glowing librarian into the green or red fake team on the client scoreboard. Nothing
+     * is sent to the server; the scoreboard (and with it both teams) is replaced on every world
+     * change, so the teams are (re)created lazily here and never managed across worlds.
+     */
+    private void updateBookTeam(Villager villager, boolean good)
+    {
+        String desired = good ? TEAM_BOOK_GOOD : TEAM_BOOK_BAD;
+        UUID uuid = villager.getUUID();
+        ClientLevel level = Minecraft.getInstance().level;
+
+        if (level == null || desired.equals(this.bookTeams.get(uuid)))
+        {
+            return;
+        }
+
+        Scoreboard scoreboard = level.getScoreboard();
+        PlayerTeam team = scoreboard.getPlayerTeam(desired);
+
+        if (team == null)
+        {
+            team = scoreboard.addPlayerTeam(desired);
+        }
+
+        Compat.setTeamColor(team, good);
+
+        // addPlayerToTeam moves the member out of any previous team first, so switching
+        // between green and red needs no explicit removal.
+        scoreboard.addPlayerToTeam(uuid.toString(), team);
+        this.bookTeams.put(uuid, desired);
+    }
+
+    private void releaseBookTeam(UUID uuid)
+    {
+        if (this.bookTeams.remove(uuid) != null)
+        {
+            ClientLevel level = Minecraft.getInstance().level;
+
+            if (level != null)
+            {
+                level.getScoreboard().removePlayerFromTeam(uuid.toString());
+            }
+        }
+    }
+
+    private void clearBookTeams()
+    {
+        if (this.bookTeams.isEmpty())
+        {
+            return;
+        }
+
+        ClientLevel level = Minecraft.getInstance().level;
+
+        if (level != null)
+        {
+            Scoreboard scoreboard = level.getScoreboard();
+
+            for (UUID uuid : this.bookTeams.keySet())
+            {
+                scoreboard.removePlayerFromTeam(uuid.toString());
+            }
+        }
+
+        this.bookTeams.clear();
     }
 
     private static void setGlow(Villager villager, boolean value)
@@ -1640,8 +1837,11 @@ public class CensusManager
             this.baseGlow.clear();
             this.managed.clear();
             this.baseUpdates.clear();
+            this.bookTeams.clear();
+            this.bookIndexDirty = true;
             this.trackingMarkers = false;
             this.reverseMarkers = false;
+            this.bookMarkers = false;
             this.verifyTotal = 0;
             this.verifyLoaded = 0;
             this.clearResumeCandidate();

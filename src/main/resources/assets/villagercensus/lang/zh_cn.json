@@ -145,6 +145,10 @@
   "villagercensus.config.hotkeys.comment.undoLast": "撤销最近一次成功的新增或覆盖更新。",
   "villagercensus.config.hotkeys.name.undoLast": "撤销上一次",
 
+  "villagercensus.config.hotkeys.prettyName.toggleBookMarker": "切换附魔书竞争力标记",
+  "villagercensus.config.hotkeys.comment.toggleBookMarker": "切换图书管理员附魔书竞争力标记模式：有竞争力的发绿光，其余发红光。",
+  "villagercensus.config.hotkeys.name.toggleBookMarker": "切换附魔书竞争力标记",
+
   "villagercensus.message.name_required": "必须为本次普查指定名称。",
   "villagercensus.message.already_running": "已有普查在进行，请先 /census stop 或 /census abort。",
   "villagercensus.message.draft_exists": "已存在名为 %s 的半成品，可用 /census resume 继续。",
@@ -186,6 +190,9 @@
   "villagercensus.message.glowing_disabled": "配置中已关闭发光标记。",
   "villagercensus.message.reverse_on": "标记模式已反转：未统计的村民发光。",
   "villagercensus.message.reverse_off": "标记模式已还原：已统计的村民发光。",
+  "villagercensus.message.books_on": "附魔书竞争力标记已开启：图书管理员发光，绿色=有竞争力，红色=无竞争力。",
+  "villagercensus.message.books_off": "附魔书竞争力标记已关闭。",
+  "villagercensus.message.books_filter_warning": "“记录全部交易”已关闭且未选择图书管理员的附魔书类别；交易被筛选时竞争力标记不可靠。",
 
   "villagercensus.command.help.start": "/census start <名称> - 在当前维度开始普查",
   "villagercensus.command.help.fork": "/census fork <名称> - fork 已存在的半成品/报告并继续统计",
@@ -198,6 +205,7 @@
   "villagercensus.command.help.discard": "/census discard - 归档找到的半成品",
   "villagercensus.command.help.pause": "/census pause - 暂停/恢复统计",
   "villagercensus.command.help.reverse": "/census reverse - 切换已统计/未统计村民发光",
+  "villagercensus.command.help.books": "/census books - 切换图书管理员附魔书竞争力标记（绿=有竞争力 / 红=无竞争力）",
 
   "villagercensus.hud.draft": "普查半成品：%s",
   "villagercensus.hud.draft_loaded": "已加载 %s/%s",
@@ -207,6 +215,7 @@
   "villagercensus.hud.count": "数量 %s | 职业 %s | 幼年 %s",
   "villagercensus.hud.marker_normal": "标记：常规（已统计发光）",
   "villagercensus.hud.marker_reversed": "标记：反转（未统计发光）",
+  "villagercensus.hud.marker_books": "标记：附魔书竞争力（绿=有竞争 / 红=无竞争）",
   "villagercensus.hud.pending_update": "待确认更新：再次右键同一村民以确认",
   "villagercensus.hud.waiting_offers": "等待交易回包 %s/%s tick…",
   "villagercensus.hud.verify": "复核 %s/%s",
