@@ -12,8 +12,8 @@ import java.util.UUID;
  * implementation plan). A book trade is competitive when no other participating book trade with
  * the same enchantment combination and the same cost items has a strictly lower price; equal
  * prices do not eliminate each other. A librarian is competitive when at least one of its book
- * trades is; adults without trade data deliberately fall into "not competitive" (red) as a
- * conservative reminder that their offers were never captured.
+ * trades is. Only adult librarians with captured trade data are marked at all; librarians whose
+ * offers never arrived stay unmarked (the capture flow already warns via {@code trade_data_failed}).
  *
  * <p>Pure logic over the record model: no Minecraft classes, unit-testable on a plain JVM.
  */
@@ -26,18 +26,18 @@ public final class BookCompetitiveness
     }
 
     /**
-     * Computes the verdict per adult librarian record. Records that are not adult librarians are
-     * absent from the result; records without a UUID (unresolved TXT forks) still take part in the
-     * price comparison but produce no entry since they can never become a glow target.
+     * Computes the verdict per marked librarian record. Records that are not adult librarians
+     * with trade data are absent from the result; records without a UUID (unresolved TXT forks)
+     * still take part in the price comparison but produce no entry since they can never become a
+     * glow target.
      */
     public static Map<UUID, Boolean> compute(List<VillagerRecord> records)
     {
         Map<String, Integer> lowest = new HashMap<>();
-        Map<String, List<TradeEntry>> byGroup = new HashMap<>();
 
         for (VillagerRecord record : records)
         {
-            if (!contributes(record))
+            if (!isMarked(record))
             {
                 continue;
             }
@@ -50,7 +50,6 @@ public final class BookCompetitiveness
                 }
 
                 String group = groupKey(trade);
-                byGroup.computeIfAbsent(group, key -> new ArrayList<>()).add(trade);
                 Integer lowestPrice = lowest.get(group);
 
                 if (lowestPrice == null || trade.cost1Count < lowestPrice)
@@ -71,15 +70,12 @@ public final class BookCompetitiveness
 
             boolean competitive = false;
 
-            if (record.hasTradeData)
+            for (TradeEntry trade : record.trades)
             {
-                for (TradeEntry trade : record.trades)
+                if (trade.enchantedBook && lowest.getOrDefault(groupKey(trade), -1) == trade.cost1Count)
                 {
-                    if (trade.enchantedBook && lowest.getOrDefault(groupKey(trade), -1) == trade.cost1Count)
-                    {
-                        competitive = true;
-                        break;
-                    }
+                    competitive = true;
+                    break;
                 }
             }
 
@@ -90,17 +86,14 @@ public final class BookCompetitiveness
     }
 
     /**
-     * Records whose book trades take part in the price comparison. Adults without trade data are
-     * still marked (red) but contribute nothing to compare against.
+     * Records whose book trades are compared and that get a green/red marker: adult librarians
+     * whose offers were captured. A librarian with trade data but no book trade stays in the
+     * result as "not competitive" (red); without trade data it is not marked at all.
      */
-    private static boolean contributes(VillagerRecord record)
-    {
-        return isMarked(record) && record.hasTradeData;
-    }
-
     private static boolean isMarked(VillagerRecord record)
     {
-        return record != null && !record.baby && LIBRARIAN.equals(record.professionId);
+        return record != null && !record.baby
+                && LIBRARIAN.equals(record.professionId) && record.hasTradeData;
     }
 
     /**

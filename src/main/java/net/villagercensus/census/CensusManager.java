@@ -76,9 +76,9 @@ public class CensusManager
     private final java.util.concurrent.ConcurrentLinkedQueue<BaseGlowUpdate> baseUpdates =
             new java.util.concurrent.ConcurrentLinkedQueue<>();
 
-    // Book-competitiveness mode (plan section 1). While on, only adult librarian records glow and
-    // are tinted green/red through client-side fake teams; reverseMarkers keeps its value and
-    // resumes untouched when the mode is turned off.
+    // Book-competitiveness mode (plan section 1). While on, only adult librarians with captured
+    // trade data glow and are tinted green/red through client-side fake teams; reverseMarkers
+    // keeps its value and resumes untouched when the mode is turned off.
     private volatile boolean bookMarkers;
     private Map<UUID, Boolean> bookIndex = java.util.Collections.emptyMap();
     private boolean bookIndexDirty = true;
@@ -1640,6 +1640,7 @@ public class CensusManager
             {
                 if (record.uuid != null && !record.baby
                         && BookCompetitiveness.LIBRARIAN.equals(record.professionId)
+                        && record.hasTradeData
                         && loaded.containsKey(record.uuid))
                 {
                     targets.add(record.uuid);

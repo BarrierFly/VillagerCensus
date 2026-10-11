@@ -67,19 +67,21 @@ normal/reversed state and restores it when turned off.
 
 - **Normal（常规）** — counted villagers glow. / 已统计的村民发光。
 - **Reversed（反转）** — uncounted villagers glow. / 未统计的村民发光。
-- **Book competitiveness（附魔书竞争力）** — only adult librarians glow: green when at least one
-  of their enchanted-book trades has no cheaper equal offer anywhere in the session, red otherwise
-  (equal prices do not eliminate each other; librarians whose offers were never captured show red
-  as a reminder). The comparison covers every record in the session regardless of dimension and
-  never touches reports or drafts. The glow outline is tinted via client-only fake teams
-  (`vc_book_good` / `vc_book_bad`), which can also change the villagers' name-tag color as a known
-  side effect; with `recordAllTrades` off and the librarian enchanted-book category unselected the
-  mode warns once because the verdict would be unreliable.
-  仅成年图书管理员发光：会话内不存在更低价的同附魔组合、同币种交易即为“有竞争力”（绿），
-  否则“无竞争力”（红）；同价并列不互相淘汰，未采到交易数据的图书管理员按红色提醒重试。
-  比较范围为会话内全部记录（不分维度），不影响报告与半成品。描边颜色通过纯客户端假队伍
-  （`vc_book_good` / `vc_book_bad`）实现，可能连带改变村民名牌颜色（已知附带效果）；若
-  `recordAllTrades` 关闭且未选择图书管理员附魔书类别，开启时会警告一次（此时判定不可靠）。
+- **Book competitiveness（附魔书竞争力）** — only adult librarians whose offers were captured glow:
+  green when at least one of their enchanted-book trades has no cheaper equal offer anywhere in the
+  session, red otherwise (equal prices do not eliminate each other; librarians whose trade data was
+  never captured are not marked at all — the capture flow already warns about them). The comparison
+  covers every record in the session regardless of dimension and never touches reports or drafts.
+  The glow outline is tinted via client-only fake teams (`vc_book_good` / `vc_book_bad`), which can
+  also change the villagers' name-tag color as a known side effect; with `recordAllTrades` off and
+  the librarian enchanted-book category unselected the mode warns once because the verdict would be
+  unreliable.
+  仅**已采到交易数据**的成年图书管理员发光：会话内不存在更低价的同附魔组合、同币种交易即为
+  “有竞争力”（绿），否则“无竞争力”（红）；同价并列不互相淘汰；未采到交易数据的图书管理员
+  完全不标记（抓取失败时普查流程已有警告提示重试）。比较范围为会话内全部记录（不分维度），
+  不影响报告与半成品。描边颜色通过纯客户端假队伍（`vc_book_good` / `vc_book_bad`）实现，可能
+  连带改变村民名牌颜色（已知附带效果）；若 `recordAllTrades` 关闭且未选择图书管理员附魔书类别，
+  开启时会警告一次（此时判定不可靠）。
 
 ### Confirmation screens / 确认界面
 

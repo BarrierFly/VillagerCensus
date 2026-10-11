@@ -244,7 +244,7 @@ class BookCompetitivenessTest
     }
 
     @Test
-    void librariansWithoutTradeDataAreNotCompetitive()
+    void librariansWithoutTradeDataAreNotMarked()
     {
         UUID noData = UUID.randomUUID();
         VillagerRecord record = librarian(noData, "minecraft:overworld");
@@ -252,7 +252,7 @@ class BookCompetitivenessTest
 
         Map<UUID, Boolean> result = BookCompetitiveness.compute(List.of(record));
 
-        assertFalse(result.get(noData));
+        assertFalse(result.containsKey(noData));
     }
 
     @Test
