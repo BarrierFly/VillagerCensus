@@ -76,6 +76,16 @@ normal/reversed state and restores it when turned off.
   also change the villagers' name-tag color as a known side effect; with `recordAllTrades` off and
   the librarian enchanted-book category unselected the mode warns once because the verdict would be
   unreliable.
+  Trade data that arrives from any source (a vanilla trade screen, an offers-hud crosshair probe,
+  …) refreshes the marker of the villagers this session already recorded, so the verdict follows
+  the latest offers. Observed trades only feed the markers: they never add a record, never change a
+  count and never reach a report or a draft, and they are not filtered by `recordAllTrades` /
+  `selectedCategories` (that filtering serves the report, and applying it here would mark every
+  librarian red). A freshly recorded villager wins over an older observation.
+  任何来源（自己打开交易界面、offers-hud 准星探针等）收到的交易数据都会刷新**会话中已有记录**的
+  村民标记，使判定跟上最新报价。观察到的交易只影响标记：不会新增记录、不改变计数、不进入报告与
+  半成品，也不受 `recordAllTrades` / `selectedCategories` 筛选影响（筛选是为报告服务的，用在这里
+  会把所有图书管理员判成红色）；刚统计进来的记录优先于更早的观察数据。
   仅**已采到交易数据**的成年图书管理员发光：会话内不存在更低价的同附魔组合、同币种交易即为
   “有竞争力”（绿），否则“无竞争力”（红）；同价并列不互相淘汰；未采到交易数据的图书管理员
   完全不标记（抓取失败时普查流程已有警告提示重试）。比较范围为会话内全部记录（不分维度），

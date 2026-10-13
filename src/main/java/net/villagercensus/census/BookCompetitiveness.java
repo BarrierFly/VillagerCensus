@@ -3,8 +3,10 @@ package net.villagercensus.census;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -83,6 +85,62 @@ public final class BookCompetitiveness
         }
 
         return result;
+    }
+
+    /**
+     * Merges the session records with trade data observed through channels other than this mod's
+     * own census flow (e.g. offers-hud probes). At most one record per UUID survives: the observed
+     * one, which is the more recent fact, otherwise the recorded one. Observed UUIDs that are not
+     * recorded at all are appended at the end. Records without a UUID (unresolved TXT forks) keep
+     * their place and still take part in the price comparison.
+     *
+     * <p>Pure logic over the record model, so the merge is unit-testable on a plain JVM.
+     */
+    public static List<VillagerRecord> mergeObserved(List<VillagerRecord> records,
+                                                     Map<UUID, VillagerRecord> observed)
+    {
+        if (observed == null || observed.isEmpty())
+        {
+            return records;
+        }
+
+        List<VillagerRecord> merged = new ArrayList<>(records.size() + observed.size());
+        Set<UUID> seen = new HashSet<>();
+
+        for (VillagerRecord record : records)
+        {
+            UUID uuid = record.uuid;
+            VillagerRecord replacement = uuid != null ? observed.get(uuid) : null;
+
+            if (replacement != null)
+            {
+                if (!seen.add(uuid))
+                {
+                    continue;
+                }
+
+                merged.add(replacement);
+            }
+            else
+            {
+                merged.add(record);
+
+                if (uuid != null)
+                {
+                    seen.add(uuid);
+                }
+            }
+        }
+
+        for (Map.Entry<UUID, VillagerRecord> entry : observed.entrySet())
+        {
+            if (seen.add(entry.getKey()))
+            {
+                merged.add(entry.getValue());
+            }
+        }
+
+        return merged;
     }
 
     /**

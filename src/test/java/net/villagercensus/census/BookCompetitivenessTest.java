@@ -2,6 +2,7 @@ package net.villagercensus.census;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -278,5 +279,94 @@ class BookCompetitivenessTest
         Map<UUID, Boolean> result = BookCompetitiveness.compute(List.of(record));
 
         assertTrue(result.get(uuid));
+    }
+
+    @Test
+    void mergeWithoutObservationsKeepsTheRecordsAsTheyAre()
+    {
+        List<VillagerRecord> records = List.of(
+                librarian(UUID.randomUUID(), "minecraft:overworld", bookTrade("minecraft:protection", 3, 10)),
+                librarian(null, "minecraft:overworld", bookTrade("minecraft:protection", 3, 12)));
+
+        List<VillagerRecord> merged = BookCompetitiveness.mergeObserved(records, Map.of());
+
+        assertEquals(records, merged);
+    }
+
+    @Test
+    void observedRecordReplacesTheRecordedOneOfTheSameUuid()
+    {
+        UUID uuid = UUID.randomUUID();
+        VillagerRecord recorded = librarian(uuid, "minecraft:overworld", bookTrade("minecraft:protection", 3, 30));
+        VillagerRecord observed = librarian(uuid, "minecraft:overworld", bookTrade("minecraft:protection", 3, 10));
+
+        List<VillagerRecord> merged = BookCompetitiveness.mergeObserved(List.of(recorded), Map.of(uuid, observed));
+
+        assertEquals(1, merged.size());
+        assertSame(observed, merged.get(0));
+    }
+
+    @Test
+    void observedUuidsMissingFromTheRecordsAreAppended()
+    {
+        UUID recordedId = UUID.randomUUID();
+        UUID observedId = UUID.randomUUID();
+        VillagerRecord recorded = librarian(recordedId, "minecraft:overworld", bookTrade("minecraft:protection", 3, 10));
+        VillagerRecord observed = librarian(observedId, "minecraft:overworld", bookTrade("minecraft:protection", 3, 12));
+
+        List<VillagerRecord> merged = BookCompetitiveness.mergeObserved(List.of(recorded), Map.of(observedId, observed));
+
+        assertEquals(2, merged.size());
+        assertSame(recorded, merged.get(0));
+        assertSame(observed, merged.get(1));
+    }
+
+    @Test
+    void recordsWithoutUuidSurviveTheMerge()
+    {
+        UUID uuid = UUID.randomUUID();
+        VillagerRecord anonymous = librarian(null, "minecraft:overworld", bookTrade("minecraft:protection", 3, 10));
+        VillagerRecord recorded = librarian(uuid, "minecraft:overworld", bookTrade("minecraft:protection", 3, 12));
+        VillagerRecord observed = librarian(uuid, "minecraft:overworld", bookTrade("minecraft:protection", 3, 12));
+
+        List<VillagerRecord> merged = BookCompetitiveness.mergeObserved(
+                List.of(anonymous, recorded), Map.of(uuid, observed));
+
+        assertEquals(2, merged.size());
+        assertSame(anonymous, merged.get(0));
+        assertSame(observed, merged.get(1));
+    }
+
+    @Test
+    void observedTradesBringBackALibrarianWithoutAnyTradeData()
+    {
+        UUID uuid = UUID.randomUUID();
+        VillagerRecord recorded = librarian(uuid, "minecraft:overworld");
+        recorded.hasTradeData = false;
+        VillagerRecord observed = librarian(uuid, "minecraft:overworld", bookTrade("minecraft:protection", 3, 22));
+
+        assertTrue(BookCompetitiveness.compute(List.of(recorded)).isEmpty());
+
+        Map<UUID, Boolean> result = BookCompetitiveness.compute(
+                BookCompetitiveness.mergeObserved(List.of(recorded), Map.of(uuid, observed)));
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(uuid));
+    }
+
+    @Test
+    void aPricierObservedOfferTurnsTheLibrarianRed()
+    {
+        UUID cheapId = UUID.randomUUID();
+        UUID expensiveId = UUID.randomUUID();
+        VillagerRecord cheapRecorded = librarian(cheapId, "minecraft:overworld", bookTrade("minecraft:protection", 3, 10));
+        VillagerRecord expensiveRecorded = librarian(expensiveId, "minecraft:overworld", bookTrade("minecraft:protection", 3, 12));
+        VillagerRecord expensiveObserved = librarian(expensiveId, "minecraft:overworld", bookTrade("minecraft:protection", 3, 40));
+
+        Map<UUID, Boolean> result = BookCompetitiveness.compute(BookCompetitiveness.mergeObserved(
+                List.of(cheapRecorded, expensiveRecorded), Map.of(expensiveId, expensiveObserved)));
+
+        assertTrue(result.get(cheapId));
+        assertFalse(result.get(expensiveId));
     }
 }

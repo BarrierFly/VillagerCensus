@@ -192,6 +192,7 @@
   "villagercensus.message.reverse_off": "标记模式已还原：已统计的村民发光。",
   "villagercensus.message.books_on": "附魔书竞争力标记已开启：图书管理员发光，绿色=有竞争力，红色=无竞争力。",
   "villagercensus.message.books_off": "附魔书竞争力标记已关闭。",
+  "villagercensus.message.observed_trades": "已用普查之外的交易数据更新 %s 的附魔书竞争力标记。",
   "villagercensus.message.books_filter_warning": "“记录全部交易”已关闭且未选择图书管理员的附魔书类别；交易被筛选时竞争力标记不可靠。",
 
   "villagercensus.command.help.start": "/census start <名称> - 在当前维度开始普查",

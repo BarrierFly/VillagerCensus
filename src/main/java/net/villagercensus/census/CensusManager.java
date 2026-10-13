@@ -59,6 +59,11 @@ public class CensusManager
     private static final long VERIFY_REFRESH_TICKS = 10L;
     // Ticks to wait after joining a world before the resume screen may open.
     private static final int DRAFT_PROMPT_DELAY_TICKS = 20;
+    // A client command runs synchronously inside ChatScreen's key handling, which closes the chat
+    // screen right after the command returns. Opening the conflict screen from the command itself
+    // therefore lasts zero frames, so it is opened from the client tick instead.
+    private static final int CONFLICT_PROMPT_DELAY_TICKS = 2;
+    private static final int CONFLICT_PROMPT_RETRY_TICKS = 20;
 
     private volatile CensusSession session;
     private volatile PendingTarget pending;
@@ -81,8 +86,21 @@ public class CensusManager
     // keeps its value and resumes untouched when the mode is turned off.
     private volatile boolean bookMarkers;
     private Map<UUID, Boolean> bookIndex = java.util.Collections.emptyMap();
+    private List<VillagerRecord> bookRecords = java.util.Collections.emptyList();
     private boolean bookIndexDirty = true;
     private final Map<UUID, String> bookTeams = new HashMap<>();
+
+    // Trade data observed through channels other than this mod's own census flow (a vanilla trade
+    // screen, offers-hud's crosshair probe). The client cannot tell which villager an incoming
+    // offers packet belongs to, so the entity id is taken from the outbound interact packet that
+    // every trade-screen interaction sends first, and paired through the container id. Observed
+    // trades feed the book-competitiveness view only: they are never written back into the
+    // session, so reports, drafts, the restat confirmation and undo stay untouched.
+    private volatile int shadowInteractEntityId = -1;
+    private volatile long shadowInteractTick = -1L;
+    private final Map<Integer, ShadowContainer> shadowContainers =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, VillagerRecord> observedTrades = new LinkedHashMap<>();
 
     private int verifyTotal;
     private int verifyLoaded;
@@ -96,6 +114,7 @@ public class CensusManager
     // the same state machine, so /census resume|discard keep working next to the screens.
     private String pendingStartName;
     private DraftStorage.NameConflict pendingConflict;
+    private int conflictPromptDelay;
     private int draftPromptDelay;
     private boolean draftPromptShown;
 
@@ -181,7 +200,7 @@ public class CensusManager
 
         this.pendingStartName = name;
         this.pendingConflict = conflict;
-        GuiBase.openGui(new GuiStartConflict(this));
+        this.conflictPromptDelay = CONFLICT_PROMPT_DELAY_TICKS;
     }
 
     private boolean validateStart(String rawName)
@@ -214,6 +233,8 @@ public class CensusManager
         this.session = new CensusSession(rawName, safeName, worldId, dimension, System.currentTimeMillis());
         this.pending = null;
         this.pendingUpdate = null;
+        this.clearObserved();
+        this.shadowContainers.clear();
         this.bookIndexDirty = true;
         this.clearPendingStart();
 
@@ -291,6 +312,7 @@ public class CensusManager
     {
         this.pendingStartName = null;
         this.pendingConflict = null;
+        this.conflictPromptDelay = 0;
     }
 
     public enum StartChoice
@@ -343,6 +365,7 @@ public class CensusManager
         this.session = null;
         this.pending = null;
         this.pendingUpdate = null;
+        this.clearObserved();
         return report;
     }
 
@@ -361,6 +384,7 @@ public class CensusManager
         this.session = null;
         this.pending = null;
         this.pendingUpdate = null;
+        this.clearObserved();
     }
 
     public void togglePaused()
@@ -541,6 +565,8 @@ public class CensusManager
         this.session = loaded;
         this.pending = null;
         this.pendingUpdate = null;
+        this.clearObserved();
+        this.shadowContainers.clear();
         this.bookIndexDirty = true;
 
         this.clearResumeCandidate();
@@ -655,6 +681,8 @@ public class CensusManager
         this.managed.clear();
         this.baseUpdates.clear();
         this.bookTeams.clear();
+        this.clearObserved();
+        this.shadowContainers.clear();
         this.bookIndexDirty = true;
         this.trackingMarkers = false;
         this.reverseMarkers = false;
@@ -867,7 +895,7 @@ public class CensusManager
 
         if (villager.isBaby())
         {
-            VillagerRecord record = this.buildRecord(villager, null, 0, false, false);
+            VillagerRecord record = this.buildRecord(villager, null, 0, false, false, false);
             this.commitRecord(villager, record, this.session.getByUuid(uuid) != null);
             return;
         }
@@ -890,33 +918,158 @@ public class CensusManager
 
     private void processMerchantOffers(ClientboundMerchantOffersPacket packet)
     {
-        if (!this.hasSession() || this.pending == null)
+        if (!this.hasSession())
+        {
+            return;
+        }
+
+        if (this.pending != null)
+        {
+            Minecraft mc = Minecraft.getInstance();
+            Entity entity = mc.level != null ? mc.level.getEntity(this.pending.entityId) : null;
+
+            if (!(entity instanceof Villager villager))
+            {
+                Messages.error( "villagercensus.message.failed");
+                this.pending = null;
+                return;
+            }
+
+            if (packet.getVillagerLevel() != villager.getVillagerData().level())
+            {
+                Messages.error( "villagercensus.message.level_mismatch");
+                this.pending = null;
+                return;
+            }
+
+            boolean weak = this.pending.containerId < 0;
+            VillagerRecord record = this.buildRecord(villager, packet.getOffers(), packet.getVillagerXp(), true, weak, false);
+            boolean restat = this.pending.restat;
+            this.pending = null;
+            this.commitRecord(villager, record, restat);
+            return;
+        }
+
+        this.processObservedOffers(packet);
+    }
+
+    /**
+     * Offers that arrived without a pending target, i.e. from a trade screen the player or another
+     * mod opened. Only villagers this session already recorded are refreshed: the observation never
+     * adds a record and never changes a count, it only brings the book markers up to date.
+     */
+    private void processObservedOffers(ClientboundMerchantOffersPacket packet)
+    {
+        if (!this.hasSession())
+        {
+            return;
+        }
+
+        ShadowContainer armed = this.shadowContainers.get(packet.getContainerId());
+        int entityId;
+        boolean weak;
+
+        if (armed != null)
+        {
+            entityId = armed.entityId;
+            weak = false;
+        }
+        else if (this.shadowInteractEntityId >= 0
+                && this.tickCounter - this.shadowInteractTick <= offerFreshnessTicks())
+        {
+            // Fallback for a container mapping that never got armed (swallowed by a higher priority
+            // hook, for instance): attribute the offers to the most recent outbound interaction.
+            entityId = this.shadowInteractEntityId;
+            weak = true;
+        }
+        else
         {
             return;
         }
 
         Minecraft mc = Minecraft.getInstance();
-        Entity entity = mc.level != null ? mc.level.getEntity(this.pending.entityId) : null;
+        Entity entity = mc.level != null ? mc.level.getEntity(entityId) : null;
 
-        if (!(entity instanceof Villager villager))
+        if (!(entity instanceof Villager villager) || villager.isBaby())
         {
-            Messages.error( "villagercensus.message.failed");
-            this.pending = null;
             return;
         }
 
         if (packet.getVillagerLevel() != villager.getVillagerData().level())
         {
-            Messages.error( "villagercensus.message.level_mismatch");
-            this.pending = null;
             return;
         }
 
-        boolean weak = this.pending.containerId < 0;
-        VillagerRecord record = this.buildRecord(villager, packet.getOffers(), packet.getVillagerXp(), true, weak);
-        boolean restat = this.pending.restat;
-        this.pending = null;
-        this.commitRecord(villager, record, restat);
+        UUID uuid = villager.getUUID();
+
+        if (this.session.getByUuid(uuid) == null)
+        {
+            return;
+        }
+
+        boolean firstTime = !this.observedTrades.containsKey(uuid);
+        // Unfiltered on purpose: trade category filtering serves the report, and applying it here
+        // would mark every observed librarian red for the missing enchanted book trades.
+        VillagerRecord observed = this.buildRecord(villager, packet.getOffers(), packet.getVillagerXp(),
+                true, weak, true);
+        this.observedTrades.put(uuid, observed);
+        this.bookIndexDirty = true;
+
+        if (Configs.Generic.DEBUG.getBooleanValue())
+        {
+            Reference.logger().debug("[villagercensus] observed trades for {} (weak={})", uuid, weak);
+        }
+
+        if (this.bookMarkers && firstTime
+                && BookCompetitiveness.LIBRARIAN.equals(observed.professionId))
+        {
+            Messages.info("villagercensus.message.observed_trades", Names.profession(observed.professionId));
+        }
+    }
+
+    /**
+     * Records the entity the player just interacted with. Called from {@code Connection#send}, so
+     * it may run on any thread and only touches volatile state.
+     */
+    public void onOutboundInteract(int entityId)
+    {
+        if (!this.hasSession() || entityId < 0)
+        {
+            return;
+        }
+
+        this.shadowInteractEntityId = entityId;
+        this.shadowInteractTick = this.tickCounter;
+    }
+
+    private long offerFreshnessTicks()
+    {
+        return Configs.Generic.OFFERS_TIMEOUT.getIntegerValue() + 40L;
+    }
+
+    private void armShadowContainer(int containerId)
+    {
+        if (this.shadowInteractEntityId >= 0
+                && this.tickCounter - this.shadowInteractTick <= offerFreshnessTicks())
+        {
+            this.armShadowContainer(containerId, this.shadowInteractEntityId);
+        }
+    }
+
+    private void armShadowContainer(int containerId, int entityId)
+    {
+        if (containerId < 0 || entityId < 0)
+        {
+            return;
+        }
+
+        if (this.shadowContainers.size() >= 32)
+        {
+            // Container ids only grow within one connection, so dropping them all costs little.
+            this.shadowContainers.clear();
+        }
+
+        this.shadowContainers.put(containerId, new ShadowContainer(entityId));
     }
 
     /**
@@ -926,6 +1079,13 @@ public class CensusManager
     {
         if (!this.hasSession() || this.pending == null)
         {
+            if (this.hasSession() && packet.getType() == MenuType.MERCHANT)
+            {
+                // Not this mod's interaction: bind the container to the villager that was
+                // interacted with most recently so the following offers can be attributed.
+                this.armShadowContainer(packet.getContainerId());
+            }
+
             return false;
         }
 
@@ -934,7 +1094,8 @@ public class CensusManager
             return false;
         }
 
-        boolean fresh = (this.tickCounter - this.pending.tick) <= (Configs.Generic.OFFERS_TIMEOUT.getIntegerValue() + 40L);
+        int pendingEntityId = this.pending.entityId;
+        boolean fresh = (this.tickCounter - this.pending.tick) <= offerFreshnessTicks();
 
         if (fresh)
         {
@@ -944,6 +1105,10 @@ public class CensusManager
         {
             this.pending = null;
         }
+
+        // The container still belongs to that villager even when the pending target went stale, so
+        // the offers can still be used by the observation path.
+        this.armShadowContainer(packet.getContainerId(), pendingEntityId);
 
         return true;
     }
@@ -989,6 +1154,7 @@ public class CensusManager
         else
         {
             this.session.addRecord(record);
+            this.forgetObserved(record.uuid);
             this.bookIndexDirty = true;
             Messages.success( "villagercensus.message.recorded",
                     villager.getVillagerData().profession().unwrapKey()
@@ -1008,6 +1174,8 @@ public class CensusManager
         }
 
         VillagerRecord old = this.session.getByUuid(update.uuid);
+
+        this.forgetObserved(update.uuid);
 
         if (old == null)
         {
@@ -1029,6 +1197,27 @@ public class CensusManager
         {
             this.pendingUpdate = null;
             Messages.info( "villagercensus.message.pending_update_cancelled");
+        }
+    }
+
+    /**
+     * A freshly committed record is the most recent fact about that villager, so an older
+     * observation must not shadow it in the book view any more.
+     */
+    private void forgetObserved(UUID uuid)
+    {
+        if (uuid != null && this.observedTrades.remove(uuid) != null)
+        {
+            this.bookIndexDirty = true;
+        }
+    }
+
+    private void clearObserved()
+    {
+        if (!this.observedTrades.isEmpty())
+        {
+            this.observedTrades.clear();
+            this.bookIndexDirty = true;
         }
     }
 
@@ -1067,7 +1256,7 @@ public class CensusManager
 
                 if (entity instanceof Villager villager)
                 {
-                    VillagerRecord record = this.buildRecord(villager, null, 0, false, false);
+                    VillagerRecord record = this.buildRecord(villager, null, 0, false, false, false);
 
                     if (restat)
                     {
@@ -1110,8 +1299,42 @@ public class CensusManager
             this.draftLoaded = this.updateVerification(this.resumeDraft);
         }
 
+        this.openConflictPromptWhenReady(mc);
         this.openDraftPromptWhenReady(mc);
         this.autoSaveDraft();
+    }
+
+    /**
+     * Opens the start-conflict screen a tick or two after {@code /census start} hit the collision
+     * branch. The chat screen closes itself in the same call stack as the command, which would
+     * close a screen opened from the command right away, so the screen is opened from here.
+     */
+    private void openConflictPromptWhenReady(Minecraft mc)
+    {
+        if (this.conflictPromptDelay <= 0 || this.pendingConflict == null || this.pendingStartName == null)
+        {
+            return;
+        }
+
+        if (this.hasSession())
+        {
+            // The session was started through another route; the stale prompt is void.
+            this.clearPendingStart();
+            return;
+        }
+
+        if (--this.conflictPromptDelay > 0)
+        {
+            return;
+        }
+
+        if (Compat.currentScreen(mc) != null)
+        {
+            this.conflictPromptDelay = CONFLICT_PROMPT_RETRY_TICKS;
+            return;
+        }
+
+        GuiBase.openGui(new GuiStartConflict(this));
     }
 
     /**
@@ -1173,7 +1396,7 @@ public class CensusManager
     // ------------------------------------------------------------------
 
     private VillagerRecord buildRecord(Villager villager, MerchantOffers offers, int villagerXp,
-                                       boolean hasTradeData, boolean weak)
+                                       boolean hasTradeData, boolean weak, boolean unfiltered)
     {
         VillagerRecord record = new VillagerRecord();
         record.uuid = villager.getUUID();
@@ -1206,16 +1429,16 @@ public class CensusManager
 
         if (offers != null)
         {
-            record.trades = this.buildTrades(record.professionId, offers);
+            record.trades = this.buildTrades(record.professionId, offers, unfiltered);
         }
 
         return record;
     }
 
-    private List<TradeEntry> buildTrades(String professionId, MerchantOffers offers)
+    private List<TradeEntry> buildTrades(String professionId, MerchantOffers offers, boolean unfiltered)
     {
         List<TradeEntry> list = new ArrayList<>();
-        boolean recordAll = Configs.Generic.RECORD_ALL_TRADES.getBooleanValue();
+        boolean recordAll = unfiltered || Configs.Generic.RECORD_ALL_TRADES.getBooleanValue();
         List<String> selected = Configs.Generic.SELECTED_CATEGORIES.getStrings();
 
         for (MerchantOffer offer : offers)
@@ -1521,9 +1744,10 @@ public class CensusManager
         if (this.bookIndexDirty)
         {
             CensusSession current = this.session;
-            this.bookIndex = current != null
-                    ? BookCompetitiveness.compute(current.records)
-                    : java.util.Collections.emptyMap();
+            this.bookRecords = current != null
+                    ? BookCompetitiveness.mergeObserved(current.records, this.observedTrades)
+                    : java.util.Collections.<VillagerRecord>emptyList();
+            this.bookIndex = BookCompetitiveness.compute(this.bookRecords);
             this.bookIndexDirty = false;
         }
     }
@@ -1636,7 +1860,7 @@ public class CensusManager
         {
             this.ensureBookIndex();
 
-            for (VillagerRecord record : this.session.records)
+            for (VillagerRecord record : this.bookRecords)
             {
                 if (record.uuid != null && !record.baby
                         && BookCompetitiveness.LIBRARIAN.equals(record.professionId)
@@ -1804,6 +2028,16 @@ public class CensusManager
         ((IMixinEntity) villager).villagercensus$setSharedFlag(GLOWING_FLAG_BIT, value);
     }
 
+    private static class ShadowContainer
+    {
+        final int entityId;
+
+        ShadowContainer(int entityId)
+        {
+            this.entityId = entityId;
+        }
+    }
+
     private static class BaseGlowUpdate
     {
         final int entityId;
@@ -1839,6 +2073,11 @@ public class CensusManager
             this.managed.clear();
             this.baseUpdates.clear();
             this.bookTeams.clear();
+            this.clearObserved();
+            this.shadowContainers.clear();
+            // Entity ids are reused across worlds, so no observation may outlive the connection.
+            this.shadowInteractEntityId = -1;
+            this.shadowInteractTick = -1L;
             this.bookIndexDirty = true;
             this.trackingMarkers = false;
             this.reverseMarkers = false;

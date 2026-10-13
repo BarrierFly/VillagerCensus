@@ -112,6 +112,16 @@ Interaction contract (do not break):
   `volatile` pending/tick flags) and must never call malilib message/render helpers or mutate
   entities there. All record building, messaging and entity access happens in
   `CensusManager.onClientTick` (client thread), which drains the queues.
+- `mixin/MixinConnection` observes outbound `ServerboundInteractPacket`s at the head of
+  `Connection.send(Packet, ChannelFutureListener, boolean)` — the overload every outgoing packet
+  funnels into, including Fabric's `sendPacket`. It is **read-only**: it never cancels and never
+  changes the packet, and it only stores the entity id in a `volatile` field. That entity id is the
+  only source that can attribute an offers packet to a villager (`ClientboundOpenScreenPacket`
+  carries no entity id, and the client's `MerchantMenu.trader` is a `ClientSideMerchant`), so the
+  `onOpenScreen` arm / `processObservedOffers` lookup pair is load-bearing. `mixins.json` is static
+  JSON (resources are not stonecutter-processed), so `IMixinServerboundInteractPacket`'s
+  `@Accessor("entityId")` is registered for both versions even though 26.3 reads the record's own
+  accessor.
 
 ## Reports, drafts and fork
 
@@ -137,10 +147,17 @@ Interaction contract (do not break):
   `gui/GuiStartConflict` maps each kind to a button set and previews the final file name through
   `ReportWriter.reportPath`, which is the same helper the writer uses, so the preview cannot drift.
 - `/census start` goes through `CensusManager.requestStart`, which validates, classifies the
-  collision and either starts right away or opens `gui/GuiStartConflict`. With
-  `startConflictPrompt` off it falls back to the old "start and warn" behaviour. Do not delete the
-  pending-conflict state (`pendingStartName` / `pendingConflict`) without also updating
-  `GuiStartConflict`.
+  collision and either starts right away or arms `conflictPromptDelay`. With `startConflictPrompt`
+  off it falls back to the old "start and warn" behaviour. Do not delete the pending-conflict state
+  (`pendingStartName` / `pendingConflict`) without also updating `GuiStartConflict`.
+- `gui/GuiStartConflict` must **not** be opened from `requestStart`: a client command runs
+  synchronously inside `ChatScreen`'s key handling, which closes the chat screen right after the
+  command returns and would close the freshly opened screen in the same event stack (zero frames).
+  `openConflictPromptWhenReady` opens it from `onClientTick` after
+  `CONFLICT_PROMPT_DELAY_TICKS` (2), retrying every `CONFLICT_PROMPT_RETRY_TICKS` (20) while another
+  screen is up; `clearPendingStart` cancels the pending prompt and every caller of it
+  (`beginStart` / `resolveStartConflict` / `adoptDraft` / `forkSession` / `onWorldLoadPre`)
+  therefore cleans the delay up for free.
 - Joining a world that holds a draft sets `draftPromptDelay`; the resume screen is opened from
   `onClientTick` after the delay (never from `onWorldLoadPost`, which would fight the loading
   screen) and only when no other screen is open. `VERIFY_REFRESH_TICKS` is 10 gt, per Q31.
@@ -178,6 +195,20 @@ Interaction contract (do not break):
   index is cached in `bookIndex` and invalidated by `bookIndexDirty` at every session mutation
   (add/update/undo/adopt/fork); it never feeds reports or drafts. While the mode is on,
   `reverseMarkers` keeps its value untouched and resumes when the mode is turned off.
+- The book view is the **merged** one: `ensureBookIndex` runs
+  `BookCompetitiveness.compute(mergeObserved(session.records, observedTrades))` and caches both the
+  verdict (`bookIndex`) and the merged list (`bookRecords`) that `maintainMarkers` walks.
+  `observedTrades` holds trade data that arrived without a pending target (a vanilla trade screen,
+  an offers-hud probe) and is deliberately **not** written back into the session, so it cannot
+  bypass the restat confirmation, `undo`, the record order or the reports/drafts. Its scope is
+  **villagers the session already recorded** (`session.getByUuid(uuid) != null`): an observed
+  villager never joins the census. Observed trades are built unfiltered (`buildTrades(...,
+  unfiltered = true)`) because `recordAllTrades` / `selectedCategories` exist for the report and
+  would turn every observed librarian red; `books_filter_warning` still covers the record side.
+  `commitRecord` (new record) and `confirmPendingUpdate` drop the same-uuid observation
+  (`forgetObserved`), while `undo` keeps it. The state is per session and is cleared in
+  `beginStart` / `adoptDraft` / `forkSession` / `stopSession` / `abortSession`; `onWorldLoadPre`
+  additionally resets the outbound-interact entity id, because entity ids are reused across worlds.
 - HUD placement is resolved by `CensusHud.layout` from `hudPosition` (malilib's `HudAlignment`,
   also used for the config option list), `hudOffsetX` and `hudOffsetY`. Both HUD branches must use
   `graphics.guiWidth()` / `graphics.guiHeight()`, which exist in 1.21.11's `GuiGraphics` and in

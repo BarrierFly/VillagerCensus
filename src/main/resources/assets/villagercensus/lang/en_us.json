@@ -192,6 +192,7 @@
   "villagercensus.message.reverse_off": "Marker mode restored: counted villagers glow.",
   "villagercensus.message.books_on": "Book competitiveness markers on: librarians glow green when competitive, red when not.",
   "villagercensus.message.books_off": "Book competitiveness markers off.",
+  "villagercensus.message.observed_trades": "Book marker updated for %s from trade data received outside the census.",
   "villagercensus.message.books_filter_warning": "Record All Trades is off and the librarian enchanted-book category is not selected; the filtered trades make the competitiveness markers unreliable.",
 
   "villagercensus.command.help.start": "/census start <name> - start a census in the current dimension",
