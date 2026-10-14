@@ -90,6 +90,12 @@ public class CensusManager
     private boolean bookIndexDirty = true;
     private final Map<UUID, String> bookTeams = new HashMap<>();
 
+    // Diagnostics (debugLog only): how the running session was created, and why each librarian in
+    // view is or is not a book-marker target. bookDebugSignature suppresses the repeat log so a
+    // per-tick call site does not flood the log file.
+    private volatile String sessionSource = "none";
+    private String bookDebugSignature = "";
+
     // Trade data observed through channels other than this mod's own census flow (a vanilla trade
     // screen, offers-hud's crosshair probe). The client cannot tell which villager an incoming
     // offers packet belongs to, so the entity id is taken from the outbound interact packet that
@@ -236,6 +242,8 @@ public class CensusManager
         this.clearObserved();
         this.shadowContainers.clear();
         this.bookIndexDirty = true;
+        this.sessionSource = "start";
+        this.bookDebugSignature = "";
         this.clearPendingStart();
 
         if (conflict != null && conflict.kind == DraftStorage.ConflictKind.DRAFT)
@@ -568,7 +576,8 @@ public class CensusManager
         this.clearObserved();
         this.shadowContainers.clear();
         this.bookIndexDirty = true;
-
+        this.sessionSource = "resume:" + file.getFileName();
+        this.bookDebugSignature = "";
         this.clearResumeCandidate();
         this.clearPendingStart();
 
@@ -687,6 +696,8 @@ public class CensusManager
         this.trackingMarkers = false;
         this.reverseMarkers = false;
         this.bookMarkers = false;
+        this.sessionSource = "fork:" + source.path.getFileName();
+        this.bookDebugSignature = "";
         this.clearResumeCandidate();
         this.clearPendingStart();
         this.verifyTotal = 0;
@@ -1701,6 +1712,7 @@ public class CensusManager
         }
 
         this.bookMarkers = !this.bookMarkers;
+        this.bookDebugSignature = "";
 
         if (this.bookMarkers)
         {
@@ -1834,6 +1846,13 @@ public class CensusManager
 
         if (!Configs.Generic.GLOWING_MARKER.getBooleanValue() || !this.markersVisible(mc))
         {
+            if (Configs.Generic.DEBUG.getBooleanValue() && this.hasSession())
+            {
+                Reference.logger().debug("[villagercensus] books markers suppressed glowing={} visible={} source={}",
+                        Configs.Generic.GLOWING_MARKER.getBooleanValue(), this.markersVisible(mc),
+                        this.sessionSource);
+            }
+
             if (!this.managed.isEmpty())
             {
                 this.restoreAllMarkers();
@@ -1892,6 +1911,11 @@ public class CensusManager
             this.clearBookTeams();
         }
 
+        if (books)
+        {
+            this.debugBookMarkers(mc, loaded, targets);
+        }
+
         this.trackingMarkers = true;
 
         for (UUID uuid : targets)
@@ -1929,6 +1953,115 @@ public class CensusManager
         }
 
         this.trackingMarkers = !this.managed.isEmpty();
+    }
+
+    /**
+     * Diagnostics for the book marker target set (debugLog only). Reports how the running session
+     * was created and, for every librarian currently in view, why it is or is not a marker target.
+     * A villager whose session record still carries no UUID is reported explicitly, because the
+     * UUID lookup in {@link #maintainMarkers} cannot see it at all. The whole block is emitted
+     * only when the summary changed, so a per-tick call site stays cheap and readable.
+     */
+    private void debugBookMarkers(Minecraft mc, Map<UUID, Villager> loaded, Set<UUID> targets)
+    {
+        if (!Configs.Generic.DEBUG.getBooleanValue() || !this.hasSession())
+        {
+            return;
+        }
+
+        int sessionNullUuid = 0;
+        int sessionLibrarianNoData = 0;
+
+        for (VillagerRecord record : this.session.records)
+        {
+            if (record.uuid == null)
+            {
+                sessionNullUuid++;
+            }
+
+            if (record.uuid == null && !record.baby
+                    && BookCompetitiveness.LIBRARIAN.equals(record.professionId) && !record.hasTradeData)
+            {
+                sessionLibrarianNoData++;
+            }
+        }
+
+        StringBuilder signature = new StringBuilder();
+        signature.append(this.sessionSource)
+                .append("|markersVisible=").append(this.markersVisible(mc))
+                .append("|records=").append(this.session.records.size())
+                .append("|sessionNullUuid=").append(sessionNullUuid)
+                .append("|sessionLibrarianNoData=").append(sessionLibrarianNoData)
+                .append("|bookRecords=").append(this.bookRecords.size())
+                .append("|bookIndex=").append(this.bookIndex.size())
+                .append("|observed=").append(this.observedTrades.size())
+                .append("|pendingUpdate=").append(this.pendingUpdate != null);
+
+        List<String> lines = new ArrayList<>();
+
+        for (Map.Entry<UUID, Villager> entry : loaded.entrySet())
+        {
+            Villager villager = entry.getValue();
+            UUID uuid = entry.getKey();
+
+            if (!BookCompetitiveness.LIBRARIAN.equals(professionOf(villager)) && !targets.contains(uuid))
+            {
+                continue;
+            }
+
+            VillagerRecord match = this.bookDebugRecord(uuid, villager);
+            lines.add(uuid + " " + professionOf(villager) + " baby=" + villager.isBaby()
+                    + (match == null
+                        ? " noSessionRecord"
+                        : " uuidInRecord=" + (match.uuid != null)
+                                + " hasCoordinates=" + match.hasCoordinates
+                                + " hasTradeData=" + match.hasTradeData
+                                + " status=" + match.status.getId())
+                    + " target=" + targets.contains(uuid));
+        }
+
+        lines.sort(String::compareTo);
+
+        String state = signature.toString() + "|" + String.join(";", lines);
+
+        if (state.equals(this.bookDebugSignature))
+        {
+            return;
+        }
+
+        this.bookDebugSignature = state;
+        Reference.logger().debug("[villagercensus] books markers {}", state);
+    }
+
+    /**
+     * The session record that describes this villager. The UUID index is tried first; when it has
+     * nothing the position/profession match is used, which is how a record whose UUID was never
+     * recovered (a TXT fork) is recognised.
+     */
+    private VillagerRecord bookDebugRecord(UUID uuid, Villager villager)
+    {
+        VillagerRecord byUuid = this.session.getByUuid(uuid);
+
+        if (byUuid != null)
+        {
+            return byUuid;
+        }
+
+        for (VillagerRecord record : this.session.records)
+        {
+            if (record.uuid == null && villagerMatches(record, villager))
+            {
+                return record;
+            }
+        }
+
+        return null;
+    }
+
+    private static String professionOf(Villager villager)
+    {
+        return villager.getVillagerData().profession().unwrapKey()
+                .map(key -> key.identifier().toString()).orElse("minecraft:none");
     }
 
     private void restoreAllMarkers()
