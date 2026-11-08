@@ -11,7 +11,9 @@
     "MixinClientPacketListener",
     "MixinConnection",
     "IMixinServerboundInteractPacket",
-    "MixinProjectileUtil"
+    "MixinProjectileUtil",
+    "MixinMerchantScreen",
+    "IMixinMerchantScreen"
   ],
   "injectors": {
     "defaultRequire": 1

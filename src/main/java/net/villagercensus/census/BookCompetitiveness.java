@@ -35,6 +35,40 @@ public final class BookCompetitiveness
      */
     public static Map<UUID, Boolean> compute(List<VillagerRecord> records)
     {
+        Map<String, Integer> lowest = lowestPrices(records);
+        Map<UUID, Boolean> result = new HashMap<>();
+
+        for (VillagerRecord record : records)
+        {
+            if (!isMarked(record) || record.uuid == null)
+            {
+                continue;
+            }
+
+            boolean competitive = false;
+
+            for (TradeEntry trade : record.trades)
+            {
+                if (isCompetitive(lowest, trade))
+                {
+                    competitive = true;
+                    break;
+                }
+            }
+
+            result.put(record.uuid, competitive);
+        }
+
+        return result;
+    }
+
+    /**
+     * Lowest observed price per comparison group. Only adult librarians with captured trade data
+     * contribute, exactly like {@link #compute(List)}: records without trade data must not lower the
+     * bar for everybody else.
+     */
+    public static Map<String, Integer> lowestPrices(List<VillagerRecord> records)
+    {
         Map<String, Integer> lowest = new HashMap<>();
 
         for (VillagerRecord record : records)
@@ -61,30 +95,23 @@ public final class BookCompetitiveness
             }
         }
 
-        Map<UUID, Boolean> result = new HashMap<>();
+        return lowest;
+    }
 
-        for (VillagerRecord record : records)
+    /**
+     * Whether a single book trade holds the lowest price of its group. This is the per-trade verdict
+     * the trade screen marks; {@link #compute(List)} collapses it to one verdict per librarian.
+     */
+    public static boolean isCompetitive(Map<String, Integer> lowest, TradeEntry trade)
+    {
+        if (trade == null || !trade.enchantedBook)
         {
-            if (!isMarked(record) || record.uuid == null)
-            {
-                continue;
-            }
-
-            boolean competitive = false;
-
-            for (TradeEntry trade : record.trades)
-            {
-                if (trade.enchantedBook && lowest.getOrDefault(groupKey(trade), -1) == trade.cost1Count)
-                {
-                    competitive = true;
-                    break;
-                }
-            }
-
-            result.put(record.uuid, competitive);
+            return false;
         }
 
-        return result;
+        Integer price = lowest.get(groupKey(trade));
+
+        return price != null && price == trade.cost1Count;
     }
 
     /**
@@ -148,7 +175,7 @@ public final class BookCompetitiveness
      * whose offers were captured. A librarian with trade data but no book trade stays in the
      * result as "not competitive" (red); without trade data it is not marked at all.
      */
-    private static boolean isMarked(VillagerRecord record)
+    public static boolean isMarked(VillagerRecord record)
     {
         return record != null && !record.baby
                 && LIBRARIAN.equals(record.professionId) && record.hasTradeData;

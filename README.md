@@ -52,7 +52,7 @@ offers are captured and counted.
 /census discard         archive the found draft / 归档半成品
 /census pause           pause/resume statistics / 暂停或恢复统计
 /census reverse         toggle whether counted or uncounted villagers glow / 切换已统计/未统计发光
-/census books           toggle librarian book-competitiveness markers / 切换图书管理员附魔书竞争力标记
+/census books           toggle librarian book-competitiveness markers and trade-screen marks / 切换图书管理员附魔书竞争力标记与交易界面标记
 /census help            show help / 显示帮助
 ```
 
@@ -70,8 +70,11 @@ normal/reversed state and restores it when turned off.
 - **Book competitiveness（附魔书竞争力）** — only adult librarians whose offers were captured glow:
   green when at least one of their enchanted-book trades has no cheaper equal offer anywhere in the
   session, red otherwise (equal prices do not eliminate each other; librarians whose trade data was
-  never captured are not marked at all — the capture flow already warns about them). The comparison
-  covers every record in the session regardless of dimension and never touches reports or drafts.
+  never captured are not marked at all — the capture flow already warns about them). While the mode
+  is on, an open merchant screen of a marked librarian also gets a green frame around every
+  enchanted-book offer that holds the lowest session-wide price, so the good rows can be picked
+  without reading the glow. The comparison covers every record in the session regardless of
+  dimension and never touches reports or drafts.
   The glow outline is tinted via client-only fake teams (`vc_book_good` / `vc_book_bad`), which can
   also change the villagers' name-tag color as a known side effect; with `recordAllTrades` off and
   the librarian enchanted-book category unselected the mode warns once because the verdict would be
@@ -88,7 +91,9 @@ normal/reversed state and restores it when turned off.
   会把所有图书管理员判成红色）；刚统计进来的记录优先于更早的观察数据。
   仅**已采到交易数据**的成年图书管理员发光：会话内不存在更低价的同附魔组合、同币种交易即为
   “有竞争力”（绿），否则“无竞争力”（红）；同价并列不互相淘汰；未采到交易数据的图书管理员
-  完全不标记（抓取失败时普查流程已有警告提示重试）。比较范围为会话内全部记录（不分维度），
+  完全不标记（抓取失败时普查流程已有警告提示重试）。开启期间，**打开已记录村民的交易界面**
+  时，会话内最低价的附魔书交易行会被绿框标出，方便直接挑货（无竞争力村民通常没有最低价行，
+  界面不会有标记）。比较范围为会话内全部记录（不分维度），
   不影响报告与半成品。描边颜色通过纯客户端假队伍（`vc_book_good` / `vc_book_bad`）实现，可能
   连带改变村民名牌颜色（已知附带效果）；若 `recordAllTrades` 关闭且未选择图书管理员附魔书类别，
   开启时会警告一次（此时判定不可靠）。
@@ -149,9 +154,11 @@ Open the malilib config screen (hotkey default: none) or use the ModMenu entry
   / category keys (`profession/id`) used when the above is off; edit them with the config
   screen's "Select Trade Categories..." picker, which collapses variant trades into one entry.
 - `glowingMarker` — 给已统计村民加发光描边；`/census reverse` 反转为“未统计发光”，
-  `/census books` 切换为图书管理员附魔书竞争力双色标记（见“标记模式”）
+  `/census books` 切换为图书管理员附魔书竞争力双色标记（并在交易界面绿框标出最低价附魔书交易，
+  见“标记模式”）
   / mark recorded villagers with Glowing; `/census reverse` flips it to mark uncounted ones and
-  `/census books` switches to the librarian book-competitiveness mode (see "Marker modes").
+  `/census books` switches to the librarian book-competitiveness mode, which also frames the lowest
+  book offers in the trade screen (see "Marker modes").
 - `markWhenNotHolding` — 关闭后主手持的不是触发物品时不再显示发光标记
   / when off, glowing markers are hidden unless the trigger item is in the main hand.
 - `passThrough` — 普查中手持触发物品时，准星跳过本次已统计的村民以选中其后方实体（默认关闭；
@@ -229,6 +236,13 @@ plus the commands.
   glow outline color is `Entity#getTeamColor`, so the mod joins librarians into `vc_book_good` /
   `vc_book_bad` on the client scoreboard. Nothing is sent to the server; teams die with the world and
   members are released when their marker is.
+- 交易界面行标记：`MerchantScreen` 的渲染尾部（26.3 `extractContents`、1.21.11 `renderContents`）
+  在模式开启时给最低价的附魔书交易行画绿框，位置按原版 276×166 面板与 7 行 ×20px 的偏移计算，
+  并跟随滚动；交易和村民都通过 `CensusManager.bookScreenFlags` 判定，每 tick 缓存一次。
+  / Row marks on the merchant screen: the render tail (`extractContents` on 26.3, `renderContents`
+  on 1.21.11) frames every lowest-price enchanted-book row in green while the mode is on. Offsets
+  follow the vanilla 276×166 panel and its 7 rows of 20px, and the marks scroll with the list.
+  Trades and the villager are resolved by `CensusManager.bookScreenFlags` and cached for the tick.
 
 ## Compatibility / 兼容性
 

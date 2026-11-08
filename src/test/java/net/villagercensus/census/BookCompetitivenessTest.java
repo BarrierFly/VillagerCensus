@@ -369,4 +369,44 @@ class BookCompetitivenessTest
         assertTrue(result.get(cheapId));
         assertFalse(result.get(expensiveId));
     }
+
+    @Test
+    void perTradeVerdictMarksOnlyTheCheapestEqualTrade()
+    {
+        VillagerRecord owner = librarian(UUID.randomUUID(), "minecraft:overworld",
+                bookTrade("minecraft:mending", 1, 20), bookTrade("minecraft:mending", 1, 8));
+
+        Map<String, Integer> lowest = BookCompetitiveness.lowestPrices(List.of(owner));
+
+        assertFalse(BookCompetitiveness.isCompetitive(lowest, owner.trades.get(0)));
+        assertTrue(BookCompetitiveness.isCompetitive(lowest, owner.trades.get(1)));
+    }
+
+    @Test
+    void perTradeVerdictIgnoresNonBookTrades()
+    {
+        VillagerRecord owner = librarian(UUID.randomUUID(), "minecraft:overworld",
+                bookTrade("minecraft:mending", 1, 8));
+        TradeEntry notABook = new TradeEntry();
+        notABook.cost1Id = "minecraft:emerald";
+        notABook.cost1Count = 1;
+        notABook.sellId = "minecraft:bread";
+        notABook.sellCount = 1;
+
+        Map<String, Integer> lowest = BookCompetitiveness.lowestPrices(List.of(owner));
+
+        assertFalse(BookCompetitiveness.isCompetitive(lowest, notABook));
+    }
+
+    @Test
+    void librariansWithoutTradeDataDoNotLowerTheLowestPrice()
+    {
+        VillagerRecord noData = librarian(UUID.randomUUID(), "minecraft:overworld",
+                bookTrade("minecraft:mending", 1, 1));
+        noData.hasTradeData = false;
+
+        Map<String, Integer> lowest = BookCompetitiveness.lowestPrices(List.of(noData));
+
+        assertTrue(lowest.isEmpty());
+    }
 }

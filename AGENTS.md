@@ -78,7 +78,7 @@ command/    Fabric client commands
 census/     session state machine, records, undo stack, interaction manager
 trade/      trade category catalog + matching
 data/       report writer, report reader, draft storage, world-id/filename helpers
-mixin/      interact / offers / openScreen / entity-data / pick-ray hooks
+mixin/      interact / offers / openScreen / entity-data / pick-ray / merchant-screen hooks
 compat/     optional integrations (ModMenu entry point, offers-hud probe)
 render/     HUD (Fabric HUD API: HudElementRegistry for 26.1+, HudRenderCallback below)
 gui/        config screen, trade category picker, draft resume + start-conflict screens
@@ -107,6 +107,12 @@ Interaction contract (do not break):
   for `passThrough`. It is guarded by a static re-entry flag and by
   `CensusManager.isPassThroughTarget` (option on, session running and not paused, trigger item in
   the main hand, entity already recorded). Keep it off by default.
+- `mixin/MixinMerchantScreen` injects at the **TAIL** of `MerchantScreen.extractContents` (26.3) /
+  `renderContents` (1.21.11) and only draws. It reads `scrollOff` through
+  `IMixinMerchantScreen.villagercensus$getScrollOff` (private in 26.3, package-private in 1.21.11),
+  resolves the villager and the offers inside `CensusManager.bookScreenFlags` and must stay a pure
+  overlay: never touch the menu, the offers or the villager there, and keep the per-frame decision
+  cached.
 - **Threading:** `handleMerchantOffers` / `handleOpenScreen` / `handleSetEntityData` run on the
   Netty network thread. They must only touch thread-safe state (the offers/base-glow queues,
   `volatile` pending/tick flags) and must never call malilib message/render helpers or mutate
@@ -195,6 +201,20 @@ Interaction contract (do not break):
   index is cached in `bookIndex` and invalidated by `bookIndexDirty` at every session mutation
   (add/update/undo/adopt/fork); it never feeds reports or drafts. While the mode is on,
   `reverseMarkers` keeps its value untouched and resumes when the mode is turned off.
+- The same verdict marks the trade screen: `mixin/MixinMerchantScreen` hooks the render tail of
+  `MerchantScreen` (`extractContents` on 26.3, `renderContents` on 1.21.11) and calls
+  `render/MerchantOfferMarks`, which frames every enchanted-book row whose price equals the
+  session-wide lowest of its group. The screen is only ever visible when this mod did not suppress
+  it (a vanilla trade screen or an offers-hud preview). `CensusManager.bookScreenFlags` resolves the
+  villager from the open container through the same `shadowContainers` / outbound-interact chain as
+  the offers packet, drops the villager's own record from the recorded prices and re-adds the open
+  offers (they are the freshest fact), builds the trades unfiltered, and caches the flags per
+  container + `bookViewVersion` for the rest of the tick, so rendering stays cheap.
+  `BookCompetitiveness` exposes `lowestPrices` / `isCompetitive` / `isMarked` for that per-trade
+  verdict; `compute` is still the per-librarian glow verdict. The row marks are drawn only while
+  `bookMarkers`, a running session and `glowingMarker` all hold, so they disappear with the mode. A
+  red (non-competitive) librarian has no lowest-price book row, so its screen simply stays
+  unmarked — the frame is the per-offer counterpart of the green glow.
 - The book view is the **merged** one: `ensureBookIndex` runs
   `BookCompetitiveness.compute(mergeObserved(session.records, observedTrades))` and caches both the
   verdict (`bookIndex`) and the merged list (`bookRecords`) that `maintainMarkers` walks.

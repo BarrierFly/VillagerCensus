@@ -88,7 +88,16 @@ public class CensusManager
     private Map<UUID, Boolean> bookIndex = java.util.Collections.emptyMap();
     private List<VillagerRecord> bookRecords = java.util.Collections.emptyList();
     private boolean bookIndexDirty = true;
+    private int bookViewVersion;
     private final Map<UUID, String> bookTeams = new HashMap<>();
+
+    // Per-frame cache for the merchant screen marks: the flags are recomputed only when the book
+    // view changed, another container is open or the client tick advanced.
+    private int bookScreenContainer = -1;
+    private int bookScreenVersion = -1;
+    private long bookScreenTick = -1L;
+    private boolean bookScreenResolved;
+    private boolean[] bookScreenFlags;
 
     // Diagnostics (debugLog only): how the running session was created, and why each librarian in
     // view is or is not a book-marker target. bookDebugSignature suppresses the repeat log so a
@@ -1713,6 +1722,7 @@ public class CensusManager
 
         this.bookMarkers = !this.bookMarkers;
         this.bookDebugSignature = "";
+        this.bookScreenResolved = false;
 
         if (this.bookMarkers)
         {
@@ -1761,7 +1771,166 @@ public class CensusManager
                     : java.util.Collections.<VillagerRecord>emptyList();
             this.bookIndex = BookCompetitiveness.compute(this.bookRecords);
             this.bookIndexDirty = false;
+            this.bookViewVersion++;
         }
+    }
+
+    /**
+     * Per-offer competitiveness flags for a merchant screen, aligned with the given offers. Returns
+     * null when the book mode is off or the screen does not belong to a marked librarian (adult,
+     * recorded in this session, with trade data). Called from the client thread while the merchant
+     * screen renders, so it only reads the session and the observation layer. The flags are cached
+     * for the rest of the tick (per container and book-view version), so rendering every frame of
+     * the same tick stays cheap.
+     */
+    public boolean[] bookScreenFlags(MerchantOffers offers, int containerId)
+    {
+        if (!this.bookMarkers || !this.hasSession())
+        {
+            return null;
+        }
+
+        if (!Configs.Generic.GLOWING_MARKER.getBooleanValue())
+        {
+            return null;
+        }
+
+        this.ensureBookIndex();
+
+        if (this.bookScreenResolved
+                && this.bookScreenContainer == containerId
+                && this.bookScreenVersion == this.bookViewVersion
+                && this.bookScreenTick == this.tickCounter)
+        {
+            return this.bookScreenFlags;
+        }
+
+        Villager villager = this.villagerForContainer(containerId);
+
+        if (villager == null)
+        {
+            // Not cached: the container mapping may be armed one frame later.
+            return null;
+        }
+
+        this.bookScreenContainer = containerId;
+        this.bookScreenVersion = this.bookViewVersion;
+        this.bookScreenTick = this.tickCounter;
+        this.bookScreenResolved = true;
+        this.bookScreenFlags = this.computeBookScreenFlags(offers, villager);
+
+        return this.bookScreenFlags;
+    }
+
+    private boolean[] computeBookScreenFlags(MerchantOffers offers, Villager villager)
+    {
+        if (offers == null || offers.isEmpty())
+        {
+            return null;
+        }
+
+        UUID uuid = villager.getUUID();
+
+        if (uuid == null || this.session.getByUuid(uuid) == null)
+        {
+            return null;
+        }
+
+        VillagerRecord merged = null;
+        List<VillagerRecord> others = new ArrayList<>(this.bookRecords.size());
+
+        for (VillagerRecord record : this.bookRecords)
+        {
+            if (uuid.equals(record.uuid))
+            {
+                merged = record;
+            }
+            else
+            {
+                others.add(record);
+            }
+        }
+
+        if (!BookCompetitiveness.isMarked(merged))
+        {
+            return null;
+        }
+
+        // Unfiltered on purpose: the record side may have dropped book trades through
+        // recordAllTrades / selectedCategories, but the screen still shows them.
+        List<TradeEntry> trades = buildBookTrades(offers);
+
+        // The open offers are the freshest fact about this villager, so its own entry is left out of
+        // the recorded prices and re-added from the screen instead.
+        Map<String, Integer> lowest = BookCompetitiveness.lowestPrices(others);
+
+        for (TradeEntry trade : trades)
+        {
+            if (trade.enchantedBook)
+            {
+                lowest.merge(BookCompetitiveness.groupKey(trade), trade.cost1Count, Math::min);
+            }
+        }
+
+        boolean[] flags = new boolean[trades.size()];
+
+        for (int i = 0; i < flags.length; i++)
+        {
+            flags[i] = BookCompetitiveness.isCompetitive(lowest, trades.get(i));
+        }
+
+        return flags;
+    }
+
+    /**
+     * Resolves the villager behind an open merchant container through the same observation chain as
+     * the offer packets: the container id is paired with the outbound interact entity id, with the
+     * most recent interaction as fallback.
+     */
+    private Villager villagerForContainer(int containerId)
+    {
+        Minecraft mc = Minecraft.getInstance();
+
+        if (mc.level == null)
+        {
+            return null;
+        }
+
+        ShadowContainer armed = this.shadowContainers.get(containerId);
+        int entityId = -1;
+
+        if (armed != null)
+        {
+            entityId = armed.entityId;
+        }
+        else if (this.shadowInteractEntityId >= 0
+                && this.tickCounter - this.shadowInteractTick <= offerFreshnessTicks())
+        {
+            entityId = this.shadowInteractEntityId;
+        }
+
+        Entity entity = entityId >= 0 ? mc.level.getEntity(entityId) : null;
+
+        return entity instanceof Villager villager ? villager : null;
+    }
+
+    private static List<TradeEntry> buildBookTrades(MerchantOffers offers)
+    {
+        List<TradeEntry> list = new ArrayList<>();
+
+        for (MerchantOffer offer : offers)
+        {
+            ItemStack cost1 = offer.getBaseCostA();
+            ItemStack cost2 = offer.getCostB();
+            ItemStack result = offer.getResult();
+
+            list.add(new TradeEntry("", itemId(cost1), cost1.getCount(),
+                    cost2.isEmpty() ? "" : itemId(cost2), cost2.getCount(),
+                    itemId(result), result.getCount(), result.is(Items.ENCHANTED_BOOK),
+                    collectEnchantments(result)));
+        }
+
+        return list;
     }
 
     /**
